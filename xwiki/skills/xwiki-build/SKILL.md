@@ -59,6 +59,20 @@ mvn test -B -ntp -pl <module-path> -Dtest=MyTestClass#myMethod
 mvn verify -B -ntp -pl <module-path> -Pintegration-tests
 ```
 
+## Common profiles
+
+Standardized across all XWiki projects — see
+https://dev.xwiki.org/xwiki/bin/view/Community/Building/#HUsingProfiles for the full list and
+definitions.
+
+| Profile             | Purpose                                                              |
+|---------------------|---------------------------------------------------------------------|
+| `legacy`            | Includes backward-compatibility (`-legacy`) modules; almost always needed |
+| `snapshot`          | Enables XWiki snapshot repositories                                  |
+| `integration-tests` | Activates integration-test (`*IT.java`) execution via Failsafe       |
+| `docker`            | Runs the Docker-based integration tests (requires Docker installed); used together with `integration-tests` |
+| `quality`           | Checkstyle + Revapi + Enforcer checks                                |
+
 ## Notes
 
 - The `legacy` profile activates backward-compatibility shim modules and is almost always required.
