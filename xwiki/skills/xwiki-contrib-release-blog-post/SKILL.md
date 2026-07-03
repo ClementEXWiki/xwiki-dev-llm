@@ -31,6 +31,13 @@ From the extension page on the Extensions wiki (e.g.
   "Extension" or "Application"; some multi-module projects are type **"Project"**. This affects
   which template to use in step 3 (see `okf/servers/index.md`, the extensions.xwiki.org row, for the
   page-structure difference).
+  - **Announce the top-level Project page, not a child module page.** A multi-module Project (e.g.
+    `Extension/Documentation/`, type "Project") aggregates child pages such as
+    `Extension/Documentation/DocumentationApplication/` (type "Application/XAR"). The release
+    announcement targets the **top-level Project** page — its space path is the single segment
+    (`Documentation`), and the child pages are *not* what you link to. Confirm the type on the page
+    you intend to announce; if it says "Application"/"XAR" but sits under a "Project", step up to the
+    parent.
 - **Released version** and **release date**.
 - **What changed** in this version:
   - For **non-project types**: each version has a dedicated page at
@@ -38,9 +45,11 @@ From the extension page on the Extensions wiki (e.g.
     (reference `extensions:Extension.<space path>.Versions.<version>.WebHome`). The JIRA issues
     listed there (e.g. "Add support for local URL fragments", "Depend on XWiki 15.10+") are the
     basis for the release text and any minimal-version change.
-  - For **project types**: there are no `Versions/<version>/` sub-pages. Gather the changes from
-    the git log (`git log --oneline <prev-tag>..<release-tag>`) and the JIRA issues referenced in
-    the commit messages.
+  - For **project types**: there are no `Versions/<version>/` sub-pages, but the Project homepage
+    itself has a **Versions** section with one heading per version, giving a stable in-page anchor
+    `#H<version>` (e.g. `#H1.14`) that the version link points at (see step 3). Gather the changes
+    from that section, and from the git log (`git log --oneline <prev-tag>..<release-tag>`) and the
+    JIRA/OpenProject issues referenced in the commit messages.
 
 ## 2. Page name and title
 
@@ -63,6 +72,10 @@ From the extension page on the Extensions wiki (e.g.
 The post's text + metadata live in a `Blog.BlogPostClass` xobject. Fill **both** the content and the
 summary/extract fields.
 
+**Present the changes as a bullet list** in the *content* field (one `*` bullet per change — bug fix,
+feature, or minimal-version bump), following the intro sentence. The *summary/extract* field stays a
+single flowing sentence — no bullet list there.
+
 ### Non-project type (has version sub-pages)
 
 The version link points to the **dedicated version page** (the older guide pointed it at a
@@ -73,13 +86,17 @@ no-longer-existing `anchor="H<version>"` on the extension homepage):
 ```
 The [[<extension name>>>doc:extensions:Extension.<space path>.WebHome]] [[<version>>>doc:extensions:Extension.<space path>.Versions.<version>.WebHome]] has been released.
 
-<one or two sentences describing what this release adds/changes>
+This release brings the following changes:
+
+* <change 1>
+* <change 2>
+* <...one bullet per change; last one is the minimal-version bump if any>
 ```
 
 **Summary / extract:**
 
 ```
-The [[<extension name>>>doc:extensions:Extension.<space path>.WebHome]] [[<version>>>doc:extensions:Extension.<space path>.Versions.<version>.WebHome]] has been released. <short description>
+The [[<extension name>>>doc:extensions:Extension.<space path>.WebHome]] [[<version>>>doc:extensions:Extension.<space path>.Versions.<version>.WebHome]] has been released. <one-sentence description>
 ```
 
 **Escape the dots in `<version>`** — `.` is the entity separator in XWiki references, so version
@@ -94,21 +111,31 @@ The [[<extension name>>>doc:extensions:Extension.<space path>.WebHome]] [[<versi
 
 ### Project type (no version sub-pages)
 
-Since there is no dedicated version page to link to, write the version number as plain text:
+There is no dedicated version page, but the Project homepage's **Versions** section has a per-version
+heading, so link the version to that in-page anchor `anchor="H<version>"` on the homepage. Unlike a
+reference, the dots inside the `anchor="..."` string are **not** escaped (`H1.14`, not `H1\.14`):
 
 **Content:**
 
 ```
-The [[<extension name>>>doc:extensions:Extension.<space path>.WebHome]] <version> has been released.
+The [[<extension name>>>doc:extensions:Extension.<space path>.WebHome]] [[<version>>>doc:extensions:Extension.<space path>.WebHome||anchor="H<version>"]] has been released.
 
-<one or two sentences describing what this release adds/changes>
+This release brings the following changes:
+
+* <change 1>
+* <change 2>
+* <...one bullet per change; last one is the minimal-version bump if any>
 ```
 
 **Summary / extract:**
 
 ```
-The [[<extension name>>>doc:extensions:Extension.<space path>.WebHome]] <version> has been released. <short description>
+The [[<extension name>>>doc:extensions:Extension.<space path>.WebHome]] [[<version>>>doc:extensions:Extension.<space path>.WebHome||anchor="H<version>"]] has been released. <one-sentence description>
 ```
+
+Example version link (Documentation project 1.14): the name "Documentation" reads awkwardly on its
+own, so add the word "extension" after the link — `The [[Documentation>>...]] extension
+[[1.14>>doc:extensions:Extension.Documentation.WebHome||anchor="H1.14"]] has been released.`
 
 ## 4. Categories
 
@@ -141,6 +168,17 @@ Use the **agent-browser** skill. Key gotchas learned the hard way:
   headed launch.
 - **Enter wiki syntax via Source mode.** The content and summary fields are CKEditor; click each
   field's **"Source"** button, then `fill` the resulting textarea with the wiki-syntax template.
+- **Never write a macro name with its braces in the text.** A literal `{{image}}` (or any
+  `{{macro}}`) in the content is *executed* by the renderer at Preview — e.g. `{{image}}` fails with
+  `Failed to execute the [image] macro. Cause: [Parameter [reference] is mandatory]` and shows as a
+  `.xwikirenderingerror`. Refer to macros in prose ("the image macro"), not as `{{image}}`.
+- **Fill from a file to avoid shell quote-mangling.** Content with double quotes (e.g. a `"How-to"`
+  label) gets mangled if passed inline through the shell. Write the wiki syntax to a temp file and
+  fill with `agent-browser … fill @ref "$(cat file.txt)"` — command substitution keeps quotes literal.
+- **Re-fill the Source textarea after any Preview round-trip.** Clicking **"Back To Edit"** re-renders
+  the fields as WYSIWYG; if the content had macro-like text the WYSIWYG round-trip can corrupt it. On
+  returning to edit, re-click "Source" and re-`fill` both fields from the files before re-previewing.
+  Category/Publish/date state does survive the round-trip; only the CKEditor content needs re-filling.
 - Check the 6 category checkboxes, the Publish checkbox, and set the publish date.
 
 ## 7. Verify, then hand off
@@ -149,8 +187,9 @@ Use the **agent-browser** skill. Key gotchas learned the hard way:
   (`.xwikirenderingerror`). Click **"Back To Edit"** to return.
   - For non-project types: verify the version link `href` points to
     `…/Extension/<ExtensionSpace>/Versions/<version>/`.
-  - For project types: only the extension name link needs to resolve; there is no version page link
-    to check.
+  - For project types: verify the version link `href` points to `…/Extension/<ExtensionSpace>/#H<version>`
+    (the Versions-section anchor on the homepage).
+  - Also confirm the changes render as a proper bullet list and the summary as a single sentence.
 - **Do not Save unless asked.** The default is to leave the form fully filled and let the user
   review and press **Save** / **Save & View** themselves. Save automatically only when the user
   explicitly tells you to.
@@ -163,8 +202,12 @@ Use the **agent-browser** skill. Key gotchas learned the hard way:
   ```
   The [[Wiki Link URL Normalizer>>doc:extensions:Extension.WikiLinkURLNormalizer.WebHome]] [[1.10.0>>doc:extensions:Extension.WikiLinkURLNormalizer.Versions.1\.10\.0.WebHome]] has been released.
 
-  This version adds support for normalizing local URLs that contain anchors (URL fragments). It now requires XWiki 15.10 or later.
+  This release brings the following changes:
+
+  * Adds support for normalizing local URLs that contain anchors (URL fragments)
+  * Raises the minimal supported XWiki version to 15.10
   ```
 - Categories: the six in step 4. Publish: on. Date: `11/06/2026 12:00:00`.
-- This example is a non-project (Extension) type. For a **Project** type, omit the version link and
-  write the version as plain text — see §3 "Project type".
+- This example is a non-project (Extension) type. For a **Project** type, link the version to the
+  homepage anchor (`…WebHome||anchor="H<version>"`) instead of a version sub-page — see §3 "Project
+  type". Example: the Documentation project 1.14 announcement links `[[1.14>>doc:extensions:Extension.Documentation.WebHome||anchor="H1.14"]]`.
