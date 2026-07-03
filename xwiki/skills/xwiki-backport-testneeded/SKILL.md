@@ -149,8 +149,12 @@ full reactor so it doesn't hit this.
 
 Caveats: the image is **amd64-only** — on Apple-silicon it runs under emulation AND spins up more
 emulated amd64 containers (XWiki+DB+Selenium) per test, so a single run is slow/flaky and running
-the whole set locally is impractical. Prefer CI for the full set; use the local run only to prove the
-mechanism. See **xwiki-fix-flickering-docker-test** if the test itself flickers.
+the whole set locally is impractical. A common failure there is Docker-out-of-Docker networking, e.g.
+Testcontainers `Could not connect to Ryuk at <ip>:<port>` (the test compiles and is discovered, then
+the *environment* fails to come up) — that is an infra limitation, not a backport defect
+(`TESTCONTAINERS_RYUK_DISABLED=true` sometimes gets past Ryuk, but the XWiki/DB containers may still
+not be reachable). Prefer CI for the full set; use the local run only to prove the code compiles and
+the test is picked up. See **xwiki-fix-flickering-docker-test** if the test itself flickers.
 
 ## Orchestration & cost notes
 - One subagent per issue, `isolation: worktree`, so parallel git operations don't collide. Batch to
