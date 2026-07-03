@@ -103,7 +103,8 @@ OKF map (files under the plugin's `okf/` directory):
   `backward-compatibility`, `security` (escaping, untrusted input/translations, context-author
   right checks), `performance` (stream large data; never buffer unbounded payloads in memory).
 - `okf/architecture/` — `component-system` (`@Role`/`@Component`/`components.txt`, `@Inject`),
-  `macro-refactoring` (`MacroRefactoring` role keyed by macro id; content-only default fallback).
+  `macro-refactoring` (`MacroRefactoring` role keyed by macro id; content-only default fallback),
+  `wiki-user-scope` (subwiki local vs global users/groups).
 - `okf/testing/` — `strategy` (test kinds, naming, framework locations; procedures are in the skills).
 - `okf/servers/` — `index` (JIRA, CI, Nexus, SonarCloud, forum… and how to access/verify each).
 - `okf/processes/` — `release` (version/release orientation; detailed steps are dev-wiki pointers),
