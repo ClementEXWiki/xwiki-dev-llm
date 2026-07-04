@@ -90,24 +90,27 @@ These are test-only changes, but naive resolution is wrong. Rules that matter:
 
 ## 6. Adjust `@since` on every branch (and master)
 
-Backporting makes new **public** API (mainly page objects under a `*-test-pageobjects`
-`src/main/java`) available in each branch's next release, so `@since` must list those versions, and
-**master must match so all branches carry identical `@since` content**. IT test classes
-(`src/test/**IT.java`) are not API — they get no `@since`. If this issue's commit(s) touch no
-`src/main/java` public API, there is no `@since` work.
+Backporting makes new **public** API available in each branch's next release, so `@since` must list
+those versions, and **master must match so all branches carry identical `@since` content**.
 
-Convention (see `xwiki-knowledge`): one `@since` line per version-line, **ascending**, e.g.
-`@since 17.10.4` then `@since 18.2.0RC1`. Patch releases are plain (`17.10.10`); `.0` releases use
-the RC form (`18.5.0RC1`).
+Scope — what carries `@since` here (see `xwiki-knowledge` → versioning):
+- **Only class-level** `@since`, and only on a **genuinely-new** test-support class (a new page
+  object under `*-test-pageobjects/src/main/java`). Members inherit the class `@since`.
+- **Never on methods** of page objects / test helpers — these are test-support methods and do not
+  get `@since`. If the original commit added a method-level `@since`, it should not have; do not
+  carry it into the backport (and it can be dropped).
+- **Never invent** an `@since` where the master code did not already have one.
+- IT test classes (`src/test/**IT.java`) are not API — no `@since`. If the issue adds no new
+  test-support **class**, there is no `@since` work at all.
 
-**Decide the lines to add EMPIRICALLY per element** (do not assume a fixed block):
-- Find the element's existing original `@since` on master and KEEP it.
-- If the element is **absent** on `origin/stable-17.10.x` → add `@since 17.10.10`.
+Format (durable): three numeric segments (`18.3.0RC1`, never `18.3RC1`; `17.10.10`; `18.4.3`), one
+line per version-line, **ascending** by version number.
+
+**Decide the lines to add EMPIRICALLY for the new class** (do not assume a fixed block):
+- Keep the class's existing original `@since` from master.
+- If the class is **absent** on `origin/stable-17.10.x` → add `@since 17.10.10`.
 - If **absent** on `origin/stable-18.4.x` (and the issue was backported there) → add `@since 18.4.3`.
-- If it already exists on a branch, do NOT add that branch's line. If it exists on **both** (its
-  `@since` predates both branch cuts, e.g. `17.4.0RC1`) → nothing to add; skip it.
-- A brand-new class carries one class-level `@since` and its members inherit it — annotate the class,
-  not every member. A new public method with no javadoc gets a minimal javadoc + the line(s).
+- If it already exists on a branch, do NOT add that branch's line.
 
 Apply the identical edit on **each backport branch** (an extra commit on the existing PR branch — it
 updates that PR) **and on master**. The master change is a **single commit whose subject = the
