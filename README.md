@@ -66,6 +66,7 @@ For local development against a checkout:
   - `xwiki-documentation` — write and review xwiki.org documentation per the XWiki Documentation Guide (Diataxis).
   - `xwiki-contrib-release-blog-post` — create the "<Extension> Extension <version> Released" announcement on the xwiki.org Blog for an xwiki-contrib extension.
   - `xwiki-fix-sonarqube-issue` — find and fix one SonarCloud issue, open a PR, mark it Accepted.
+  - `xwiki-backport-testneeded` — backport `testneeded`-labelled tests to supported stable branches, adjust `@since` across branches, open the PRs.
 
 ## Required environment variables
 
