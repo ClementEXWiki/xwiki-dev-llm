@@ -1,6 +1,6 @@
 ---
 name: xwiki-backport-testneeded
-description: Backport the automated test of one JIRA issue labelled `testneeded` to the currently-supported stable branches, adjust its `@since` tags across all branches, and open the PRs. Use when asked to backport the test of a given testneeded issue, or to catch a stable branch up with a recently-added test. (For several issues at once, the user will say so — then apply this per issue.) This is the test-specific layer on top of xwiki-backport (which owns the generic cherry-pick / adapt-to-branch / verify mechanics — including the mandatory pom-version and Java-version checks). For Maven use xwiki-build; for PR/commit conventions use xwiki-pull-request; for the `@since` rules use xwiki-knowledge.
+description: Backport the automated test of one JIRA issue labelled `testneeded` to the currently-supported stable branches, adjust its `@since` tags across all branches, and open the PRs. Use when asked to backport the test of a given testneeded issue, or to catch a stable branch up with a recently-added test. (For several issues at once, the user will say so — then apply this per issue.) This is the test-specific layer on top of xwiki-backport (which owns the generic cherry-pick / adapt-to-branch / verify mechanics — including the mandatory pom-version, Java-version and `@since` checks). For Maven use xwiki-build; for PR/commit conventions use xwiki-pull-request; for the `@since` rules use xwiki-knowledge.
 ---
 
 Backport the test added for **one** `testneeded`-labelled JIRA issue onto the currently-supported
@@ -9,7 +9,7 @@ stable branches, keep its `@since` tags consistent across every branch, and open
 **This skill is the `testneeded` layer on top of `xwiki-backport`.** Do the generic backport work —
 establishing the target branches/versions, finding all the issue's commits, worktree +
 `cherry-pick -x` oldest-first, the **adapt-to-branch checks (pom versions §3.A, Java level §3.B,
-conflict rules §3.C)**, reset-and-re-cherry-pick when a base moves, verification, and push/PR — by
+conflict rules §3.C, `@since` §3.D)**, reset-and-re-cherry-pick when a base moves, verification, and push/PR — by
 following **xwiki-backport**. This file adds only what is specific to backporting `testneeded` tests:
 finding the issues, the `@since` policy for test-support classes, the `testneeded` label, and the
 consolidated master PR.
@@ -45,30 +45,27 @@ Follow **xwiki-backport** end to end. Two testneeded-specific touches on top:
 
 ## `@since` on every branch (and master) — the test-specific layer
 
-Backporting makes new **public** API available in each branch's next release, so `@since` must list
-those versions, and **master must match so all branches carry identical `@since` content**.
+The **generic `@since` adjustment** — add the target branch's line, keep the block identical on every
+branch (master/source included), decide the lines empirically and ascending, the durable format — is
+**xwiki-backport §3.D**. Apply it. This section adds only what is specific to `testneeded` tests:
 
-Scope — what carries `@since` here (see `xwiki-knowledge` → versioning):
+Scope — what carries `@since` for a test backport (see `xwiki-knowledge` → versioning):
 - **Only class-level** `@since`, and only on a **genuinely-new** test-support class (a new page
   object under `*-test-pageobjects/src/main/java`). Members inherit the class `@since`.
 - **Never on methods** of page objects / test helpers — these are test-support methods and do not get
   `@since`. If the original commit added a method-level `@since`, it should not have; do not carry it
   into the backport (and it can be dropped).
-- **Never invent** an `@since` where the master code did not already have one.
 - IT test classes (`src/test/**IT.java`) are not API — no `@since`. If the issue adds no new
-  test-support **class**, there is no `@since` work at all.
+  test-support **class**, there is **no `@since` work at all**.
 
-Format (durable): three numeric segments (`18.3.0RC1`, never `18.3RC1`; `17.10.10`; `18.4.3`), one
-line per version-line, **ascending** by version number.
-
-**Decide the lines to add EMPIRICALLY for the new class** (do not assume a fixed block):
-- Keep the class's existing original `@since` from master.
-- If the class is **absent** on `origin/stable-17.10.x` → add `@since 17.10.10`.
-- If **absent** on `origin/stable-18.4.x` (and the issue was backported there) → add `@since 18.4.3`.
-- If it already exists on a branch, do NOT add that branch's line.
+Concretely, deciding the lines for the new class (the §3.D empirical check, made explicit here): keep
+the class's existing original `@since` from master; if the class is **absent** on
+`origin/stable-17.10.x` → add `@since 17.10.10`; if **absent** on `origin/stable-18.4.x` (and the
+issue was backported there) → add `@since 18.4.3`; if it already exists on a branch, do not re-add
+that branch's line.
 
 Apply the identical edit on **each backport branch** (an extra commit on the existing PR branch — it
-updates that PR) **and on master**. The master change is a **single commit whose subject = the
-original commit title** (body noting the `@since` was adjusted), on a `backport/master/XWIKI-nnnnn`
-branch, opened as its own master PR. For several issues at once, fold all their master `@since` edits
-into one consolidated master PR.
+updates that PR) **and on master** (the "source branch also carries it" half of §3.D). The master
+change is a **single commit whose subject = the original commit title** (body noting the `@since` was
+adjusted), on a `backport/master/XWIKI-nnnnn` branch, opened as its own master PR. For several issues
+at once, fold all their master `@since` edits into one consolidated master PR.

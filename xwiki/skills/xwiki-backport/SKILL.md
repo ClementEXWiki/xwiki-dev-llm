@@ -1,6 +1,6 @@
 ---
 name: xwiki-backport
-description: Backport any change (bug fix, feature, refactor, or test) to an older branch of an XWiki repo (xwiki-platform / xwiki-commons / xwiki-rendering / xwiki-contrib). Cherry-pick `-x` the source commit(s) into a worktree, ADAPT the result to the older branch (module pom versions, Java level, style/API divergence), verify it compiles against that branch, and push / open a PR. Use whenever a commit that exists on one branch needs to be applied to an older/maintenance branch. For the `testneeded`-labelled test sweep and the `@since` rules use xwiki-backport-testneeded (which builds on this skill); for Maven commands use xwiki-build; for PR/commit conventions use xwiki-pull-request; for versioning/`@since` rules use xwiki-knowledge.
+description: Backport any change (bug fix, feature, refactor, or test) to an older branch of an XWiki repo (xwiki-platform / xwiki-commons / xwiki-rendering / xwiki-contrib). Cherry-pick `-x` the source commit(s) into a worktree, ADAPT the result to the older branch (module pom versions, Java level, `@since` tags, style/API divergence), verify it compiles against that branch, and push / open a PR. Use whenever a commit that exists on one branch needs to be applied to an older/maintenance branch. For the `testneeded`-labelled test sweep use xwiki-backport-testneeded (which builds on this skill); for Maven commands use xwiki-build; for PR/commit conventions use xwiki-pull-request; for the versioning/`@since` conventions (the format and what carries `@since`) use xwiki-knowledge.
 ---
 
 Apply a change that exists on one branch (the **source** — often `master`, but it can be any newer
@@ -11,7 +11,7 @@ the mechanics here), **xwiki-build** (Maven), **xwiki-pull-request** (PR/commit 
 **xwiki-knowledge** (versioning / `@since` in the OKF).
 
 > A cherry-pick copies file bytes **verbatim**. That is exactly why backports break: the source
-> content assumes the source branch's module versions, Java level, and surrounding code. §4 (Adapt to
+> content assumes the source branch's module versions, Java level, and surrounding code. §3 (Adapt to
 > the branch) is the heart of this skill — do not skip it even when the cherry-pick applied cleanly.
 
 ## 1. Establish the inputs first
@@ -26,11 +26,11 @@ the mechanics here), **xwiki-build** (Maven), **xwiki-pull-request** (PR/commit 
   branches are supported — that changes every release; ask or infer from the last patch release of
   each active line.)
 - **The target branch's version**, read from its root `pom.xml` `<version>` (e.g.
-  `17.10.10-SNAPSHOT`). Needed for the pom-version check (§4.A) and any `@since` work.
+  `17.10.10-SNAPSHOT`). Needed for the pom-version check (§3.A) and the `@since` adjustment (§3.D).
 - **The target branch's Java level.** It depends on the XWiki version and differs across lines (newer
   lines use newer JDKs). Do NOT hardcode — resolve it from the version via the Java Support Strategy
   (linked from the org instructions / `dev.xwiki.org`), or read the branch's effective build config.
-  Needed for the Java-compatibility check (§4.B); have the matching JDK installed to verify.
+  Needed for the Java-compatibility check (§3.B); have the matching JDK installed to verify.
 
 ## 2. Cherry-pick oldest-first, in an isolated worktree
 
@@ -53,7 +53,7 @@ The `backport/<target-branch>/XWIKI-nnnnn` name mirrors the auto-backport bot's
 
 ## 3. Adapt to the branch — the part that actually matters
 
-Run **all three** checks below after every cherry-pick, clean or conflicted.
+Run **all four** checks below after every cherry-pick, clean or conflicted.
 
 ### 3.A — Module pom versions (MANDATORY, fires even on a clean cherry-pick)
 
@@ -120,6 +120,30 @@ the arbiter.
   correctness signal.**
 - **Independent backport PRs touching the same file on the same branch** will conflict at merge time
   (the second to merge needs a rebase). Flag it; it's expected.
+
+### 3.D — `@since` tags (fires whenever the change carries `@since`)
+
+If any cherry-picked commit adds new public API — or an `@Deprecated(since = "…")` — carrying an
+`@since` tag, that tag lists the versions in which the API becomes available. Backporting makes it
+available in the **target branch's next release** too, so the tag must be adjusted. `@since` is
+Javadoc, so it does **not** surface as a compile error (§5 won't catch it) — this is a review check.
+Backporting **adds** `@since` lines, it never replaces the existing ones. Two things to verify:
+
+- **The target branch's line is present.** Add `@since <target-next-release>` (three numeric
+  segments, e.g. `17.10.10`, `18.4.3` — the version this target branch will next release, §1) —
+  unless it is already there.
+- **The source branch you cherry-picked from also carries it.** The `@since` block must be
+  **identical on every branch the code lives on**, the source/master included. So the version line(s)
+  you added here must also exist on the source branch (and on every other branch that received the
+  backport); if the source's block is missing a line, fix it there too (a separate `@since` commit /
+  PR on the source branch) — otherwise the branches drift.
+
+Decide the lines **empirically**, one per version-line, **ascending** by version number: inspect what
+each branch already carries (`git show origin/<branch>:<path>` for the file) and add only the missing
+lines. **Never invent an `@since`** where the source code did not already have one.
+
+For the exact format and *which elements* carry `@since` (class vs. method; test-support scope — e.g.
+page-object methods do **not** get `@since`), see the versioning convention via **xwiki-knowledge**.
 
 ## 4. When a backport branch goes stale (base moved under it)
 
