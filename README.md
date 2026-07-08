@@ -56,6 +56,7 @@ For local development against a checkout:
   - `xwiki-build` — canonical Maven build/test commands.
   - `xwiki-pull-request` — conventions for creating a PR (template, commit format, squash/backport).
   - `xwiki-test-guidelines` — testing best practices and the XWiki test frameworks.
+  - `xwiki-javadoc` — write clear, useful Javadoc following the XWiki Java Code Style and Oracle conventions.
   - `xwiki-convert-tests` — convert unit tests to JUnit5/Mockito.
   - `xwiki-convert-tests-docker` — convert functional IT tests to the Docker `@UITest` framework.
   - `xwiki-increase-test-coverage` — raise and lock in a module's unit-test coverage (JaCoCo instruction ratio).
