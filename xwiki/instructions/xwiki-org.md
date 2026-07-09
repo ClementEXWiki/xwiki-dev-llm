@@ -70,8 +70,8 @@ role holders): the relevant file gives a `verify:` recipe instead (read `pom.xml
 
 OKF map (topic files under `okf/`, described in `okf/index.md`):
 
-- `okf/conventions/` — `code-style`, `code-comments`, `commit-messages`, `page-naming`,
-  `versioning`, `backward-compatibility`, `security`, `performance`.
+- `okf/conventions/` — `code-style`, `code-comments`, `commit-messages`, `versioning`,
+  `backward-compatibility`, `security`, `performance`.
 - `okf/architecture/` — `component-system`, `macro-refactoring`, `wiki-user-scope`.
 - `okf/testing/` — `strategy`.
 - `okf/servers/` — `index` (JIRA, CI, Nexus, SonarCloud, forum… and how to access/verify each).
