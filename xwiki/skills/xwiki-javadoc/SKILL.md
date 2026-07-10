@@ -85,20 +85,33 @@ the real contract. If a detail genuinely can't be determined, describe what is k
 - **Do not duplicate inherited Javadoc.** For an `@Override` method, either add nothing (inherits automatically) or
   use `{@inheritDoc}` and then add only what is specific. Always keep the `@Override` annotation.
 
-## Do NOT use the `{@return ...}` combo tag (yet)
+## The `{@return ...}` combo tag — allowed, but only for simple getters
 
-Java 16's inline `{@return description}` (which folds the summary and `@return` into one) is **rejected by XWiki's
-Checkstyle** — verified: it fails with `JavadocStyle: First sentence should end with a period.` and
-`JavadocMethod: @return tag should be present and have description.`, breaking the `-Pquality` build. So:
+Java 16's inline `{@return description}` folds the summary and `@return` into one. XWiki's Checkstyle **now accepts
+it** (fixed in xwiki-commons by the *"[Misc] Allow {@return...} structure"* change), so it no longer breaks the
+`-Pquality` build on current versions. The community agreed
+([forum discussion](https://forum.xwiki.org/t/adopt-the-combo-return-tag-javadoc-syntax-to-avoid-redundancy/18595)) to
+use it **only for simple getter(-like) methods** whose entire behaviour fits in the one or two sentences of the tag:
 
-- Keep the classic form: a first-sentence summary **and** a separate `@return` tag.
-- This is not an invitation to write an empty/omitted summary either — the summary sentence is valuable (it is copied
-  into the summary tables). If summary and `@return` feel redundant, that is the signal to make the Javadoc *better*
-  (add the detail the summary is missing), not shorter.
+```java
+/**
+ * {@return the key of the space this page belongs to, for example {@code Main}}
+ */
+String getParentSpaceKey();
+```
 
-See the forum discussion: [Adopt the combo @returns tag javadoc syntax to avoid redundancy](https://forum.xwiki.org/t/adopt-the-combo-returns-tag-javadoc-syntax-to-avoid-redundancy/18595).
-If Checkstyle support lands later, `{@return}` may be used, but only for simple getter-like methods whose whole
-behaviour fits in the one or two sentences of the tag — never as a replacement for a comprehensive comment.
+It is **not** a replacement for comprehensive Javadoc. As soon as there is anything a caller needs to reason about
+(parameters, sentinel values, `null` behaviour, defaults, error conditions — see "be useful, not shallow" above), keep
+the classic form: a standalone first-sentence summary **and** a separate `@return` tag, both carrying the real detail.
+If summary and `@return` feel redundant, that is the signal to make the Javadoc *better* (add the missing detail), not
+to collapse it into `{@return}`.
+
+Notes:
+- The combo tag renders as `Returns ` + your text + `.`, so write it as a noun phrase (`{@return the label}`), not a
+  full sentence beginning with "Returns".
+- On older branches that predate the Checkstyle fix, `{@return}` still fails `-Pquality` (with `JavadocStyle: First
+  sentence should end with a period.` / `JavadocMethod: @return tag should be present and have description.`); use the
+  classic form there. Verify with the `-Pquality` profile (see below).
 
 ## Checkstyle
 
