@@ -43,6 +43,27 @@ This command runs all checks (Checkstyle, API compat, etc.) and is the correct w
 code quality before committing. Do not add the skip flags from the full build recipe here unless
 you explicitly want to bypass those checks.
 
+## Also rebuild any legacy module that weaves the changed module
+
+Some modules are wrapped by a `-legacy` module that re-adds deprecated/removed APIs by weaving the
+original module's bytecode with AspectJ. That legacy module compiles and tests against your changed
+code, so a change that builds fine on its own can still break the legacy module.
+
+A legacy module wraps your module when its `pom.xml` configures `aspectj-maven-plugin` with a
+`<weaveDependency>` whose `<artifactId>` is the module you changed. For example, a change to
+`xwiki-platform-oldcore` must also be validated by rebuilding `xwiki-platform-legacy-oldcore`:
+
+```bash
+grep -rl '<weaveDependency>' --include=pom.xml   # find legacy modules and inspect their weaveDependency artifactIds
+```
+
+When such a legacy module exists, build it too (single-module build, all checks on) to confirm it
+still compiles and its tests still pass:
+
+```bash
+mvn clean install -B -ntp -pl <legacy-module-path> -Plegacy,snapshot
+```
+
 ## Run tests
 
 ```bash
