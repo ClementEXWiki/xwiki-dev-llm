@@ -24,8 +24,9 @@ the **`xwiki-jira`** skill (that skill owns the *procedure*; this file owns the 
 
 ## Project keys
 
-Each repo has its own key: `XWIKI` (Platform), `XCOMMONS` (Commons), `XRENDERING` (Rendering), and a
-per-extension key for each xwiki-contrib extension. Always reference an issue by its key
+Each repo has its own key: `XWIKI` (Platform), `XCOMMONS` (Commons), `XRENDERING` (Rendering); other
+`xwiki`-org repos have their own keys too (e.g. `XDOCKER` for the `xwiki/xwiki-docker` image); and
+each xwiki-contrib extension has a per-extension key. Always reference an issue by its key
 (`XWIKI-12345`); the commit that fixes it carries that key as its prefix (see [[commit-messages]]).
 
 ## Issue-field conventions (creating a Bug)
@@ -43,6 +44,11 @@ below). When filing/curating a bug, set:
   version. Note the naming: JIRA version names use dashes (e.g. `18.7.0-rc-1`), whereas the source
   `@since` / `@Deprecated(since=…)` tag for the *same* release uses `18.7.0RC1` — see [[versioning]]
   for the tag format. Add the stable-branch fix versions too when the fix is backported.
+
+These conventions target the core projects (`XWIKI`, `XCOMMONS`, `XRENDERING`). **Some projects
+configure fewer fields** — e.g. `XDOCKER` has **no Component/s, no Affects Version/s and no Fix
+Version/s** at all, so there is nothing to set there; do not treat their absence as a mistake to
+correct. Check what the project actually exposes before insisting on a field.
 
 Write the **description in JIRA wiki markup** (`h2.`, `{{monospace}}`, `*bold*`, `* bullet`) and make
 it explain the **user-visible problem**, not just the code change.
