@@ -14,23 +14,11 @@
       "args": ["-y", "@discourse/mcp@latest", "--site", "https://forum.xwiki.org"]
     },
     "sonarqube": {
-      "command": "docker",
-      "args": [
-        "run", "-i", "--rm", "--pull=always",
-        "-e", "SONARQUBE_URL",
-        "-e", "SONARQUBE_TOKEN",
-        "-e", "SONARQUBE_ORG",
-        "-e", "SONARQUBE_PROJECT_KEY",
-        "-e", "SONARQUBE_TOOLSETS",
-        "-e", "SONARQUBE_ADVANCED_ANALYSIS_ENABLED",
-        "-v", "${PWD}:/app/mcp-workspace:rw",
-        "mcp/sonarqube"
-      ],
+      "command": "node",
+      "args": ["./xwiki/scripts/start-sonarqube-mcp.mjs"],
       "env": {
         "SONARQUBE_URL": "https://sonarcloud.io",
-        "SONARQUBE_TOKEN": "${SONARQUBE_TOKEN}",
         "SONARQUBE_ORG": "xwiki",
-        "SONARQUBE_PROJECT_KEY": "${SONARQUBE_PROJECT_KEY}",
         "SONARQUBE_TOOLSETS": "cag,projects,analysis,issues",
         "SONARQUBE_ADVANCED_ANALYSIS_ENABLED": "true"
       }
@@ -39,12 +27,12 @@
   "hooks": [
     {
       "event": "SessionStart",
-      "command": "node \"${KIMI_PLUGIN_ROOT}/xwiki/scripts/inject-org-instructions.mjs\""
+      "command": "node \"./xwiki/scripts/inject-org-instructions.mjs\""
     },
     {
       "event": "PostToolUse",
       "matcher": "Write|Edit",
-      "command": "node \"${KIMI_PLUGIN_ROOT}/xwiki/scripts/check-line-endings.mjs\""
+      "command": "node \"./xwiki/scripts/check-line-endings.mjs\""
     }
   ]
 }
