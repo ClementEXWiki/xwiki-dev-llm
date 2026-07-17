@@ -1,17 +1,21 @@
 # xwiki-dev-llm
 
 Shared LLM configuration for XWiki developers, distributed as a
-[Claude Code plugin marketplace](https://docs.claude.com/en/docs/claude-code/plugin-marketplaces).
+[Claude Code plugin marketplace](https://docs.claude.com/en/docs/claude-code/plugin-marketplaces)
+and a [Kimi Code](https://www.kimi.com/code/docs/en/kimi-code-cli/customization/plugins.html) plugin.
 
 The goal is consistency across developers, sharing the work of others, and simple onboarding —
 generic enough to work for **every** XWiki developer (no required directory layout, no symlinks, no
 committed secrets). It was designed in the forum thread
 [Organizing our LLM configs for all our repos](https://forum.xwiki.org/t/organizing-our-llm-configs-for-all-our-repos/18551).
 
-The marketplace manifest lives at the repo root (`.claude-plugin/marketplace.json`); the single
-plugin lives under [`xwiki/`](xwiki).
+The Claude marketplace manifest lives at the repo root (`.claude-plugin/marketplace.json`), the
+Kimi plugin manifest lives at `kimi.plugin.json`, and the shared plugin content lives under
+[`xwiki/`](xwiki).
 
 ## Install
+
+### Claude Code
 
 ```
 /plugin marketplace add https://github.com/xwiki/xwiki-dev-llm
@@ -25,6 +29,20 @@ For local development against a checkout:
 /plugin install xwiki@xwiki-dev-llm
 ```
 
+### Kimi Code
+
+```
+/plugins install https://github.com/xwiki/xwiki-dev-llm
+/reload
+```
+
+For local development against a checkout:
+
+```
+/plugins install /path/to/xwiki-dev-llm
+/reload
+```
+
 ## What the `xwiki` plugin provides
 
 - **Org-wide conventions** (`xwiki/instructions/xwiki-org.md`) — the shared "CLAUDE.md for all
@@ -35,10 +53,12 @@ For local development against a checkout:
 - **Line-ending guard** (`xwiki/scripts/check-line-endings.mjs`) — a `PostToolUse` hook on
   `Write`/`Edit` that checks every file written against the explicit `eol` declared by the repo's
   `.gitattributes` (via `git check-attr`). On a CRLF/LF mismatch it fails with a clear message so
-  the file gets rewritten with the right endings, preventing spurious whole-file diffs. It enforces
-  this deterministically and at near-zero token cost — it only emits output on an actual violation,
-  and stays silent when no `eol` is declared (so it never mis-fires on Windows `core.autocrlf`
-  working trees). Also Node-based for cross-platform support.
+  Claude Code rewrites the file with the right endings, preventing spurious whole-file diffs. It
+  enforces this deterministically and at near-zero token cost — it only emits output on an actual
+  violation, and stays silent when no `eol` is declared (so it never mis-fires on Windows
+  `core.autocrlf` working trees). Also Node-based for cross-platform support. In Kimi Code the same
+  warning is emitted, but because `PostToolUse` hooks are observation-only there, the model must
+  act on the warning itself.
 - **MCP servers** (`xwiki/.mcp.json`):
   - `discourse` — forum.xwiki.org search/read (no auth).
   - `sonarqube` — SonarCloud code-quality analysis (Docker). Reads `SONARQUBE_TOKEN` and the

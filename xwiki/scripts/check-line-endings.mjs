@@ -5,7 +5,10 @@
 // message so Claude rewrites the file correctly. This enforces line endings deterministically
 // and at near-zero token cost (it only speaks up on a real violation) instead of relying on a
 // skill being consulted on every single write.
-// Written in Node (which Claude Code requires) so it works on Windows, macOS and Linux.
+// Written in Node (ships with Claude Code and Kimi Code) so it works on Windows, macOS and Linux.
+//
+// Kimi Code note: Kimi's PostToolUse hooks are observation-only and cannot block execution. The
+// same stderr warning is emitted, but the model must act on it itself; the file is not rejected.
 
 import { readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
