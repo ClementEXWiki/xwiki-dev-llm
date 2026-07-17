@@ -18,7 +18,7 @@ hard-to-diagnose failures.
 ## Full build (fast, unit tests only — no integration tests)
 
 ```bash
-mvn clean install -B -ntp -Plegacy,snapshot \
+mvn clean install -B -ntp -Plegacy \
   -Dxwiki.checkstyle.skip=true -Dxwiki.surefire.captureconsole.skip=true \
   -Dxwiki.revapi.skip=true
 ```
@@ -34,14 +34,16 @@ keeping unit tests; `-DskipTests` skips all tests.
 ## Build a single module
 
 ```bash
-mvn clean install -B -ntp -pl <module-path> -Plegacy,snapshot
+mvn clean install -B -ntp -pl <module-path> -Plegacy
 ```
 
 For example in xwiki-platform: `-pl xwiki-platform-core/xwiki-platform-<module>`.
 
-This command runs all checks (Checkstyle, API compat, etc.) and is the correct way to validate
-code quality before committing. Do not add the skip flags from the full build recipe here unless
-you explicitly want to bypass those checks.
+This command runs Checkstyle, API compat (Revapi) and the other default checks, and is the correct
+way to validate code quality before committing. Do not add the skip flags from the full build recipe
+here unless you explicitly want to bypass those checks. It does **not**, however, run the JaCoCo
+test-coverage check — add `-Pquality` for that (see Notes); do so whenever the change touches
+production code.
 
 ## Also rebuild any legacy module that weaves the changed module
 
@@ -61,7 +63,7 @@ When such a legacy module exists, build it too (single-module build, all checks 
 still compiles and its tests still pass:
 
 ```bash
-mvn clean install -B -ntp -pl <legacy-module-path> -Plegacy,snapshot
+mvn clean install -B -ntp -pl <legacy-module-path> -Plegacy
 ```
 
 ## Run tests
@@ -89,17 +91,24 @@ definitions.
 | Profile             | Purpose                                                              |
 |---------------------|---------------------------------------------------------------------|
 | `legacy`            | Includes backward-compatibility (`-legacy`) modules; almost always needed |
-| `snapshot`          | Enables XWiki snapshot repositories                                  |
 | `integration-tests` | Activates integration-test (`*IT.java`) execution via Failsafe       |
 | `docker`            | Runs the Docker-based integration tests (requires Docker installed); used together with `integration-tests` |
-| `quality`           | Checkstyle + Revapi + Enforcer checks                                |
+| `quality`           | Checkstyle + Revapi + Enforcer checks, **plus the JaCoCo coverage check** (see Notes) |
 
 ## Notes
 
 - The `legacy` profile activates backward-compatibility shim modules and is almost always required.
-- The `snapshot` profile enables XWiki snapshot repositories.
 - Skip flags worth knowing: `-Dxwiki.checkstyle.skip=true` (Checkstyle),
   `-Dxwiki.revapi.skip=true` (API compat), `-Dxwiki.surefire.captureconsole.skip=true`
   (stdout capture check).
 - Checkstyle and Revapi run in the `verify` phase (not `test`), so `mvn test` won't catch them —
   use `mvn clean verify` or `install` to validate.
+- **The JaCoCo test-coverage check runs ONLY under `-Pquality`.** The `jacoco:check` goal that
+  enforces each module's `xwiki.jacoco.instructionRatio` minimum is bound inside the `quality`
+  profile in the parent POM — a plain `mvn clean install` (even a single-module one) never runs it.
+  So **any code change must be verified with `-Pquality`** to confirm it didn't drop the module below
+  its pinned coverage ratio, e.g. `mvn clean install -B -ntp -pl <module-path> -Plegacy,quality`.
+  Because each module pins the ratio to its *achieved* coverage (locked in by the
+  `xwiki-increase-test-coverage` skill), there is almost no slack: removing or simplifying code —
+  including a mechanical SonarQube fix — can shift the covered/total instruction ratio and fail the
+  check. This failure is invisible without `-Pquality` and only surfaces in CI (which builds with it).

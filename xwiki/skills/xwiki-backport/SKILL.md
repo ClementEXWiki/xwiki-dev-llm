@@ -181,7 +181,7 @@ mvn -B -ntp -Plegacy -DskipTests test-compile
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v <worktree-on-backport-branch>:/root/xwiki-platform -v $HOME/.m2:/root/.m2 \
     --entrypoint /bin/bash xwiki/build -c "cd /root/xwiki-platform/<test-docker-module> && \
-      /home/hudsonagent/maven/bin/mvn -B -ntp verify -Plegacy,integration-tests,docker,snapshot \
+      /home/hudsonagent/maven/bin/mvn -B -ntp verify -Plegacy,integration-tests,docker \
         -Dit.test=<TheIT> -Dxwiki.checkstyle.skip=true -Dxwiki.surefire.captureconsole.skip=true \
         -Dxwiki.revapi.skip=true -Dxwiki.enforcer.skip=true -Dxwiki.license.skip=true"
   ```
