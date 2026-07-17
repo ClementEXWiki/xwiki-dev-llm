@@ -10,7 +10,8 @@ below).
 
 - **Issue tracker:** https://jira.xwiki.org (NOT GitHub Issues). Each repo has its own JIRA project
   key — `XWIKI` (Platform), `XCOMMONS` (Commons), `XRENDERING` (Rendering), a per-extension key for
-  contrib. Reference issues by their key (e.g. `XWIKI-12345`).
+  contrib. Reference issues by their key (e.g. `XWIKI-12345`). To view/create/update issues use the
+  **`xwiki-jira`** skill (jira-cli or REST); issue-field conventions are in `okf/servers/jira.md`.
 - XWiki Commons, XWiki Rendering and XWiki Platform are **released together with the same version**.
 - The **Java version depends on the XWiki version** (defined in the `pom.xml`) — see
   https://dev.xwiki.org/xwiki/bin/view/Community/SupportStrategy/JavaSupportStrategy/#HByXWikiVersions
@@ -74,7 +75,8 @@ OKF map (topic files under `okf/`, described in `okf/index.md`):
   `backward-compatibility`, `security`, `performance`.
 - `okf/architecture/` — `component-system`, `macro-refactoring`, `wiki-user-scope`.
 - `okf/testing/` — `strategy`.
-- `okf/servers/` — `index` (JIRA, CI, Nexus, SonarCloud, forum… and how to access/verify each).
+- `okf/servers/` — `index` (JIRA, CI, Nexus, SonarCloud, forum… and how to access/verify each);
+  `jira` (jira.xwiki.org access via jira-cli/REST + issue-field conventions — see the `xwiki-jira` skill).
 - `okf/processes/` — `release`, `security-policy`.
 - `okf/decisions/` — ADRs (the *why* behind durable architectural choices).
 

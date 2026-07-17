@@ -51,6 +51,8 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
 ### servers/
 - **index** — the xwiki.org server ecosystem (JIRA, CI, Nexus, SonarCloud, forum, …) and how to
   access/verify each (MCP vs. WebFetch).
+- **jira** — accessing jira.xwiki.org (jira-cli or REST) and the durable issue-field conventions
+  (Component, Affects Version = oldest affected/else last LTS, Fix Version); values are volatile.
 
 ### processes/
 - **release** — how XWiki versions/releases (Commons+Rendering+Platform together); detailed steps are
@@ -70,7 +72,7 @@ each grounded in a cited source. `_template.md` holds the format and the groundi
 `xwiki-convert-tests-docker`, `xwiki-fix-flickering-docker-test`, `xwiki-increase-test-coverage`,
 `xwiki-deploy-extension`, `xwiki-xar-pages`, `xwiki-documentation`, `xwiki-translations`,
 `xwiki-contrib-release-blog-post`, `xwiki-fix-sonarqube-issue`, `xwiki-backport`,
-`xwiki-backport-testneeded`.
+`xwiki-backport-testneeded`, `xwiki-jira`.
 
 ## How to extend the OKF (EXTEND)
 

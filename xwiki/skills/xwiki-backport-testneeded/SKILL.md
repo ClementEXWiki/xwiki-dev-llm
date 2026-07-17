@@ -1,6 +1,6 @@
 ---
 name: xwiki-backport-testneeded
-description: Backport the automated test of one JIRA issue labelled `testneeded` to the currently-supported stable branches, adjust its `@since` tags across all branches, and open the PRs. Use when asked to backport the test of a given testneeded issue, or to catch a stable branch up with a recently-added test. (For several issues at once, the user will say so — then apply this per issue.) This is the test-specific layer on top of xwiki-backport (which owns the generic cherry-pick / adapt-to-branch / verify mechanics — including the mandatory pom-version, Java-version and `@since` checks). For Maven use xwiki-build; for PR/commit conventions use xwiki-pull-request; for the `@since` rules use xwiki-knowledge.
+description: Backport the automated test of one JIRA issue labelled `testneeded` to the currently-supported stable branches, adjust its `@since` tags across all branches, and open the PRs. Use when asked to backport the test of a given testneeded issue, or to catch a stable branch up with a recently-added test. (For several issues at once, the user will say so — then apply this per issue.) This is the test-specific layer on top of xwiki-backport (which owns the generic cherry-pick / adapt-to-branch / verify mechanics — including the mandatory pom-version, Java-version and `@since` checks). For Maven use xwiki-build; for PR/commit conventions use xwiki-pull-request; for the `@since` rules use xwiki-knowledge; for querying JIRA (the testneeded sweep) use xwiki-jira.
 ---
 
 Backport the test added for **one** `testneeded`-labelled JIRA issue onto the currently-supported
@@ -23,15 +23,16 @@ Run per **one** issue. Doing several at once is opt-in: only when the user asks,
 issue (a worktree + subagent per issue parallelises well) and consolidate the master `@since` edits
 of all issues into a **single** master PR (see below) instead of one per issue.
 
-To find candidate issues, sweep JIRA:
+To find candidate issues, sweep JIRA with this JQL:
 ```
 project = XWIKI AND labels = testneeded AND resolution = Fixed AND resolutiondate >= <cutoff>
 ```
-For each, read `fixVersions` + `summary` (`.../issue/<KEY>?fields=fixVersions,summary`) and the
-version release dates / branch-cut points (`.../project/XWIKI/versions`) to drive the branch decision
-(xwiki-backport §1: a branch needs the test only if the fix landed after that branch was cut and is
-not already released on its line). (Network calls redirected under context-mode: run them via
-`ctx_execute`/`ctx_fetch_and_index`.)
+Run the JQL and the per-issue lookups via the **`xwiki-jira`** skill (it owns JIRA access — jira-cli
+or REST — and auth). For each candidate, read `fixVersions` + `summary`
+(`.../issue/<KEY>?fields=fixVersions,summary`) and the version release dates / branch-cut points
+(`.../project/XWIKI/versions`) to drive the branch decision (xwiki-backport §1: a branch needs the
+test only if the fix landed after that branch was cut and is not already released on its line).
+(Network calls redirected under context-mode: run them via `ctx_execute`/`ctx_fetch_and_index`.)
 
 ## Backport it — via xwiki-backport
 

@@ -55,6 +55,7 @@ For local development against a checkout:
   - `xwiki-knowledge` — read and extend the OKF knowledge base (declarative XWiki knowledge).
   - `xwiki-build` — canonical Maven build/test commands.
   - `xwiki-pull-request` — conventions for creating a PR (template, commit format, squash/backport).
+  - `xwiki-jira` — view/search/create/update/transition issues on jira.xwiki.org (jira-cli or REST).
   - `xwiki-test-guidelines` — testing best practices and the XWiki test frameworks.
   - `xwiki-javadoc` — write clear, useful Javadoc following the XWiki Java Code Style and Oracle conventions.
   - `xwiki-convert-tests` — convert unit tests to JUnit5/Mockito.
@@ -76,6 +77,8 @@ For local development against a checkout:
 |-------------------------|-----------|----------------------------------------------------|
 | `SONARQUBE_TOKEN`       | sonarqube | Your personal SonarCloud token (same for all repos). |
 | `SONARQUBE_PROJECT_KEY` | sonarqube | The SonarCloud project key — **differs per repo**.   |
+| `JIRA_API_TOKEN`        | `xwiki-jira` (jira-cli / REST) | Your jira.xwiki.org personal access token. Optional — only needed to act on JIRA issues. See "JIRA access" below. |
+| `JIRA_AUTH_TYPE`        | jira-cli  | Set to `bearer` (PAT auth) for the self-hosted XWiki JIRA.       |
 
 ### Setting `SONARQUBE_PROJECT_KEY` per repo
 
@@ -99,6 +102,43 @@ before launching Claude Code from that repo.
 
 Find a repo's exact key on its SonarCloud project page (**Project Information → Project Key**) at
 https://sonarcloud.io/organizations/xwiki/projects.
+
+## JIRA access (for the `xwiki-jira` skill)
+
+The `xwiki-jira` skill lets Claude view, search, create, update and transition issues on
+[jira.xwiki.org](https://jira.xwiki.org). This is **optional** — set it up only if you want Claude to
+operate on JIRA. Two backends; the skill auto-detects which is available.
+
+### Recommended: install `jira-cli`
+
+[`jira-cli`](https://github.com/ankitpokhrel/jira-cli) gives the richest experience. XWiki's JIRA is
+a **self-hosted (Server/Data Center)** instance authenticated with a **personal access token (PAT)**:
+
+1. Install it — e.g. `brew install ankitpokhrel/jira-cli/jira-cli` (see the
+   [installation guide](https://github.com/ankitpokhrel/jira-cli/wiki/Installation) for Nix, Docker, etc.).
+2. Create a PAT in your JIRA profile (**Profile → Personal Access Tokens**) and export it, plus the
+   bearer auth type, in your shell profile (or a git-ignored `.envrc` as above):
+   ```bash
+   export JIRA_API_TOKEN="<your-jira-personal-access-token>"
+   export JIRA_AUTH_TYPE="bearer"
+   ```
+3. Run `jira init` and choose:
+   - installation type **Local** (on-premise, not Cloud),
+   - server **`https://jira.xwiki.org`**,
+   - authentication type **bearer** (PAT),
+   - your login (JIRA username / email) and a default project (e.g. `XWIKI`).
+
+### Fallback: REST API only
+
+If you don't install `jira-cli`, the skill falls back to the JIRA REST API using the **same**
+`JIRA_API_TOKEN` as a bearer token — just export it:
+
+```bash
+export JIRA_API_TOKEN="<your-jira-personal-access-token>"
+```
+
+The token is read from the environment and never committed. Issue-field conventions (Component,
+Affects/Fix Version) are documented once in `xwiki/okf/servers/jira.md`.
 
 ## Validate
 
