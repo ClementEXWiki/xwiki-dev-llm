@@ -84,7 +84,22 @@ curl -s -w '\n%{http_code}\n' -X PUT \
   "https://jira.xwiki.org/rest/api/2/issue/XWIKI-12345"
 ```
 
+## Change issue type or summary
+
+Use a `fields` block (it overwrites the named fields). jira-cli's `issue edit` has no type flag, so
+REST is the only way to convert an existing issue (e.g. Bug→Improvement). Returns **204 No Content**:
+
+```bash
+curl -s -w '\n%{http_code}\n' -X PUT \
+  -H "Authorization: Bearer $JIRA_API_TOKEN" -H "Content-Type: application/json" \
+  -d '{"fields":{"issuetype":{"name":"Improvement"},"summary":"New summary"}}' \
+  "https://jira.xwiki.org/rest/api/2/issue/XWIKI-12345"
+```
+
 ## Add a comment
+
+Unlike jira-cli (which Markdown-converts the body), REST stores the body **verbatim** — send JIRA
+wiki markup directly.
 
 ```bash
 curl -s -w '\n%{http_code}\n' -X POST \
@@ -92,6 +107,9 @@ curl -s -w '\n%{http_code}\n' -X POST \
   -d '{"body":"Comment in JIRA wiki markup."}' \
   "https://jira.xwiki.org/rest/api/2/issue/XWIKI-12345/comment"
 ```
+
+Edit an existing comment with `PUT .../comment/<id>` and the same `{"body":…}` payload (returns
+**200**) — handy to fix a comment that jira-cli mangled by Markdown-converting wiki markup.
 
 ## Transition an issue (status change)
 

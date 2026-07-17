@@ -53,13 +53,24 @@ Set **Affects/Fix Version** with `--affects-version`/`--fix-version` and **Compo
 per `okf/servers/jira.md`. Multi-line descriptions: use `--template -` and pipe the body on stdin, or
 `--no-input` only when every required field is supplied (see the jira-cli deep-dive note below).
 
+**jira-cli gotchas:**
+- **Bodies are treated as Markdown, not wiki markup.** jira-cli runs comment/description text
+  (including `--template` files and stdin) through a Markdown→JIRA-wiki converter, so pass **Markdown**
+  and let it convert. Passing raw JIRA wiki markup gets double-escaped (hyphens, parens, `*`) and
+  `[text|url]` links mangled. To store **raw wiki markup verbatim**, use the REST backend instead
+  (`references/rest-api.md`).
+- **`-t`/`--type` exists only on `jira issue create`, not `jira issue edit`.** jira-cli cannot change
+  the type of an *existing* issue (e.g. Bug→Improvement) — use the REST recipe in
+  `references/rest-api.md`. (`jira issue move` changes status, not type.)
+
 ## Workflow
 
 **Creating an issue:**
 1. Gather context (the code/PR/commit it concerns; whether a similar issue already exists — search first).
 2. Read `okf/servers/jira.md` and resolve the fields: issue type, **Component/s**, **Affects
    Version/s** (oldest affected, else last LTS — verify the version values, don't cache them),
-   **Fix Version/s**. Write the description in JIRA wiki markup, explaining the *user-visible* problem.
+   **Fix Version/s**. Write the description explaining the *user-visible* problem — in JIRA wiki markup
+   for the REST backend, in Markdown for jira-cli (it converts; see the gotcha above).
 3. Show the user the drafted summary + description + fields, then create.
 4. Report the created key and URL.
 
