@@ -4,7 +4,7 @@
 //   1. Every skill directory under xwiki/skills/ is listed in README.md, and (except the OKF
 //      governor xwiki-knowledge) in xwiki/okf/index.md.
 //   2. Each SKILL.md frontmatter `name:` equals its directory name.
-//   3. The three plugin version fields are identical.
+//   3. The four plugin version fields are identical (Claude marketplace, Claude plugin, Kimi plugin).
 //   4. Every OKF topic file is referenced in xwiki/okf/index.md AND in the injected mirror
 //      xwiki/instructions/xwiki-org.md.
 // Node built-ins only. Run from anywhere: `node scripts/validate.mjs`.
@@ -47,10 +47,12 @@ for (const skill of skills) {
 // ---- Invariant 3: version sync ---------------------------------------------------------------
 const marketplace = JSON.parse(read(".claude-plugin/marketplace.json"));
 const pluginJson = JSON.parse(read("xwiki/.claude-plugin/plugin.json"));
+const kimiPluginJson = JSON.parse(read("kimi.plugin.json"));
 const versions = {
   "marketplace.metadata.version": marketplace.metadata?.version,
   "marketplace.plugins[xwiki].version": marketplace.plugins?.find((p) => p.name === "xwiki")?.version,
   "xwiki/.claude-plugin/plugin.json version": pluginJson.version,
+  "kimi.plugin.json version": kimiPluginJson.version,
 };
 if (new Set(Object.values(versions)).size !== 1) {
   errors.push(`Plugin version mismatch across manifests: ${JSON.stringify(versions)}`);
@@ -84,4 +86,4 @@ if (errors.length) {
   for (const e of errors) console.error(`  - ${e}`);
   process.exit(1);
 }
-console.log(`validate.mjs: OK (${skills.length} skills, versions in sync, OKF map complete).`);
+console.log(`validate.mjs: OK (${skills.length} skills, Claude + Kimi versions in sync, OKF map complete).`);

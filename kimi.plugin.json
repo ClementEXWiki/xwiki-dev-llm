@@ -1,0 +1,50 @@
+{
+  "name": "xwiki",
+  "version": "0.10.0",
+  "description": "Org-wide XWiki conventions, MCP servers and dev skills for all xwiki / xwiki-contrib GitHub org repos",
+  "interface": {
+    "displayName": "XWiki",
+    "shortDescription": "XWiki org conventions, skills and MCP servers"
+  },
+  "skills": "./xwiki/skills/",
+  "skillInstructions": "When a skill needs to locate the shared OKF knowledge base, resolve it relative to the skill file: `${KIMI_SKILL_DIR}/../../okf/`. In Claude Code the same location is `${CLAUDE_PLUGIN_ROOT}/okf/`.",
+  "mcpServers": {
+    "discourse": {
+      "command": "npx",
+      "args": ["-y", "@discourse/mcp@latest", "--site", "https://forum.xwiki.org"]
+    },
+    "sonarqube": {
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm", "--pull=always",
+        "-e", "SONARQUBE_URL",
+        "-e", "SONARQUBE_TOKEN",
+        "-e", "SONARQUBE_ORG",
+        "-e", "SONARQUBE_PROJECT_KEY",
+        "-e", "SONARQUBE_TOOLSETS",
+        "-e", "SONARQUBE_ADVANCED_ANALYSIS_ENABLED",
+        "-v", "${PWD}:/app/mcp-workspace:rw",
+        "mcp/sonarqube"
+      ],
+      "env": {
+        "SONARQUBE_URL": "https://sonarcloud.io",
+        "SONARQUBE_TOKEN": "${SONARQUBE_TOKEN}",
+        "SONARQUBE_ORG": "xwiki",
+        "SONARQUBE_PROJECT_KEY": "${SONARQUBE_PROJECT_KEY}",
+        "SONARQUBE_TOOLSETS": "cag,projects,analysis,issues",
+        "SONARQUBE_ADVANCED_ANALYSIS_ENABLED": "true"
+      }
+    }
+  },
+  "hooks": [
+    {
+      "event": "SessionStart",
+      "command": "node \"${KIMI_PLUGIN_ROOT}/xwiki/scripts/inject-org-instructions.mjs\""
+    },
+    {
+      "event": "PostToolUse",
+      "matcher": "Write|Edit",
+      "command": "node \"${KIMI_PLUGIN_ROOT}/xwiki/scripts/check-line-endings.mjs\""
+    }
+  ]
+}
