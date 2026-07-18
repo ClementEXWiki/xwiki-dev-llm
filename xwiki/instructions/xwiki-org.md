@@ -76,7 +76,7 @@ OKF map (topic files under `okf/`, described in `okf/index.md`):
 - `okf/architecture/` — `component-system`, `macro-refactoring`, `wiki-user-scope`.
 - `okf/testing/` — `strategy`.
 - `okf/servers/` — `index` (JIRA, CI, Nexus, SonarCloud, forum… and how to access/verify each);
-  `jira` (jira.xwiki.org access via jira-cli/REST + issue-field conventions — see the `xwiki-jira` skill).
+  `jira` (jira.xwiki.org access via jira-cli/REST + issue-field conventions + wiki-markup gotchas — see the `xwiki-jira` skill).
 - `okf/processes/` — `release`, `security-policy`.
 - `okf/decisions/` — ADRs (the *why* behind durable architectural choices).
 

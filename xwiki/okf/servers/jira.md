@@ -51,7 +51,27 @@ Version/s** at all, so there is nothing to set there; do not treat their absence
 correct. Check what the project actually exposes before insisting on a field.
 
 Write the **description in JIRA wiki markup** (`h2.`, `{{monospace}}`, `*bold*`, `* bullet`) and make
-it explain the **user-visible problem**, not just the code change.
+it explain the **user-visible problem**, not just the code change — but mind the angle-bracket gotcha
+below.
+
+## Wiki-markup gotchas (descriptions and comments)
+
+Both descriptions and comments are rendered with the **JIRA wiki renderer**, which treats `<…>` as
+**HTML and silently strips unknown tags**. This bites any content with angle brackets — XML/HTML
+snippets, generics, `sed` expressions, placeholders like `<version>`:
+
+- **Inline `{{monospace}}` does NOT protect angle brackets.** `{{<id>}}` renders as empty `{{}}` —
+  the `<id>` is eaten as an HTML tag. Same for `<version>`/`<variant>` written in prose.
+- **Put anything containing `<` or `>` in a `{code}` or `{noformat}` block**, never in prose or inline
+  `{{…}}`. Inside those blocks the brackets are preserved (HTML-escaped to `&lt;`/`&gt;`), so a `sed`
+  command like `s/…-war</…-docker</` survives intact. This is exactly how well-formed descriptions do
+  it — mirror the reporter's existing `{noformat}`/`{code}` blocks.
+- Reserve `{{monospace}}` for bracket-free tokens (identifiers, file paths, method names).
+
+**Editing a comment** (e.g. to fix a mis-rendered one) is REST-only — `jira-cli` cannot edit
+comments: `PUT /rest/api/2/issue/{KEY}/comment/{ID}` with JSON `{"body": "…"}`. **Verify the result**
+by fetching `GET …/comment/{ID}?expand=renderedBody` and checking the brackets survived in the
+rendered HTML, rather than trusting the source you sent.
 
 ## Identifying the current LTS (for the Affects-Version fallback)
 
