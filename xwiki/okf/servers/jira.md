@@ -51,27 +51,33 @@ Version/s** at all, so there is nothing to set there; do not treat their absence
 correct. Check what the project actually exposes before insisting on a field.
 
 Write the **description in JIRA wiki markup** (`h2.`, `{{monospace}}`, `*bold*`, `* bullet`) and make
-it explain the **user-visible problem**, not just the code change — but mind the angle-bracket gotcha
-below.
+it explain the **user-visible problem**, not just the code change — but mind the markup gotchas below.
 
 ## Wiki-markup gotchas (descriptions and comments)
 
-Both descriptions and comments are rendered with the **JIRA wiki renderer**, which treats `<…>` as
-**HTML and silently strips unknown tags**. This bites any content with angle brackets — XML/HTML
-snippets, generics, `sed` expressions, placeholders like `<version>`:
+Both descriptions and comments use the **JIRA wiki renderer**. Governing rule: **pick the right
+container, escape only *active* markup — never over-escape, and never escape inside code blocks.**
 
-- **Inline `{{monospace}}` does NOT protect angle brackets.** `{{<id>}}` renders as empty `{{}}` —
-  the `<id>` is eaten as an HTML tag. Same for `<version>`/`<variant>` written in prose.
-- **Put anything containing `<` or `>` in a `{code}` or `{noformat}` block**, never in prose or inline
-  `{{…}}`. Inside those blocks the brackets are preserved (HTML-escaped to `&lt;`/`&gt;`), so a `sed`
-  command like `s/…-war</…-docker</` survives intact. This is exactly how well-formed descriptions do
-  it — mirror the reporter's existing `{noformat}`/`{code}` blocks.
-- Reserve `{{monospace}}` for bracket-free tokens (identifiers, file paths, method names).
+- **Literals → monospace.** Wrap identifiers, flags, filenames and short commands in `{{…}}` (e.g.
+  `{{JAVA_OPTS}}`, `{{-e JAVA_OPTS="-Dhttp.proxyHost=…"}}`). It reads as code and removes any need to
+  escape the punctuation inside — the preferred style, cleaner than backslash-escaping.
+- **Do not over-escape prose.** Most punctuation is already literal: `-`, `(`, `)`, `.`, `/`, `:`, and
+  an underscore **inside a word** (`JAVA_OPTS` renders fine — `_italic_` only triggers at word
+  boundaries). A backslash is only needed to stop *active* markup: line-leading `*`/`#`/`-` (lists),
+  `*bold*`, `_italic_`, `+ins+`, `[link]`, `{macro}`, `|` in tables. Escaping an **issue key**
+  (`XWIKI\-123`) is counter-productive — it suppresses the auto-link; write `XWIKI-123`.
+- **Never escape inside `{code}` / `{noformat}` blocks.** Their content is literal, so a backslash
+  added to "escape" markup renders as a **visible backslash** (`\- JAVA\_OPTS=…` shows the `\-`/`\_`).
+  Put the **raw** snippet in the block; escaping is a *prose* concern only.
+- **`{{monospace}}` specifics.** It preserves angle brackets (`{{<version>/solr/}}` → `<version>/solr/`),
+  so short `<…>` tokens are fine inline — but it must not be glued to an adjacent word character:
+  `{{curl}}s` fails to parse and renders literally as `{{curl}}s` (add a space or reword). For
+  multi-line commands or `sed`/XML/YAML, use a `{code}`/`{noformat}` block (raw), as good descriptions do.
 
 **Editing a comment** (e.g. to fix a mis-rendered one) is REST-only — `jira-cli` cannot edit
-comments: `PUT /rest/api/2/issue/{KEY}/comment/{ID}` with JSON `{"body": "…"}`. **Verify the result**
-by fetching `GET …/comment/{ID}?expand=renderedBody` and checking the brackets survived in the
-rendered HTML, rather than trusting the source you sent.
+comments: `PUT /rest/api/2/issue/{KEY}/comment/{ID}` with JSON `{"body": "…"}`. **Verify** afterwards
+via `GET …/comment/{ID}?expand=renderedBody`: no stray backslashes in `<pre>`, no literal `{{…}}`, and
+the intended monospace/links present — don't trust the source you sent.
 
 ## Identifying the current LTS (for the Affects-Version fallback)
 

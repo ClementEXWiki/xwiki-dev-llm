@@ -53,7 +53,7 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
   access/verify each (MCP vs. WebFetch).
 - **jira** — accessing jira.xwiki.org (jira-cli or REST), the durable issue-field conventions
   (Component, Affects Version = oldest affected/else last LTS, Fix Version); values are volatile; and
-  wiki-markup gotchas (the renderer strips `<…>` as HTML — use `{code}`/`{noformat}`, not `{{…}}`).
+  wiki-markup gotchas (wrap literals in `{{…}}`, don't over-escape prose, never escape inside `{code}`).
 
 ### processes/
 - **release** — how XWiki versions/releases (Commons+Rendering+Platform together); detailed steps are
