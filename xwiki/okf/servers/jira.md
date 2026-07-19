@@ -60,12 +60,16 @@ container, escape only *active* markup — never over-escape, and never escape i
 
 - **Literals → monospace.** Wrap identifiers, flags, filenames and short commands in `{{…}}` (e.g.
   `{{JAVA_OPTS}}`, `{{-e JAVA_OPTS="-Dhttp.proxyHost=…"}}`). It reads as code and removes any need to
-  escape the punctuation inside — the preferred style, cleaner than backslash-escaping.
+  escape the punctuation inside — the preferred style, cleaner than backslash-escaping. **Exception:
+  issue keys** — never monospace them (see below).
 - **Do not over-escape prose.** Most punctuation is already literal: `-`, `(`, `)`, `.`, `/`, `:`, and
   an underscore **inside a word** (`JAVA_OPTS` renders fine — `_italic_` only triggers at word
   boundaries). A backslash is only needed to stop *active* markup: line-leading `*`/`#`/`-` (lists),
-  `*bold*`, `_italic_`, `+ins+`, `[link]`, `{macro}`, `|` in tables. Escaping an **issue key**
-  (`XWIKI\-123`) is counter-productive — it suppresses the auto-link; write `XWIKI-123`.
+  `*bold*`, `_italic_`, `+ins+`, `[link]`, `{macro}`, `|` in tables.
+- **Issue keys → plain, never decorated.** Write a key as bare text (`XWIKI-123`) so JIRA auto-links
+  it. Both **backslash-escaping** (`XWIKI\-123`) and **monospacing** (`{{XWIKI-123}}`) suppress the
+  auto-link — the monospace case is the easy mistake, since the "literals → monospace" rule otherwise
+  encourages wrapping identifiers.
 - **Never escape inside `{code}` / `{noformat}` blocks.** Their content is literal, so a backslash
   added to "escape" markup renders as a **visible backslash** (`\- JAVA\_OPTS=…` shows the `\-`/`\_`).
   Put the **raw** snippet in the block; escaping is a *prose* concern only.
