@@ -52,7 +52,8 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
 - **index** — the xwiki.org server ecosystem (JIRA, CI, Nexus, SonarCloud, forum, …) and how to
   access/verify each (MCP vs. WebFetch).
 - **jira** — accessing jira.xwiki.org (jira-cli or REST), the durable issue-field conventions
-  (Component, Affects Version = oldest affected/else last LTS, Fix Version); values are volatile; and
+  (Component, Affects Version = oldest affected/else last LTS, Fix Version); values are volatile;
+  resolving/closing (Fixed vs. Cannot Reproduce for already-covered issues, assign to yourself); and
   wiki-markup gotchas (wrap literals in `{{…}}`, don't over-escape prose, never escape inside `{code}`).
 
 ### processes/

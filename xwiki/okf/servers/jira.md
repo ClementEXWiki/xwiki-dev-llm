@@ -53,6 +53,25 @@ correct. Check what the project actually exposes before insisting on a field.
 Write the **description in JIRA wiki markup** (`h2.`, `{{monospace}}`, `*bold*`, `* bullet`) and make
 it explain the **user-visible problem**, not just the code change — but mind the markup gotchas below.
 
+## Resolving / closing an issue
+
+Choose the **resolution** that matches reality and **assign the issue to yourself** as you close it
+(you are the one resolving/verifying it). The distinction that is easy to get wrong:
+
+- **A change fixed it** → resolution **Fixed** (set the Fix Version/s where the project has them).
+- **The reported problem no longer occurs, but no single change fixed it** — it was already
+  implemented or fixed as a *side effect* of other work, so there is no commit to attribute — →
+  resolution **Cannot Reproduce**, *not* Fixed (Fixed would falsely imply a dedicated fix and a Fix
+  Version). Add a comment saying why it can no longer be reproduced (what now covers it). Example:
+  `XDOCKER-83` ("Support for ARM architectures") was closed **Cannot Reproduce** once the image had
+  become multi-arch as a side effect of other work, with no ARM-specific fix to point at.
+
+Set the transition + resolution with `jira-cli` (`jira issue move {KEY} "Close Issue"`) or REST
+(`POST /rest/api/2/issue/{KEY}/transitions` with
+`{"transition":{"id":…},"fields":{"resolution":{"name":"Cannot Reproduce"}}}`). **List the issue's
+available transitions first** (`GET …/transitions`) — transition names/ids vary per project and
+workflow state, and a close may be gated behind an intermediate state.
+
 ## Wiki-markup gotchas (descriptions and comments)
 
 Both descriptions and comments use the **JIRA wiki renderer**. Governing rule: **pick the right
