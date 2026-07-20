@@ -46,7 +46,7 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
   `WikiManager.WikiUserConfiguration` doc (not the descriptor) and defaults to `GLOBAL_ONLY` when absent.
 
 ### testing/
-- **strategy** — test kinds & naming, no-stdout rule, lightest-base rule, `@Order` source-ordering rule, coverage, framework locations.
+- **strategy** — test kinds & naming, no-stdout rule, lightest-base rule, `@Order` source-ordering rule, don't-pay-the-timeout rule, coverage, framework locations.
 
 ### servers/
 - **index** — the xwiki.org server ecosystem (JIRA, CI, Nexus, SonarCloud, forum, …) and how to

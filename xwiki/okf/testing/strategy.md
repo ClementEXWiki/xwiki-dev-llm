@@ -2,9 +2,11 @@
 title: XWiki testing strategy (overview)
 stability: durable
 summary: The kinds of tests XWiki uses, their naming, the no-stdout rule, the prefer-the-lightest-base
-  rule, coverage, and where each test framework lives. Procedures live in the test skills.
+  rule, the don't-pay-the-timeout rule, coverage, and where each test framework lives. Procedures
+  live in the test skills.
 sources:
   - https://dev.xwiki.org/xwiki/bin/view/Community/Testing/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/Testing/DockerTesting/#HDon27tpaythetimeout
 ---
 
 # XWiki testing strategy (overview)
@@ -29,6 +31,16 @@ This is the declarative map of how testing works in XWiki. For **doing** the wor
   with `-Dxwiki.surefire.captureconsole.skip=true` only when justified.
 - **Prefer the lightest base that works** — use `@ComponentTest` rather than `@OldcoreTest` when
   oldcore is not required.
+- **Don't pay the timeout (Docker functional tests)** — a test must never burn the full Selenium
+  wait timeout waiting for something that will not appear. The waiting APIs (`findElement`,
+  `findElements`, and the `waitUntil…` helpers) are for elements *expected to be present*; to assert
+  an element's absence, or to look without blocking, use `findElementWithoutWaiting()`,
+  `hasElementWithoutWaiting()` or `waitUntilElementDisappears()` instead. Since XWiki 18.6.0 a
+  wasteful wait logs an `org.xwiki.test.ui.XWikiWebDriver - The currently running test wasted [N] ms
+  waiting for element …` WARN, with a stack trace (`warnIfWastefulWait`) pointing at the offending
+  `findElement*` call — treat any such warning for the test/page-objects you are touching as a defect
+  to fix (fix the page object doing the wait, not just the test). A warning charged to an unrelated,
+  untouched test is out of scope for your change — just report it.
 - **Test method order matches `@Order`** — in a test class that orders its methods with `@Order(n)`,
   keep the physical (source) order of the `@Test` methods aligned with their `@Order` values (1, 2,
   3 …) so the file reads in execution order. When adding a new test, place it according to its
