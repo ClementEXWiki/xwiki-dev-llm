@@ -44,6 +44,10 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
   rename/move and extracts them for backlinks; `DefaultMacroRefactoring` is content-only (ignores parameters).
 - **wiki-user-scope** — a subwiki's user scope (local/global/both) is stored on its own
   `WikiManager.WikiUserConfiguration` doc (not the descriptor) and defaults to `GLOBAL_ONLY` when absent.
+- **solr-search** — XWiki's Solr backend: embedded by default, externalisable to a remote/standalone
+  Solr which needs several pre-created cores (`search`, `extension_index`, `ratings`, `events`, named
+  `xwiki_<core>_<solrMajor>`); configured via `solr.type=remote` + `solr.remote.baseURL`; the search
+  core needs Solr's `analysis-extras` module.
 
 ### testing/
 - **strategy** — test kinds & naming, no-stdout rule, lightest-base rule, `@Order` source-ordering rule, don't-pay-the-timeout rule, coverage, framework locations.
