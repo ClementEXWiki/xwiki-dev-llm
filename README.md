@@ -81,6 +81,7 @@ For local development against a checkout:
   - `xwiki-convert-tests` — convert unit tests to JUnit5/Mockito.
   - `xwiki-convert-tests-docker` — convert functional IT tests to the Docker `@UITest` framework.
   - `xwiki-increase-test-coverage` — raise and lock in a module's unit-test coverage (JaCoCo instruction ratio).
+  - `xwiki-legacy` — move a deprecated public API out of a main module into its `-legacy` companion (migrate callers, remove, re-add via a plain class or an AspectJ aspect, Revapi ignore).
   - `xwiki-fix-flickering-docker-test` — fix a flickering Docker-based functional test.
   - `xwiki-deploy-extension` — deploy a XAR/JAR extension to a running XWiki instance.
   - `xwiki-xar-pages` — edit extension wiki pages (XAR XML): the `xar:format` / `xar:verify` conventions.
