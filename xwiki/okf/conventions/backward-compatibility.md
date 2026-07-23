@@ -41,3 +41,23 @@ creating a new interface:
 
 Deprecated APIs are re-exported from `-legacy` modules (see [[code-style]]); never put new logic
 there. Tag deprecations with `@Deprecated(since = "…")` using the [[versioning]] format.
+
+### How `-legacy` modules work
+
+A `-legacy` module is the backward-compatibility companion of a main module. It re-exports the same
+`xwiki.extension.features` as the main module and, when it must keep an API that the main module has
+dropped, it **weaves the main artifact's bytecode with AspectJ** (`aspectj-maven-plugin` +
+`<weaveDependency>`) so the produced legacy jar is a full *replacement* of the main jar:
+
+- A removed **whole type** is re-added as a plain `.java` file in the legacy module (same package).
+- A removed **member** is re-added by an aspect: an inter-type declaration for a concrete class, or a
+  companion interface with a `default` method plus `declare parents : <Iface> implements <Companion>`
+  for an interface method — each delegating to the replacement.
+- A weaving legacy module merges its own `META-INF/components.txt` onto the woven one, excludes the
+  main jar from the test classpath, and declares the main artifact once as `<type>pom</type>` (trigger)
+  and once as `provided` (weaving source). Because it now bundles the main classes, its
+  `xwiki.jacoco.instructionRatio` is pinned low.
+
+Removing the API from the main module is itself a Revapi break, so it needs a `<revapi.differences>`
+ignore (`java.method.removed` / `java.class.removed`) justified by the move to legacy. The full
+procedure — migrate callers, remove, re-add, ignore, verify — is the `xwiki-legacy` skill.

@@ -1,0 +1,151 @@
+---
+name: xwiki-legacy
+description: Move a deprecated public XWiki API out of a main module into its backward-compatibility
+  `-legacy` module, so the main artifact drops the dead API while the legacy artifact re-adds it for
+  existing extensions. Use when asked to remove/retire a deprecated class, interface, method or field,
+  to "move an API to legacy", to clean up a module's deprecated surface, or whenever you deprecate an
+  API and want the old one gone from the main jar. Covers migrating in-repo callers to the
+  replacement, removing the API, re-adding it via a plain legacy class or an AspectJ aspect, the
+  Revapi ignore, and the coverage/pom fallout. For the build/verify commands use xwiki-build; for the
+  `@since`/`@Deprecated(since)` version string use xwiki-knowledge; for the PR use xwiki-pull-request.
+---
+
+# Moving a deprecated API to a `-legacy` module
+
+XWiki keeps binary/semantic backward compatibility (enforced by Revapi — see the
+`backward-compatibility` OKF topic). A deprecated **public** API therefore cannot simply be deleted:
+it is **removed from the main module** and **re-added by that module's `-legacy` companion**, which
+weaves the main artifact with AspectJ and re-exports it under the same
+`xwiki.extension.features`. Existing extensions that still call the old API keep working by depending
+on the legacy jar; the main jar is clean.
+
+Do this only for a **public** API that has a **replacement** and is **not used** (or only lightly
+used, migratable) inside `xwiki-commons`, `xwiki-rendering` and `xwiki-platform`. Purely `internal`
+classes are not API — just delete them (with a Revapi ignore if flagged), no legacy needed.
+
+## 1. Scope it and migrate callers first
+
+1. Confirm the API is deprecated and has a documented replacement (`@deprecated … use {@link …}`).
+2. Find every caller across the three repos (they are released together), e.g.
+   `grep -rn "getFied(" xwiki-commons xwiki-rendering xwiki-platform --include=*.java | grep -v /target/`.
+   The safest candidates have **zero production callers**.
+3. **Migrate all in-repo callers to the replacement** and commit that mentally as step one — the main
+   module and every consumer must compile without the deprecated API before you remove it.
+
+## 2. Remove the API from the main module
+
+Delete the declaration (and, for an interface method, its implementations). Keep the replacement.
+Fix any `@see`/`{@link}` references that pointed at the removed member.
+
+## 3. Re-add it in the `-legacy` module
+
+Pick the pattern by API shape. Study the sibling that already does it (`xwiki-commons-legacy-job`
+for whole types, `xwiki-commons-legacy-velocity` / `xwiki-commons-legacy-component` for aspects).
+
+- **Whole type** (class / interface / enum): move the `.java` file verbatim into the legacy module
+  under the same package (see `xwiki-commons-legacy-job` → `JobManager`). Nothing else needed beyond
+  the module being a weaver (step 4) — a re-added top-level type does not even require an aspect.
+
+- **Instance method / field on a concrete class**: add an AspectJ **inter-type declaration** in a
+  `src/main/aspect/…/<Class>CompatibilityAspect.aj`, delegating to the replacement, e.g.
+
+  ```java
+  public privileged aspect JSONToolCompatibilityAspect
+  {
+      @Deprecated
+      public Object JSONTool.parse(String json)
+      {
+          return fromString(json);
+      }
+  }
+  ```
+
+- **Interface method**: an ITD cannot add an abstract method to an interface's implementors, so use a
+  companion interface carrying the method as a **default** method, plus a `declare parents` aspect
+  that makes the woven interface extend it:
+
+  ```java
+  // CompatiblePropertyDescriptor.java  (plain source in the legacy module)
+  public interface CompatiblePropertyDescriptor
+  {
+      @Deprecated
+      default Field getFied()
+      {
+          return ((PropertyDescriptor) this).getField();   // delegate to the replacement
+      }
+  }
+
+  // PropertyDescriptorCompatibilityAspect.aj
+  public aspect PropertyDescriptorCompatibilityAspect
+  {
+      declare parents : PropertyDescriptor implements CompatiblePropertyDescriptor;
+  }
+  ```
+
+  After weaving, `PropertyDescriptor extends CompatiblePropertyDescriptor`, so every implementation
+  inherits the default `getFied()` — no per-class ITD required. (The older `-legacy-component` code
+  predates default methods and instead pairs an abstract `Compatibility*` interface with a per-class
+  ITD aspect; prefer the default-method form in new code.)
+
+Give new legacy types/aspects `@since <next-version>RC1` (see xwiki-knowledge for the version
+string) and keep the original `@deprecated since …` line.
+
+## 4. Make the legacy module a weaver (if it wasn't already)
+
+A legacy module that only **added** classes (no `<weaveDependency>`) becomes a **replacement** of the
+main artifact the moment it must modify an existing type. Mirror `xwiki-commons-legacy-velocity`'s
+`pom.xml`:
+
+- Properties: `xwiki.extension.features = <groupId>:<main-artifactId>` and an `xwiki.extension.name`.
+- Dependencies: the main module as `<type>pom</type>` (trigger, no jar) **and** again as
+  `<scope>provided</scope>` (build order + weaving source); add `org.aspectj:aspectjrt`.
+- `aspectj-maven-plugin` with a `<weaveDependency>` naming the main artifact.
+- `maven-jar-plugin` excluding `**/builddef.lst`.
+- `maven-surefire-plugin` `classpathDependencyExcludes` for the main jar (and
+  `xwiki-commons-component-api` jar) so tests run against the woven jar only.
+- If the main module ships a `META-INF/components.txt`, a `maven-antrun-plugin` step (phase
+  `process-classes`) that **concats the legacy module's own `components.txt` onto the woven one**
+  (`append="true"`). The woven jar must end up with *all* component lines (main + legacy). Verify:
+  `wc -l target/classes/META-INF/components.txt` and check for no duplicates.
+- If the module runs Spoon, set the `ComponentAnnotationProcessor` `skipForeignDeclarations=true`
+  (the merged `components.txt` references classes that come from the woven dependency).
+
+## 5. Add the Revapi ignore
+
+Removing the API from the main module is a break Revapi will flag. Add a `<revapi.differences>` entry
+(commons: in `xwiki-commons-core/pom.xml` under `<analysisConfiguration>`) with `criticality`
+`allowed` and a justification that the API moved to the legacy module, e.g.
+
+```xml
+<item>
+  <ignore>true</ignore>
+  <code>java.method.removed</code>
+  <old>method java.lang.reflect.Field org.xwiki.properties.PropertyDescriptor::getFied()</old>
+</item>
+```
+
+Use `java.class.removed` for a whole type. Add one item per removed member (interface + each impl if
+Revapi tracks it — the build tells you exactly which).
+
+## 6. Fix the legacy module's coverage ratio
+
+Once the legacy module weaves the whole main artifact, its jar now bundles the (untested-here) main
+classes, so its JaCoCo instruction ratio drops sharply. Lower `xwiki.jacoco.instructionRatio` to the
+new achieved value with a comment explaining the module re-exports the main artifact (as
+`xwiki-commons-legacy-velocity` does). Use the `xwiki-increase-test-coverage` skill to compute it.
+
+## 7. Build and verify
+
+Build the main module **and** the legacy weaver with all checks — this is exactly the case the
+`xwiki-build` skill covers ("also rebuild any legacy module that weaves the changed module"):
+
+```bash
+mvn clean install -B -ntp -Pquality,legacy \
+  -pl <main-module-path>,<legacy-module-path>
+```
+
+`-Pquality` is mandatory: it runs Revapi (confirms your ignore) **and** the JaCoCo check (confirms the
+lowered ratio). Then sanity-check the outcome with `javap` on the woven legacy classes: the main jar
+must no longer expose the API, and the legacy jar must re-add it.
+
+Open the PR with the `xwiki-pull-request` conventions (`[Misc]` prefix when there is no JIRA issue).
