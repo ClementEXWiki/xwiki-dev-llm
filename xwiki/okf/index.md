@@ -37,6 +37,9 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
   script services, configurable HTML sanitizer.
 - **performance** — prefer streaming over buffering; never load an unbounded payload (attachment,
   body, upload, export, query result) fully into memory.
+- **documentation** — xwiki.org documentation rules: Diataxis types & audiences, title/page-name
+  rules, page-structure xobject fields, style, location, version perspective (the live Documentation
+  Guide is the evolving source of truth). Applied by `xwiki-doc-writing` and `xwiki-doc-convert`.
 
 ### architecture/
 - **component-system** — `@Role`/`@Component`/`components.txt`, `@Inject`/`@Named` hints, instantiation.
@@ -76,7 +79,7 @@ each grounded in a cited source. `_template.md` holds the format and the groundi
 
 `xwiki-build`, `xwiki-pull-request`, `xwiki-javadoc`, `xwiki-test-guidelines`, `xwiki-convert-tests`,
 `xwiki-convert-tests-docker`, `xwiki-fix-flickering-docker-test`, `xwiki-increase-test-coverage`,
-`xwiki-legacy`, `xwiki-deploy-extension`, `xwiki-xar-pages`, `xwiki-documentation`, `xwiki-translations`,
+`xwiki-legacy`, `xwiki-deploy-extension`, `xwiki-xar-pages`, `xwiki-doc-writing`, `xwiki-doc-convert`, `xwiki-translations`,
 `xwiki-contrib-release-blog-post`, `xwiki-fix-sonarqube-issue`, `xwiki-backport`,
 `xwiki-backport-testneeded`, `xwiki-jira`.
 

@@ -72,7 +72,9 @@ role holders): the relevant file gives a `verify:` recipe instead (read `pom.xml
 OKF map (topic files under `okf/`, described in `okf/index.md`):
 
 - `okf/conventions/` — `code-style`, `code-comments`, `commit-messages`, `versioning`,
-  `backward-compatibility`, `security`, `performance`.
+  `backward-compatibility`, `security`, `performance`, `documentation` (xwiki.org doc rules —
+  Diataxis, titles, page structure, style, versioning; applied by `xwiki-doc-writing` /
+  `xwiki-doc-convert`).
 - `okf/architecture/` — `component-system`, `macro-refactoring`, `wiki-user-scope`, `solr-search`.
 - `okf/testing/` — `strategy`.
 - `okf/servers/` — `index` (JIRA, CI, Nexus, SonarCloud, forum… and how to access/verify each);
