@@ -57,7 +57,12 @@ dropped, it **weaves the main artifact's bytecode with AspectJ** (`aspectj-maven
   main jar from the test classpath, and declares the main artifact once as `<type>pom</type>` (trigger)
   and once as `provided` (weaving source). Because it now bundles the main classes, its
   `xwiki.jacoco.instructionRatio` is pinned low.
+- Because the woven legacy jar *replaces* the main jar, the WAR must never contain both: the
+  xwiki-platform `xwiki-platform-distribution-war-legacydependencies` pom **bans** the main artifact
+  (enforcer `bannedDependencies`) and **excludes** it from the clean dependency tree. So the first
+  time a legacy module becomes a weaver, that pom must be updated too.
 
 Removing the API from the main module is itself a Revapi break, so it needs a `<revapi.differences>`
 ignore (`java.method.removed` / `java.class.removed`) justified by the move to legacy. The full
-procedure — migrate callers, remove, re-add, ignore, verify — is the `xwiki-legacy` skill.
+procedure — migrate callers, remove, re-add, ignore, ban in the WAR, verify — is the `xwiki-legacy`
+skill.

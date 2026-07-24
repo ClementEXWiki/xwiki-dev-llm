@@ -6,7 +6,8 @@ description: Move a deprecated public XWiki API out of a main module into its ba
   to "move an API to legacy", to clean up a module's deprecated surface, or whenever you deprecate an
   API and want the old one gone from the main jar. Covers migrating in-repo callers to the
   replacement, removing the API, re-adding it via a plain legacy class or an AspectJ aspect, the
-  Revapi ignore, and the coverage/pom fallout. For the build/verify commands use xwiki-build; for the
+  Revapi ignore, the coverage/pom fallout, and banning the main artifact in the WAR legacy
+  dependencies. For the build/verify commands use xwiki-build; for the
   `@since`/`@Deprecated(since)` version string use xwiki-knowledge; for the PR use xwiki-pull-request.
 ---
 
@@ -134,7 +135,26 @@ classes, so its JaCoCo instruction ratio drops sharply. Lower `xwiki.jacoco.inst
 new achieved value with a comment explaining the module re-exports the main artifact (as
 `xwiki-commons-legacy-velocity` does). Use the `xwiki-increase-test-coverage` skill to compute it.
 
-## 7. Build and verify
+## 7. Ban the main artifact in the WAR (only when the module *became* a weaver in step 4)
+
+A weaving legacy module's jar is a full *replacement* of the main jar, so packaging **both** in the
+WAR under the `legacy` profile is a conflict (duplicate, woven-vs-clean classes). If step 4 turned a
+previously non-weaving legacy module into a weaver — i.e. the main artifact was **not** banned before
+— you must update
+`xwiki-platform-distribution/xwiki-platform-distribution-war-legacydependencies/pom.xml` in the
+**xwiki-platform** repo (released together with commons/rendering):
+
+- **Ban** the main artifact in the `maven-enforcer-plugin` `bannedDependencies` rule:
+  `<exclude>org.xwiki.commons:xwiki-commons-<name>:*:jar:*</exclude>` — this fails the build if the
+  clean jar ever comes back, and
+- **Exclude** the main artifact from the `xwiki-platform-distribution-war-dependencies` dependency
+  (and from any other legacy dependency that pulls it in transitively — the enforcer tells you where).
+
+Model it on the existing `xwiki-commons-velocity` / `xwiki-commons-component-*` entries, which are
+wrapped commons modules handled exactly this way. (A legacy module that was *already* a weaver — and
+thus already banned — needs nothing here.)
+
+## 8. Build and verify
 
 Build the main module **and** the legacy weaver with all checks — this is exactly the case the
 `xwiki-build` skill covers ("also rebuild any legacy module that weaves the changed module"):
