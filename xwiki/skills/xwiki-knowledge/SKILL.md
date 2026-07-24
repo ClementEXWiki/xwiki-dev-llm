@@ -7,7 +7,8 @@ description: Find and extend XWiki declarative knowledge held in the OKF knowled
 
 The **OKF** is the curated, LLM-oriented knowledge base of XWiki *declarative* knowledge. It lives
 in this plugin at `okf/` (resolve it from this skill's directory: `../../okf/` — in Kimi Code
-that is `${KIMI_SKILL_DIR}/../../okf/`, in Claude Code `${CLAUDE_PLUGIN_ROOT}/okf/`). Procedures
+that is `${KIMI_SKILL_DIR}/../../okf/`, in Claude Code `${CLAUDE_PLUGIN_ROOT}/okf/`, in opencode
+`$XWIKI_LLM_HOME/xwiki/okf/`). Procedures
 live in the other `xwiki-*` skills; the OKF holds facts,
 conventions, architecture, the server ecosystem and process orientation.
 

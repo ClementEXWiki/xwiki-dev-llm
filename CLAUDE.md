@@ -32,6 +32,11 @@ Two-level structure required by the marketplace format:
   and points each `source` at its directory.
 - **`xwiki/`** — the single plugin. Its own `.claude-plugin/plugin.json` is the plugin manifest.
 
+The same `xwiki/` assets are shared by three hosts, each with its own root manifest: Claude Code
+(`.claude-plugin/`), Kimi Code (`kimi.plugin.json`), and opencode (`opencode.jsonc`). When editing a
+capability, update all three manifests together (a skill needs no manifest change — it is
+auto-discovered — but MCP servers, instructions and hooks are declared per host).
+
 Inside `xwiki/`:
 
 - **`instructions/xwiki-org.md`** — the "org-wide CLAUDE.md" (build commands, commit format, code
@@ -51,6 +56,12 @@ Inside `xwiki/`:
   cross-reference each other (e.g. `xwiki-convert-tests` vs `xwiki-convert-tests-docker`,
   `xwiki-test-guidelines` building on the others), so when editing one, check the others' "use X
   instead" pointers stay accurate.
+- **`opencode/plugins/*.js`** — opencode plugins (host-specific wrappers). Currently
+  `xwiki-line-endings.js`, which ports the line-ending guard to opencode's `tool.execute.after` hook
+  and reuses `scripts/check-line-endings.mjs` (that script exports a shared `checkLineEndings()`
+  function; run directly it is still the Claude/Kimi CLI hook). opencode resolves the shared assets
+  through the `XWIKI_LLM_HOME` env var (which points at the checkout), since it has no plugin
+  marketplace — see `opencode.jsonc` and README.md.
 
 ## Conventions when editing this repo
 
@@ -58,9 +69,10 @@ Inside `xwiki/`:
   entry, `instructions/xwiki-org.md`, `.mcp.json`, hooks). Claude Code only pulls a plugin update
   when its version *increases*, so an un-bumped change never reaches installed machines. Which
   segment: **patch** for content edits (OKF/skill/instruction/README wording); **minor** when
-  capabilities change (adding/removing a skill or MCP server). Keep the three numbers in sync:
-  `marketplace.json` (`metadata.version` and the plugin entry's `version`) and
-  `xwiki/.claude-plugin/plugin.json` — `node scripts/validate.mjs` fails if they diverge.
+  capabilities change (adding/removing a skill or MCP server). Keep the version in sync across all
+  host manifests: `marketplace.json` (`metadata.version` and the plugin entry's `version`),
+  `xwiki/.claude-plugin/plugin.json`, `kimi.plugin.json`, and the `// version:` comment in
+  `opencode.jsonc` — `node scripts/validate.mjs` fails if they diverge.
 - A skill's `description` must clearly state *when* to use it (and when to use a sibling skill
   instead) — that text is the only thing Claude sees when deciding to invoke it.
 - Mirror substantive changes to the plugin's capabilities in `README.md`, which documents the

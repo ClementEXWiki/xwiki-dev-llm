@@ -4,7 +4,8 @@
 //   1. Every skill directory under xwiki/skills/ is listed in README.md, and (except the OKF
 //      governor xwiki-knowledge) in xwiki/okf/index.md.
 //   2. Each SKILL.md frontmatter `name:` equals its directory name.
-//   3. The four plugin version fields are identical (Claude marketplace, Claude plugin, Kimi plugin).
+//   3. The plugin version fields are identical across all hosts (Claude marketplace + plugin, Kimi
+//      plugin, opencode config comment).
 //   4. Every OKF topic file is referenced in xwiki/okf/index.md AND in the injected mirror
 //      xwiki/instructions/xwiki-org.md.
 // Node built-ins only. Run from anywhere: `node scripts/validate.mjs`.
@@ -48,11 +49,15 @@ for (const skill of skills) {
 const marketplace = JSON.parse(read(".claude-plugin/marketplace.json"));
 const pluginJson = JSON.parse(read("xwiki/.claude-plugin/plugin.json"));
 const kimiPluginJson = JSON.parse(read("kimi.plugin.json"));
+// opencode.jsonc is JSONC (comments), and opencode's config schema has no version field, so the
+// version is carried in a `// version: X.Y.Z` comment instead.
+const opencodeVersion = read("opencode.jsonc").match(/^\s*\/\/\s*version:\s*(\d+\.\d+\.\d+)/m)?.[1];
 const versions = {
   "marketplace.metadata.version": marketplace.metadata?.version,
   "marketplace.plugins[xwiki].version": marketplace.plugins?.find((p) => p.name === "xwiki")?.version,
   "xwiki/.claude-plugin/plugin.json version": pluginJson.version,
   "kimi.plugin.json version": kimiPluginJson.version,
+  "opencode.jsonc version comment": opencodeVersion,
 };
 if (new Set(Object.values(versions)).size !== 1) {
   errors.push(`Plugin version mismatch across manifests: ${JSON.stringify(versions)}`);
@@ -86,4 +91,4 @@ if (errors.length) {
   for (const e of errors) console.error(`  - ${e}`);
   process.exit(1);
 }
-console.log(`validate.mjs: OK (${skills.length} skills, Claude + Kimi versions in sync, OKF map complete).`);
+console.log(`validate.mjs: OK (${skills.length} skills, Claude + Kimi + opencode versions in sync, OKF map complete).`);

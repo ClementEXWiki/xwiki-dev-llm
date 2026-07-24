@@ -1,17 +1,18 @@
 # xwiki-dev-llm
 
 Shared LLM configuration for XWiki developers, distributed as a
-[Claude Code plugin marketplace](https://docs.claude.com/en/docs/claude-code/plugin-marketplaces)
-and a [Kimi Code](https://www.kimi.com/code/docs/en/kimi-code-cli/customization/plugins.html) plugin.
+[Claude Code plugin marketplace](https://docs.claude.com/en/docs/claude-code/plugin-marketplaces),
+a [Kimi Code](https://www.kimi.com/code/docs/en/kimi-code-cli/customization/plugins.html) plugin,
+and an [opencode](https://opencode.ai) config.
 
 The goal is consistency across developers, sharing the work of others, and simple onboarding —
-generic enough to work for **every** XWiki developer (no required directory layout, no symlinks, no
-committed secrets). It was designed in the forum thread
+generic enough to work for **every** XWiki developer (no committed secrets, no personal paths). It
+was designed in the forum thread
 [Organizing our LLM configs for all our repos](https://forum.xwiki.org/t/organizing-our-llm-configs-for-all-our-repos/18551).
 
 The Claude marketplace manifest lives at the repo root (`.claude-plugin/marketplace.json`), the
-Kimi plugin manifest lives at `kimi.plugin.json`, and the shared plugin content lives under
-[`xwiki/`](xwiki).
+Kimi plugin manifest lives at `kimi.plugin.json`, the opencode config lives at `opencode.jsonc`,
+and the shared plugin content lives under [`xwiki/`](xwiki).
 
 ## Install
 
@@ -43,13 +44,58 @@ For local development against a checkout:
 /reload
 ```
 
+### opencode
+
+opencode has no plugin marketplace, so it reads this repo from a local checkout. Clone it once and
+point `XWIKI_LLM_HOME` at it (the `opencode.jsonc` config resolves every path through that variable,
+so the file stays portable — no personal paths):
+
+```bash
+git clone https://github.com/xwiki/xwiki-dev-llm ~/dev/xwiki/xwiki-dev-llm
+# in your shell profile (~/.zshrc, ~/.bashrc, …):
+export XWIKI_LLM_HOME="$HOME/dev/xwiki/xwiki-dev-llm"
+```
+
+**Skills.** opencode only discovers skills in fixed directories, so symlink this checkout's skills
+into your opencode config once (a single link — the skills and their OKF stay in the checkout):
+
+```bash
+mkdir -p ~/.config/opencode
+ln -s "$XWIKI_LLM_HOME/xwiki/skills" ~/.config/opencode/skills
+```
+
+**Config (MCP servers + org conventions).** Choose one:
+
+- *Global (install once, applies everywhere).* Point opencode at the shipped config:
+  ```bash
+  export OPENCODE_CONFIG="$XWIKI_LLM_HOME/opencode.jsonc"
+  ```
+  Or merge the `mcp` and `instructions` entries from `opencode.jsonc` into your
+  `~/.config/opencode/opencode.json`.
+- *Per project.* Copy `opencode.jsonc` to `opencode.json` in an XWiki repo (it needs no editing —
+  it reads `XWIKI_LLM_HOME`). This scopes the config to that repo only.
+
+**Line-ending guard (optional).** Symlink the plugin into an opencode plugin directory:
+
+```bash
+mkdir -p ~/.config/opencode/plugins
+ln -s "$XWIKI_LLM_HOME/xwiki/opencode/plugins/xwiki-line-endings.js" ~/.config/opencode/plugins/xwiki-line-endings.js
+```
+
+> **Note — no git-remote scoping in opencode.** In Claude Code the org conventions are injected only
+> inside `xwiki/*` / `xwiki-contrib/*` repos (a remote-scoped `SessionStart` hook). opencode has no
+> equivalent hook, so with the *global* config the conventions load in every repo. Use the
+> *per-project* config if you need them scoped to XWiki repos only.
+
 ## What the `xwiki` plugin provides
 
 - **Org-wide conventions** (`xwiki/instructions/xwiki-org.md`) — the shared "CLAUDE.md for all
-  repos". Injected into every session by a `SessionStart` hook (`xwiki/scripts/inject-org-instructions.mjs`),
-  **scoped by git remote** so it only applies inside `xwiki/*` and `xwiki-contrib/*` repos (never in
-  personal projects). The hook is written in Node (which ships with Claude Code), so it works on
-  Windows, macOS and Linux without a bash or `jq` dependency.
+  repos". In Claude Code and Kimi Code it is injected into every session by a `SessionStart` hook
+  (`xwiki/scripts/inject-org-instructions.mjs`), **scoped by git remote** so it only applies inside
+  `xwiki/*` and `xwiki-contrib/*` repos (never in personal projects). The hook is written in Node
+  (which ships with Claude Code), so it works on Windows, macOS and Linux without a bash or `jq`
+  dependency. In opencode it is loaded via the `instructions` config entry (not remote-scoped — see
+  the opencode install note above).
 - **Line-ending guard** (`xwiki/scripts/check-line-endings.mjs`) — a `PostToolUse` hook on
   `Write`/`Edit` that checks every file written against the explicit `eol` declared by the repo's
   `.gitattributes` (via `git check-attr`). On a CRLF/LF mismatch it fails with a clear message so
@@ -58,8 +104,10 @@ For local development against a checkout:
   violation, and stays silent when no `eol` is declared (so it never mis-fires on Windows
   `core.autocrlf` working trees). Also Node-based for cross-platform support. In Kimi Code the same
   warning is emitted, but because `PostToolUse` hooks are observation-only there, the model must
-  act on the warning itself.
-- **MCP servers** (`xwiki/.mcp.json`):
+  act on the warning itself. In opencode the same check runs as a plugin
+  (`xwiki/opencode/plugins/xwiki-line-endings.js`, a `tool.execute.after` hook reusing the same
+  logic).
+- **MCP servers** (`xwiki/.mcp.json` for Claude; mirrored in `kimi.plugin.json` and `opencode.jsonc`):
   - `discourse` — forum.xwiki.org search/read (no auth).
   - `sonarqube` — SonarCloud code-quality analysis (Docker). Reads `SONARQUBE_TOKEN` and the
     repo-specific `SONARQUBE_PROJECT_KEY` from the environment; no secrets are committed.
@@ -96,6 +144,7 @@ For local development against a checkout:
 
 | Variable                | Used by   | Notes                                              |
 |-------------------------|-----------|----------------------------------------------------|
+| `XWIKI_LLM_HOME`        | opencode  | Absolute path to your `xwiki-dev-llm` checkout. **opencode only** (Claude Code and Kimi Code resolve paths themselves). |
 | `SONARQUBE_TOKEN`       | sonarqube | Your personal SonarCloud token (same for all repos). |
 | `SONARQUBE_PROJECT_KEY` | sonarqube | The SonarCloud project key — **differs per repo**.   |
 | `JIRA_API_TOKEN`        | `xwiki-jira` (jira-cli / REST) | Your jira.xwiki.org personal access token. Optional — only needed to act on JIRA issues. See "JIRA access" below. |

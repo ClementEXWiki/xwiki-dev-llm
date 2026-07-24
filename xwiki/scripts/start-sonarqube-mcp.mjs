@@ -3,9 +3,9 @@
 // /app/mcp-workspace so analysis tools can read files by path instead of receiving
 // full file contents.
 //
-// Kimi Code does not expand shell-style variables (${PWD}, ${VAR}) in MCP server
-// configs, so the workspace path is resolved at runtime from the current working
-// directory (the session's working directory).
+// Kimi Code and opencode do not expand shell-style ${PWD} inside an MCP command,
+// so the workspace path is resolved at runtime from the current working directory
+// (the session's working directory).
 
 import { spawn } from "node:child_process";
 
