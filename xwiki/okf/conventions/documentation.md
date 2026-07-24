@@ -12,6 +12,8 @@ sources:
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationStyle/PageTitlesNames/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/PageStructure/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/Versioning/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/HandleOriginalDocumentationPages/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/HandleExtensionPages/
   - https://diataxis.fr/
 ---
 
@@ -81,7 +83,11 @@ the type-grouped landing pages.
 ## Page-structure fields
 
 Documentation pages have stable, auto-generated level-1 headings backed by the
-`DocApp.Code.DocumentationClass` xobject. The fields:
+`DocApp.Code.DocumentationClass` xobject (which also stores the Diataxis **`type`** — `howto` /
+`tutorial` / `reference` / `explanation` — and the **`target`** audience — `user` / `admin` /
+`developer`); the **Technical ID** lives on a separate `DocApp.Code.DocumentationExtensionClass`
+xobject (`id` property). The page body itself is the page **content** field (XWiki 2.1 syntax).
+Developer API-reference pages sit under `documentation/xs/dev/<topic>/<subtopic>/WebHome`. The fields:
 
 - **Content** — the main content for the page type. Additional headings go under it as level-2 (or
   lower) headings.
@@ -129,6 +135,26 @@ no existing topic fits.
 - **Maintenance** — remove content and version macros for **unsupported old versions**, and remove
   obsolete macros once the referenced version is no longer relevant.
 
+## Handling the original page after migration
+
+Migrating old content is not done until the **source** page is handled (see the Migrate/Handle guide
+pages below). The rules differ by origin:
+
+- **Old `Documentation`-space page** — repoint its backlinks to the new page(s). When only part of a
+  page is moved, keep the section heading and point it to the new page, preserving old anchors with
+  an `{{id name="HOldSectionName"/}}` so saved links still resolve.
+- **Extensions-wiki (e.x.o) extension page** — **never delete it**: it still carries technical
+  metadata (dependencies, prerequisites, versions). Instead:
+  1. Remove the migrated documentation from the `ExtensionCode.ExtensionClass` **`description`**
+     xproperty — on an extension page, prose/examples live in that field, not the page content — so
+     the page keeps only technical information.
+  2. Add the **"Documentation" button** by setting the ExtensionClass **`website`** field to
+     `https://www.xwiki.org/xwiki/bin/view/DocApp/Code/ExtensionLD?id=<extension id>&name=%22<name>%22`.
+     The `id` **must equal the new doc page's Technical ID** (its `DocApp.Code.DocumentationExtensionClass`
+     `id`) — that is what makes the generated page list the migrated docs; it need not equal the
+     extension page's own `id` field.
+  3. Repoint the original page's backlinks to the new location.
+
 ## Documentation Guide — reference index
 
 The authoritative, evolving pages (left-navigation of the Documentation Guide):
@@ -147,5 +173,6 @@ The authoritative, evolving pages (left-navigation of the Documentation Guide):
 - [Working with Attachments](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/WorkingAttachments/)
 - [Migrate and Refactor Documentation](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/)
 - [Handle Original Documentation Pages](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/HandleOriginalDocumentationPages/)
+- [Handle Extension Pages](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/HandleExtensionPages/)
 - [Save Changes](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/SaveChanges/)
 - [Diataxis methodology](https://diataxis.fr/)

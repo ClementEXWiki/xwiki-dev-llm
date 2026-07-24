@@ -23,6 +23,27 @@ Interact with a running XWiki over its REST API using `curl`.
   nested, GET the space's pages list or try `.../pages/WebHome`.
 - Response headers include `xwiki-version` (WAR version) and `xwiki-user` (the resolved user, absent
   for guest) — handy to confirm you authenticated as expected. Add `-i` to `curl` to see them.
+- **CSRF form token (writes, XWiki 14.10.8+/15.2+):** a state-changing REST call whose body is
+  `text/plain`, `multipart/form-data` or `application/x-www-form-urlencoded` needs a form token in
+  the **`XWiki-Form-Token` request header**, or it fails with `403` and body `Invalid or missing form
+  token.`. Every REST response returns the current token in that same `XWiki-Form-Token` header, so a
+  cheap GET (e.g. `GET .../rest/wikis/xwiki`) yields one; read it and echo it back on the write:
+
+  ```
+  TOKEN=$(curl -s -I -u Admin:admin "http://localhost:8080/xwiki/rest/wikis/xwiki" \
+    | tr -d '\r' | awk -F': ' 'tolower($1)=="xwiki-form-token"{print $2}')
+  curl -s -u Admin:admin -X POST -H "XWiki-Form-Token: $TOKEN" \
+    -H "Content-Type: application/x-www-form-urlencoded" \
+    --data-urlencode "className=XWiki.TestClass" --data-urlencode "property#text=hi" \
+    ".../pages/WebHome/objects"
+  ```
+
+  The token stays constant per server run but can rotate on restart — **retry once on `403`** with the
+  token from the error response. Sending it when it isn't needed is harmless. An `application/xml`
+  page `PUT` is exempt; form-encoded object `POST` and property writes are not. On **xwiki.org
+  specifically**, the token cannot be scraped from a `/bin/edit` page — `/bin/` rejects Basic auth and
+  returns the *guest* token; only `/rest` honors Basic auth, so obtain the token from a `/rest`
+  response (see [[servers/index]]).
 
 Path template used throughout (with `{S}` standing for the possibly-repeated `/spaces/{name}`
 segments):
@@ -200,7 +221,8 @@ and a link to its REST resource — feed that link back into use case 1 to fetch
 - URL-encode reserved characters in page/space names (a space name with a dot, `/`, space, etc.).
   `curl --data-urlencode` handles bodies; encode path segments yourself.
 - On a write failure, add `-i` and read the status line and `xwiki-user` header — a `401` almost
-  always means you posted as guest (wrong/missing `-u`), a `403` means the authenticated user lacks
-  edit rights on that page.
+  always means you posted as guest (wrong/missing `-u`), a `403` means either the authenticated user
+  lacks edit rights on that page or (body `Invalid or missing form token.`) a missing/stale CSRF
+  token — see the `XWiki-Form-Token` note under Fundamentals.
 - The XML representations conform to the [REST model XSD](https://github.com/xwiki/xwiki-platform/blob/master/xwiki-platform-core/xwiki-platform-rest/xwiki-platform-rest-model/src/main/resources/xwiki.rest.model.xsd);
   full endpoint reference: https://www.xwiki.org/xwiki/bin/view/Documentation/UserGuide/Features/XWikiRESTfulAPI

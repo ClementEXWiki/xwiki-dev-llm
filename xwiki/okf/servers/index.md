@@ -5,6 +5,7 @@ summary: The servers making up the xwiki.org dev ecosystem, what each is for, an
   accesses or verifies each one (MCP, REST, or live WebFetch).
 sources:
   - https://dev.xwiki.org/xwiki/bin/view/Community/DevelopmentPractices#HServers
+  - https://www.xwiki.org/xwiki/bin/view/Documentation/UserGuide/Features/XWikiRESTfulAPI#HAuthentication
 ---
 
 # XWiki development server ecosystem
@@ -31,7 +32,7 @@ https://dev.xwiki.org/xwiki/bin/view/Community/DevelopmentPractices#HServers
 | [forum.xwiki.org](https://forum.xwiki.org) | Community + dev discussion (replaced most mailing-list usage). | **MCP: `discourse`** (this plugin, no auth) — search/read topics and posts. |
 | [lists.xwiki.org](https://lists.xwiki.org) | Mailing lists kept for server notifications and committer-private / infra / security discussions. | No MCP. Web archive. |
 | [extensions.xwiki.org](https://extensions.xwiki.org) | Catalog + docs of all free extensions; the source used by in-product Extension Manager. Extension/Application types have a per-version page at `Extension/<Space>/Versions/<version>/WebHome`; **Project** types do not. | No MCP. WebFetch an extension page (e.g. to find an extension id/version). |
-| [xwiki.org](https://xwiki.org) | The product/documentation web site. New docs live under `/documentation` (see the `xwiki-doc-writing` and `xwiki-doc-convert` skills). | No MCP. WebFetch pages. |
+| [xwiki.org](https://xwiki.org) | The product/documentation web site (itself a running XWiki instance). New docs live under `/documentation` (see the `xwiki-doc-writing` and `xwiki-doc-convert` skills). | No MCP. WebFetch to read a rendered page. To read/write page content or xobjects programmatically, use its REST API via the `xwiki-rest-api` skill. |
 | [dev.xwiki.org](https://dev.xwiki.org/xwiki/bin/view/Community/) | The dev guide / development practices wiki — source of truth for conventions and process. | No MCP. WebFetch; index with context-mode for repeated lookups. |
 | [l10n.xwiki.org](https://l10n.xwiki.org) | Weblate — contribute translations. | No MCP. See the `xwiki-translations` skill for the dev side of i18n. |
 | [design.xwiki.org](https://design.xwiki.org) | Design proposals. | No MCP. WebFetch. |
@@ -45,6 +46,21 @@ https://dev.xwiki.org/xwiki/bin/view/Community/DevelopmentPractices#HServers
 - **Everything else is WebFetch / REST / `gh` / git.** For repeated reads of the same dev-wiki or
   extensions page within a session, index it once with context-mode (if installed) and search,
   rather than re-fetching.
+
+## Accessing / writing to xwiki.org & extensions.xwiki.org via REST
+
+Both sites run XWiki; program against the REST API (`/xwiki/rest/…`), not the `/xwiki/bin/…` UI URLs.
+The procedure lives in the `xwiki-rest-api` skill; the durable gotchas are:
+
+- **Only `/rest` honors HTTP Basic auth.** The `/bin/` (view/edit/save) endpoints resolve Basic-auth
+  requests to `XWiki.Guest`, so a `form_token` scraped from a `/bin/edit` page is the *guest* token
+  and gets rejected — authenticate and read/write through `/rest`.
+- **REST writes need a CSRF form token** (XWiki 14.10.8+/15.2+): send it in the **`XWiki-Form-Token`
+  request header**; every REST response returns the current token in that same header (so any GET
+  yields one). Retry once on `403 "Invalid or missing form token."` (it can rotate on server
+  restart). An XML page `PUT` is exempt; form-encoded object `POST`/property writes are not.
+- **Wiki ids differ:** www.xwiki.org's main wiki is `xwiki` (`/rest/wikis/xwiki/…`);
+  **extensions.xwiki.org is a subwiki named `extensions`** (`/rest/wikis/extensions/…`), not `xwiki`.
 
 ## Verifying volatile facts
 

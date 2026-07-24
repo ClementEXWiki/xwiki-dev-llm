@@ -73,11 +73,13 @@ OKF map (topic files under `okf/`, described in `okf/index.md`):
 
 - `okf/conventions/` — `code-style`, `code-comments`, `commit-messages`, `versioning`,
   `backward-compatibility`, `security`, `performance`, `documentation` (xwiki.org doc rules —
-  Diataxis, titles, page structure, style, versioning; applied by `xwiki-doc-writing` /
-  `xwiki-doc-convert`).
+  Diataxis, titles, page structure, style, versioning, original-page handling after migration;
+  applied by `xwiki-doc-writing` / `xwiki-doc-convert`).
 - `okf/architecture/` — `component-system`, `macro-refactoring`, `wiki-user-scope`, `solr-search`.
 - `okf/testing/` — `strategy`.
-- `okf/servers/` — `index` (JIRA, CI, Nexus, SonarCloud, forum… and how to access/verify each);
+- `okf/servers/` — `index` (JIRA, CI, Nexus, SonarCloud, forum… and how to access/verify each, plus
+  writing via REST: only `/rest` honors Basic auth, the `XWiki-Form-Token` CSRF header, the
+  `extensions` subwiki id);
   `jira` (jira.xwiki.org access via jira-cli/REST + issue-field conventions + resolving/closing conventions + wiki-markup gotchas — see the `xwiki-jira` skill).
 - `okf/processes/` — `release`, `security-policy`.
 - `okf/decisions/` — ADRs (the *why* behind durable architectural choices).

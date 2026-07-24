@@ -38,8 +38,9 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
 - **performance** — prefer streaming over buffering; never load an unbounded payload (attachment,
   body, upload, export, query result) fully into memory.
 - **documentation** — xwiki.org documentation rules: Diataxis types & audiences, title/page-name
-  rules, page-structure xobject fields, style, location, version perspective (the live Documentation
-  Guide is the evolving source of truth). Applied by `xwiki-doc-writing` and `xwiki-doc-convert`.
+  rules, page-structure xobject fields, style, location, version perspective, and handling the
+  original page after migration (the live Documentation Guide is the evolving source of truth).
+  Applied by `xwiki-doc-writing` and `xwiki-doc-convert`.
 
 ### architecture/
 - **component-system** — `@Role`/`@Component`/`components.txt`, `@Inject`/`@Named` hints, instantiation.
@@ -57,7 +58,8 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
 
 ### servers/
 - **index** — the xwiki.org server ecosystem (JIRA, CI, Nexus, SonarCloud, forum, …) and how to
-  access/verify each (MCP vs. WebFetch).
+  access/verify each (MCP vs. WebFetch); plus writing via REST (only `/rest` honors Basic auth, the
+  `XWiki-Form-Token` CSRF header, and the `extensions` subwiki id).
 - **jira** — accessing jira.xwiki.org (jira-cli or REST), the durable issue-field conventions
   (Component, Affects Version = oldest affected/else last LTS, Fix Version); values are volatile;
   resolving/closing (Fixed vs. Cannot Reproduce for already-covered issues, assign to yourself); and
