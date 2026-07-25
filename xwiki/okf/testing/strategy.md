@@ -2,8 +2,8 @@
 title: XWiki testing strategy (overview)
 stability: durable
 summary: The kinds of tests XWiki uses, their naming, the no-stdout rule, the prefer-the-lightest-base
-  rule, the don't-pay-the-timeout rule, coverage, and where each test framework lives. Procedures
-  live in the test skills.
+  rule, the don't-pay-the-timeout rule, how to read a PRChecker log line, coverage, and where each
+  test framework lives. Procedures live in the test skills.
 sources:
   - https://dev.xwiki.org/xwiki/bin/view/Community/Testing/
   - https://dev.xwiki.org/xwiki/bin/view/Community/Testing/DockerTesting/#HDon27tpaythetimeout
@@ -41,6 +41,18 @@ This is the declarative map of how testing works in XWiki. For **doing** the wor
   `findElement*` call — treat any such warning for the test/page-objects you are touching as a defect
   to fix (fix the page object doing the wait, not just the test). A warning charged to an unrelated,
   untouched test is out of scope for your change — just report it.
+- **A `PRChecker` log line reports a probe, not a requirement** — functional tests run with
+  `ProgrammingRightCheckerAuthorizationManager` (`xwiki-platform-test-checker`), which overrides the
+  authorization manager so that wiki content never obtains Programming Right, and logs
+  `PRChecker: Block programming right for page [X]`. It fires whenever *any* code evaluates the
+  Programming Right while `X` is the context's secure document (`sdoc`) — including callers that merely
+  ask in order to choose between a privileged and a non-privileged branch and that behave correctly on
+  the latter. The line therefore means "the right was asked for here and denied", **not** "`X` requires
+  Programming Right". Before treating one as a defect, locate the actual call and check whether the
+  denied branch is harmful. Each secure document is logged only once per instance, so one line can hide
+  further probes from the same page. A page that legitimately needs the right is allowlisted with the
+  `test.prchecker.excludePattern` property (a regex matched against the serialized secure-document
+  reference), which logs `PRChecker: Skipping check for [X] since it's excluded` instead.
 - **Test method order matches `@Order`** — in a test class that orders its methods with `@Order(n)`,
   keep the physical (source) order of the `@Test` methods aligned with their `@Order` values (1, 2,
   3 …) so the file reads in execution order. When adding a new test, place it according to its
