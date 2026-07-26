@@ -63,7 +63,7 @@ Then:
    `xwiki/.claude-plugin/plugin.json`, and `kimi.plugin.json` — the Kimi manifest); **patch** for an
    OKF content edit. `node scripts/validate.mjs` verifies they stay in sync.
 4. Open a PR using the `xwiki-pull-request` skill's conventions (JIRA/`[Misc]` prefix, squashed
-   commit, no AI-attribution trailers). The change is reviewed like code before it ships.
+   commit, AI-attribution trailers). The change is reviewed like code before it ships.
 
 ### Recording an ADR (architectural decision)
 

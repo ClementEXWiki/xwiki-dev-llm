@@ -13,8 +13,9 @@ description: Create a GitHub pull request for an XWiki repo (xwiki-platform, xwi
   Do not create unnecessary JIRA issues
   (see https://dev.xwiki.org/xwiki/bin/view/Community/DevelopmentPractices).
 - Keep **one squashed commit per issue** — the backport automation only works with a single commit.
-- Match existing XWiki history: do **not** add `Co-Authored-By: Claude` trailers or
-  "Generated with Claude Code" lines (XWiki commits/PRs carry no AI attribution).
+- When the change was authored with AI assistance, add AI attribution: a `Co-Authored-By: Claude
+  <model> <noreply@anthropic.com>` trailer on the commit and a "Generated with Claude Code" line in
+  the PR body.
 
 ## PR description — always use the template
 
