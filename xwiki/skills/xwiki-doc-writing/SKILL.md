@@ -31,7 +31,10 @@ developer creates/edits the page on the wiki and submits a Change Request.
 4. **Write the title and page name** per the type's rules (verb-led for How-to/Tutorial; noun phrase
    for Reference/Explanation; kebab-case page name, stop words removed, no parent/child repetition).
 5. **Fill the page-structure fields** — Content (per type), FAQ (questions with 1–2 sentence
-   answers), Highlights, Related links, Technical ID (the extension id, or empty).
+   answers), Related links (**non-child** pages only), Technical ID (the extension id, or empty).
+   **Leave Highlights empty unless the page has many children**: it is a two-level list of the most
+   important *child* pages, not a "key points" summary, and the automatic "More" table already lists
+   every child — see `okf/conventions/documentation.md`.
 6. **Apply the style rules** — `"quotes"` for UI elements, uppercase-first XWiki terminology,
    `##literals##`, link-reference syntax (never hardcoded URLs), `{{scm}}` for GitHub files, the
    code macro with an explicit `language`, the display macro to avoid duplication.
@@ -39,7 +42,7 @@ developer creates/edits the page on the wiki and submits a Change Request.
    for changed behavior) only for genuine new/changed behavior.
 8. Use the [Documentation Resources](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationResources/)
    XARs to set up a realistic environment for screenshots/examples.
-9. **Save** via a Change Request (the expected way to submit edits). Add Highlights if useful.
+9. **Save** via a Change Request (the expected way to submit edits).
 
 ## Flow — update an existing page
 
@@ -59,8 +62,10 @@ to; confirm against the live guide when borderline):
       inline explanations.
 - [ ] **FAQ** — reader questions live in the FAQ field (1–2 sentence answers), not buried in steps;
       longer answers split into an Explanation page.
-- [ ] **Structure fields** — Content, FAQ, Highlights, Related links filled; Technical ID set when an
-      extension applies.
+- [ ] **Structure fields** — Content, FAQ and Related links filled; Technical ID set when an extension
+      applies. **Highlights empty** unless the page has many children (and then only a subset of them);
+      **Related holds no children** and never links to the page itself.
+- [ ] **Title case** — significant words capitalised ("Using", not "using").
 - [ ] **Style** — UI elements in `"quotes"`, terminology uppercased, literals in `##…##`, code macro
       uses a `language` parameter.
 - [ ] **Links** — link-reference syntax (no hardcoded xwiki.org URLs); `{{scm}}` for GitHub files.

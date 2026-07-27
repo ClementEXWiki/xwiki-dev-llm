@@ -38,9 +38,18 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
 - **performance** — prefer streaming over buffering; never load an unbounded payload (attachment,
   body, upload, export, query result) fully into memory.
 - **documentation** — xwiki.org documentation rules: Diataxis types & audiences, title/page-name
-  rules, page-structure xobject fields, style, location, version perspective, and handling the
+  rules (incl. title case), how much belongs on one page (a How-to is one procedure; one fact, one
+  page), page-structure xobject fields with the exact semantics of Highlights / More / Related, style,
+  location, version perspective and the `{{version}}` macro, the XWiki syntax traps that silently
+  mis-render (`image:`, `--`, anchors, URLs in headings), navigation-order pinning, and handling the
   original page after migration (the live Documentation Guide is the evolving source of truth).
   Applied by `xwiki-doc-writing` and `xwiki-doc-convert`.
+- **documentation-mechanics** — the storage side of the above, for editing xwiki.org pages
+  programmatically or diagnosing a warning banner: the three `DocApp` xobjects (structure fields,
+  Technical ID, quality-checker violations), how to read the checker's real findings instead of guessing
+  at the red banner, how navigation order is pinned on the parent space's `WebPreferences` page (and why
+  it must be verified through the Document Tree service), and the hidden-fragment pattern behind
+  `{{display}}`. The generic REST calls live in the `xwiki-rest-api` skill.
 
 ### architecture/
 - **component-system** — `@Role`/`@Component`/`components.txt`, `@Inject`/`@Named` hints, instantiation.
