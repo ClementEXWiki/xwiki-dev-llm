@@ -2,17 +2,24 @@
 title: XWiki documentation conventions (Documentation Guide)
 stability: durable
 summary: The rules for xwiki.org documentation — Diataxis page types & audiences, title/page-name
-  rules, per-type content rules, the page-structure xobject fields, documentation style, page
-  location, and version-perspective rules. The live Documentation Guide is the evolving source of
-  truth; prefer it whenever a detail here is borderline or missing.
+  rules, per-type content rules, how much belongs on one page (granularity & no duplication), the
+  page-structure xobject fields (Highlights/More/Related and their exact semantics), documentation
+  style, page location, version-perspective and `{{version}}` rules, the XWiki syntax traps that
+  silently mis-render, and navigation-order pinning. The live Documentation Guide is the evolving
+  source of truth; prefer it whenever a detail here is borderline or missing.
 sources:
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/ApplyDiataxis/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationStyle/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationStyle/PageTitlesNames/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/PageStructure/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/ChooseRightLocation/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationNavigationTree/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/Versioning/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/HandleOriginalDocumentationPages/
+  - https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/create-documentation-page/page-structure/
+  - https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/version-macro/
+  - https://www.xwiki.org/xwiki/bin/view/Macros/SCM
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/HandleExtensionPages/
   - https://diataxis.fr/
 ---
@@ -63,6 +70,12 @@ the type-grouped landing pages.
 | Reference | **Does not** start with a verb; indicates the topic is covered extensively — "All Wiki Pages" |
 | Explanation | **Does not** start with a verb; a phrase naming the subject, answering "why" — "Conflict Resolution" |
 
+**Titles use English title case** — capitalise the significant words, not just the first:
+*"Edit a Page Using the WYSIWYG Editor"*, not *"Edit a Page using the WYSIWYG Editor"*. This rule is **not currently
+stated** on the guide's
+[Page Titles and Page Names](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationStyle/PageTitlesNames/)
+page even though existing pages follow it, so it is worth adding upstream.
+
 **Page-name rules** (the URL segment):
 
 - Use **kebab-case** (XWiki naming strategy).
@@ -80,24 +93,94 @@ the type-grouped landing pages.
 - **Reference** — prefer **tables**, keep information concise; use **code examples** for API references.
 - **Explanation** — explain concepts, limitations, consequences, and background.
 
+### Troubleshooting pages
+
+A "troubleshooting" page is **not** a fifth Diataxis type (none exists — see the allowed `type` values
+below). The established convention on xwiki.org is: `type=explanation`, with **level-3** `=== Cause ===`
+/ `=== Solution ===` headings. Level 3 is deliberate and is what the existing troubleshooting pages
+use, even though level 2 is the norm for ordinary section headings elsewhere — do not "correct" it.
+
+## How much belongs on one page
+
+- **A How-to is ONE procedure**: a single numbered list, **no level-2 sections**, and no explanatory
+  material inside the steps. Reader questions go to the **FAQ** field; the *why* goes to an
+  Explanation page. As an order of magnitude (indicative sizes observed on one refactored tree, **not**
+  limits): a leaf How-to came to a few thousand characters, under ten steps and **0 headings**; a hub
+  Explanation was somewhat shorter and carried no procedure at all.
+- **Two alternative procedures for the same goal are two How-tos**, with an **Explanation hub** above
+  them that explains how to choose between them — e.g. several alternative ways to install or deploy
+  something become one How-to each, under a single Explanation that compares them.
+- **When a topic needs both a How-to and an Explanation, the How-to is the parent** and the
+  Explanation its child, linked from the How-to's intro, so the reader lands on the goal page first.
+  **This inverts for a hub**: when one Explanation covers several sibling How-tos, the Explanation is
+  the parent and the How-tos are its children. The guide's
+  [Choose the Right Location](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/ChooseRightLocation/)
+  does not state a rule either way.
+- **One fact lives on one page; every other page links to it.** A How-to's intro states the goal plus
+  the facts needed to follow the steps — never the *why*, which is the Explanation's job. Do not
+  copy-paste a paragraph, a FAQ entry or a step between pages, however short it is.
+- When the **same** content genuinely must appear in two places, use the **`{{display}}` macro**, not a
+  second copy — the shared text lives on a **hidden page nested inside one of the consuming pages** and
+  is displayed from the others. Never a second copy, however short. Mechanics (hiding the page, what
+  objects it must *not* carry, reference syntax, heading levels): [[documentation-mechanics]].
+
 ## Page-structure fields
 
 Documentation pages have stable, auto-generated level-1 headings backed by the
-`DocApp.Code.DocumentationClass` xobject (which also stores the Diataxis **`type`** — `howto` /
-`tutorial` / `reference` / `explanation` — and the **`target`** audience — `user` / `admin` /
-`developer`); the **Technical ID** lives on a separate `DocApp.Code.DocumentationExtensionClass`
-xobject (`id` property). The page body itself is the page **content** field (XWiki 2.1 syntax).
-Developer API-reference pages sit under `documentation/xs/dev/<topic>/<subtopic>/WebHome`. The fields:
+`DocApp.Code.DocumentationClass` xobject; the **Technical ID** lives on a separate
+`DocApp.Code.DocumentationExtensionClass` xobject (`id` property). The page body itself is the page
+**content** field (XWiki 2.1 syntax). Developer API-reference pages sit under
+`documentation/xs/dev/<topic>/<subtopic>/WebHome`. For how these xobjects are stored and read
+programmatically, see [[documentation-mechanics]].
+
+The **exact allowed values** of the two classification properties, read from the class definition
+itself (`GET /rest/wikis/xwiki/classes/DocApp.Code.DocumentationClass`) rather than guessed:
+
+| Property | Allowed values |
+|----------|----------------|
+| `type` | `tutorial` \| `howto` \| `reference` \| `explanation` |
+| `target` | `user` \| `administrator` \| `developer` (**`administrator`**, not `admin`) |
+
+There are only those four `type` values — in particular **there is no `troubleshooting` type**; a
+troubleshooting page is an **Explanation** (see "Troubleshooting pages" below).
+
+The fields:
 
 - **Content** — the main content for the page type. Additional headings go under it as level-2 (or
   lower) headings.
 - **FAQ** — level-2 headings phrased as **questions** a user/admin/developer might have, with answers
   limited to **1–2 sentences**. If a longer answer is needed, create a dedicated Explanation page.
-- **Highlights** — short points to help readers quickly discover key information.
-- **Related links** — links to related pages.
+- **Highlights** — **a short list of the most important *child* pages**, to guide readers when a page
+  has **many** children. It is *not* prose, and *not* a general "key points" summary. The syntax is a
+  strict two-level list — level 1 is the **link**, level 2 its **description**:
+  ```
+  * [[Title 1>>doc:reference.to.page1.WebHome]]
+  ** Description 1
+  * [[Title 2>>doc:reference.to.page2.WebHome]]
+  ** Description 2
+  ```
+  **Fill it only when a page has many children**, and then **only with a subset** — the "More" field
+  already lists every child, so highlighting all of them defeats the purpose (on one refactored tree the
+  hubs settled on 5 highlights out of 9 children, and 5 out of 7). A **leaf page's Highlights is empty**;
+  so is that of a page with one or a few children. Do not "fill Highlights everywhere".
+- **More** — **automatic**; a filterable livedata table of the page's **child** pages plus a search
+  box. Nothing to fill. Highlights are displayed inside this section.
+- **Related links** — links to pages with related content that are **NOT children** of this page. A
+  child belongs in **Highlights**, never here. Two further rules:
+  - **A `related` field must never link to its own page.**
+  - **After a restructure, re-check it.** Moving a page *in* under a hub turns it into a child, which
+    silently puts it in breach of the not-children rule inside that hub's `related` — the link still
+    resolves, so no broken-reference sweep can detect it. The check a restructure needs is not only
+    "does every reference still resolve?" but **"is every field still allowed to hold what it holds?"**
 - **Technical ID** — the id of the extension providing the documented feature (or its NPM package),
   copied from the Extensions-wiki `ExtensionCode` xobject. Empty when no extension applies (e.g.
   installation pages).
+
+The **Documentation application's own reference** for these fields is
+[Documentation Page Structure](https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/create-documentation-page/page-structure/)
+— note that it lives on **www**.xwiki.org under `/documentation`, and is a *different* resource from
+the [Documentation Guide](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide) on **dev**.xwiki.org.
+Use the guide for the authoring rules, and that page for what each structure field does.
 
 ## Documentation style
 
@@ -110,7 +193,11 @@ Developer API-reference pages sit under `documentation/xs/dev/<topic>/<subtopic>
 - **Linking** — do **not** hardcode xwiki.org URLs; use XWiki **link reference syntax** (copy the
   page reference from its Information tab). Use the relative reference for same-wiki links and the
   global reference for cross-wiki links. To link to a file on GitHub, use the `{{scm}}` macro so SCM
-  moves don't break links.
+  moves don't break links — but note its **two hard limits**, which make the rule not always
+  achievable: a macro **does not render inside `{{code}}`** (so a download URL inside a shell snippet
+  can never use it), and it has **no `anchor` parameter** (so it cannot link to a section of a README).
+  Signature (from [Macros.SCM](https://www.xwiki.org/xwiki/bin/view/Macros/SCM)): `user` (default
+  `xwiki`), `project` (default `xwiki-platform`), `branch` (default `master`), `path`, `raw`.
 - **Macros** — use the **code macro with an explicit `language` parameter** for code snippets
   (omitting it is slower and mis-colors). Use the **display macro** to avoid duplicated content: put
   repeated text/steps/images on a single hidden page and display it where needed.
@@ -135,6 +222,32 @@ no existing topic fits.
 - **Maintenance** — remove content and version macros for **unsupported old versions**, and remove
   obsolete macros once the referenced version is no longer relevant.
 
+### The `{{version}}` macro — real signature and rendering
+
+Full signature (Documentation 1.7+, per
+[Version Macro](https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/version-macro/)):
+`{{version product="…" since|before="…, …, …"}}content{{/version}}`.
+
+- **`since`/`before` take a comma-separated *list* of versions**, not a single value — which is what
+  you need when a change ships on several maintained branches at once.
+- **`product`** is free text, defaulting to `XWiki`.
+- **How it renders:** `since` produces `XWiki 17.10.11+, 18.4.3+, 18.6.0+` and `before` produces
+  `XWiki <17.10.11, <18.4.3, <18.6.0`. The badge is **prefixed to** the wrapped content, so **the
+  sentence must not repeat the numbers** or the reader sees them twice.
+- **Where it works:** inline, **inside a table cell**, and as a block wrapping several paragraphs plus
+  a code block.
+
+### What deserves a version badge at all
+
+- **Only product behaviour gets a badge.** A capability of the *surrounding* platform that works against
+  every release (a container-runtime flag, a filesystem mount, a database setting) is never
+  version-scoped, however new the documentation's *use* of it is.
+- **Do not pin a version in prose unless it is load-bearing.** The test that separates the two cases:
+  **does the sentence stay complete and true without the number?** If yes, the number is an incidental
+  "what happens to be current" value — delete it. If no, it marks a real behavioural boundary — badge
+  it with `{{version}}`. This is what keeps the versioning rule above from colliding with the general
+  preference for writing from the latest version's perspective.
+
 ## Handling the original page after migration
 
 Migrating old content is not done until the **source** page is handled (see the Migrate/Handle guide
@@ -154,6 +267,75 @@ pages below). The rules differ by origin:
      `id`) — that is what makes the generated page list the migrated docs; it need not equal the
      extension page's own `id` field.
   3. Repoint the original page's backlinks to the new location.
+
+## XWiki syntax traps that bite when authoring documentation
+
+All verified against rendered output on www.xwiki.org. Each one produces a *plausible-looking* page
+rather than an error, which is why they are worth listing.
+
+- **Newlines are significant.** A paragraph, a table row or a list item must be on **one single
+  line** — never wrap for readability. A newline inside a paragraph splits it in two; inside a table
+  row it breaks the table.
+- **Never let the word `image` be followed by a colon, anywhere.** XWiki parses `image:` as a
+  resource-scheme prefix, so a sentence ending `…a ready-to-use image:` emits an *empty image
+  reference*, which the doc-quality checker flags (`Use the Image macro instead.`) and which makes the
+  page render a red validation banner. Before `(((` it also swallows the word and leaks a literal `)))`
+  into the page. **Rephrase** ("…image, as follows:") — never escape it. The same applies to any
+  scheme-like token followed by `:` — `attach:`, `url:`, `mailto:`. **Grep every draft for these.**
+- **`--` is strikethrough, and `##…##` does not protect it.** A monospace span such as
+  `##--flag-name=value##` renders as `<del>flag-name=value</del>`: the leading dashes are *eaten*. An
+  **unmatched** `--` opens a `<del>` that runs **to the end of the block**, silently striking through
+  every remaining sentence. So every occurrence is a defect, not just paired ones. Use
+  `{{code language="none"}}--flag{{/code}}` inline, or a block code macro. Command-line flags are
+  exactly the content that trips this.
+- **`##…##` does not work around a URL.** `##http://localhost:8080/##` renders as
+  `http://localhost:8080/#` plus a stray `#`, because the autolinker eats one hash. Use
+  `{{code language="none"}}` for URLs.
+- **Never escape the hashes of a monospace span.** `~#~#1/1~#~#` renders as a *literal* `##1/1##`.
+  Plain `##1/1##` works fine, even directly after a sentence.
+- **Never put a bare URL in a heading** — the autolinker absorbs the trailing punctuation into the
+  href, so `== …look like https://wiki.example.com:80/? ==` loses its question mark, and it poisons the
+  generated anchor id. Rephrase the heading and put the URL in the body inside a code macro.
+- **A blank line between two list items ends the list**, so numbering restarts at 1. Keep list items on
+  consecutive lines.
+- **Angle brackets inside `##…##` are safe** — `##<prefix>_xwiki-data##` renders as literal monospace.
+  XWiki 2.1 does not accept raw HTML outside `{{html}}`, so `<…>` placeholders need no escaping.
+- **Section anchors barely work on www.xwiki.org.** The syntax is
+  `[[label>>doc:PageA.PageB||anchor="HMyheading"]]` (the id is `H` + the heading with only
+  alphanumerics kept), but the fragment **is only serialized when a `queryString` is also present** —
+  `||anchor="…"` alone is silently dropped from the rendered `href`. Appending `#HMySection` to the
+  reference is **not** an alternative: it is parsed as part of the page name and yields a red
+  `wikicreatelink` to a non-existent page. Until this is fixed, **link to the page and make the section
+  title the link label** so the reader knows what to look for on arrival.
+- **Copy-pasted content carries non-breaking spaces (`\xa0`)**, which defeat exact-string matching and
+  look like double spaces. Match on line prefixes rather than whole-string equality.
+
+## Navigation order — pinning child pages
+
+The documentation navigation panel is a **Document Tree macro**, and an unpinned node lists its
+children **alphabetically by page *title*** (not by page name — which is what makes the default order
+so hard to predict from a URL). So **finishing a documentation tree includes deciding its order**:
+creating or restructuring pages without pinning silently hands the reader an alphabetical one, in which
+an advanced "build your own image" How-to can easily precede the pages that tell you how to run it.
+
+The authority is the guide's
+[Documentation Navigation Panel](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationNavigationTree/):
+top-level nodes **must** be pinned, ordered by "usability, relevance, and importance"; other pages
+pinned "where it makes sense"; and **type landing pages** (a distinct thing from ordinary pages) are
+pinned in Diataxis order Tutorial → How-to → Reference → Explanation.
+
+Two further rules, established in practice and **not** stated in the guide:
+
+- **Pin a node in full, or not at all.** A partial pin leaves the remaining children sorting
+  alphabetically underneath the pinned ones, which is worse than either extreme because it looks
+  deliberate.
+- **The tree must not contradict the page.** When a landing page's prose lists its children in a
+  deliberate order, the pin repeats that order rather than inventing a second one. The same applies to
+  the **Highlights** field: if it singles out a subset, take them in the pinned order.
+
+A node with a single child needs no pin. For the **mechanism** — where the pin is stored, and why it
+must be verified through the tree service rather than by reading the stored value back — see
+[[documentation-mechanics]].
 
 ## Documentation Guide — reference index
 

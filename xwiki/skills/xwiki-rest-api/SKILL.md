@@ -81,6 +81,23 @@ curl -s -u Admin:admin \
 
 A single property value: append `/properties/{propertyName}`.
 
+**Two traps that return *empty* rather than failing**, so they read as "the page has no such field":
+
+- **`<value>` is not the first child of `<property>`** — two `<link/>` elements come first, so a
+  `<property name="…">\s*<value>` regex matches nothing and reports **every field as empty**. Match the
+  whole `<property …>…</property>` block, then find `<value>` inside it. `?media=json` avoids this.
+- **`GET …/objects` carries no property values** — only summaries. Fetch `…/objects/{Class}/{n}`.
+
+## Enumerating the pages of a tree
+
+**Enumerate by space prefix, not by asking for children.** `GET <space>/spaces` returns **the space
+itself, not its sub-spaces**, the `query` endpoint rejects XWQL (`400`), and REST-created pages have an
+**empty `parent`** — so any `parent`/`children` walk under-reports *silently*, looking complete. List
+the pages explicitly and assert the expected count; cache the tree locally for repeated scans.
+
+When merging object properties into page data, note that a class may define its own `content` property,
+which then **clobbers the page content** — keep them under a separate key.
+
 ## 2. Write page changes (content, title) — update an existing page
 
 PUT to the page URL. Three body formats are accepted; pick the simplest that fits.
@@ -143,6 +160,17 @@ curl -s -u Admin:admin -X PUT \
 ```
 
 Delete an object with `-X DELETE` on the object URL (`204` on success).
+
+### A `202` does not mean the write landed — always read it back
+
+**Back-to-back writes to the same page can silently drop one**: a property `PUT` issued right after a
+content `PUT` returned `202` and was **lost** (it read back empty, while properties written *after* it
+stuck); re-issuing it a moment later stored it byte-for-byte. **Follow every write with a read-back
+assert** and re-issue on mismatch. A rendered-page check is no substitute — a lost field that is not
+displayed renders as nothing at all.
+
+`hidden` is settable as a **plain form field** on the page `PUT` (alongside `content`, `title`,
+`syntax`) — no separate object is needed.
 
 ## 3. Create a new page (optionally with xobjects)
 
@@ -220,6 +248,9 @@ and a link to its REST resource — feed that link back into use case 1 to fetch
 
 - URL-encode reserved characters in page/space names (a space name with a dot, `/`, space, etc.).
   `curl --data-urlencode` handles bodies; encode path segments yourself.
+- Editing **xwiki.org documentation** pages? The tree's own specifics — the `DocApp` xobjects, reading
+  the doc-quality checker's findings, navigation pinning, hidden `{{display}}` fragments — are in the
+  OKF's `conventions/documentation-mechanics.md`, not here.
 - On a write failure, add `-i` and read the status line and `xwiki-user` header — a `401` almost
   always means you posted as guest (wrong/missing `-u`), a `403` means either the authenticated user
   lacks edit rights on that page or (body `Invalid or missing form token.`) a missing/stale CSRF
