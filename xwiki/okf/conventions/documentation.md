@@ -258,15 +258,44 @@ pages below). The rules differ by origin:
   an `{{id name="HOldSectionName"/}}` so saved links still resolve.
 - **Extensions-wiki (e.x.o) extension page** — **never delete it**: it still carries technical
   metadata (dependencies, prerequisites, versions). Instead:
-  1. Remove the migrated documentation from the `ExtensionCode.ExtensionClass` **`description`**
-     xproperty — on an extension page, prose/examples live in that field, not the page content — so
-     the page keeps only technical information.
+  1. Remove the migrated documentation from **every xproperty that holds prose** — not just
+     `description` (see "Where an e.x.o extension page keeps its prose" below) — so the page keeps
+     only technical information. An `installation` step that is genuinely **mandatory at install
+     time** is the exception: replace it with a one-line pointer at the new page rather than blanking
+     it, so it stays discoverable where the reader installs the extension.
   2. Add the **"Documentation" button** by setting the ExtensionClass **`website`** field to
      `https://www.xwiki.org/xwiki/bin/view/DocApp/Code/ExtensionLD?id=<extension id>&name=%22<name>%22`.
      The `id` **must equal the new doc page's Technical ID** (its `DocApp.Code.DocumentationExtensionClass`
      `id`) — that is what makes the generated page list the migrated docs; it need not equal the
      extension page's own `id` field.
   3. Repoint the original page's backlinks to the new location.
+
+### Where an e.x.o extension page keeps its prose
+
+An extension page's own **content field is empty** — everything the reader sees comes from
+xproperties of its xobjects, and **more than one of them holds documentation**. Extracting only
+`description` silently loses content, and the loss is invisible afterwards: every "nothing lost"
+sweep then compares the new pages against an already-incomplete source and reports success. So
+**enumerate all xproperties of all the page's xobjects and filter for prose**, rather than reading
+the fields you expect.
+
+| xobject | xproperty | Migrate? |
+|---|---|---|
+| `ExtensionCode.ExtensionClass` | `description` | **Yes** — the bulk of the documentation |
+| `ExtensionCode.ExtensionClass` | `installation` | **Yes** — often holds a mandatory setup step that appears nowhere else |
+| `EXOExtensionCode.ExtensionClass` | `compatibility` | **Yes** — prerequisites and supported-version constraints |
+| `ExtensionCode.ExtensionClass` | `website` | No — the "Documentation" button (see above) |
+| `ExtensionCode.ExtensionClass` | `properties`, `supportPlans` | No — Maven metadata and support-plan references |
+| `ExtensionCode.ProjectClass` | `description`, `entryPoints` | No — project overview and navigation |
+
+Two further traps:
+
+- A **project** page (`ExtensionCode.ProjectClass`) has **no `id` xproperty**, so no `ExtensionLD`
+  URL and therefore no "Documentation" button is possible — point its `description` at the new pages
+  instead.
+- The `compatibility` and `installation` fields commonly carry **long-obsolete** rows (errors on
+  XWiki versions no longer supported, ancient version tables). Those are content to **drop**, not to
+  migrate — but confirm against the repo's real minimum version rather than trusting the field.
 
 ## XWiki syntax traps that bite when authoring documentation
 

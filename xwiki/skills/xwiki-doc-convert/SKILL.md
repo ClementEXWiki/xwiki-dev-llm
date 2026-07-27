@@ -27,7 +27,12 @@ this skill covers only what is specific to converting.
 1. **Check for existing Change Requests** on the target first, so two people don't refactor the same
    page in parallel.
 2. **Read the legacy page in source mode** so you capture its real syntax, links, macros and version
-   notes (not just the rendered text).
+   notes (not just the rendered text). For an **e.x.o extension page** the page content is empty and
+   the documentation lives in xobject xproperties — **enumerate every xproperty of every xobject and
+   filter for prose**, never just `description`. `installation` and `compatibility` routinely hold
+   mandatory steps and prerequisites that appear nowhere else, and missing them is invisible later:
+   the "nothing lost" verification below would compare against your incomplete extraction and pass.
+   The field-by-field table is in `okf/conventions/documentation.md`.
 3. **Decompose by Diataxis type.** A legacy page usually mixes types — some explanation, a procedure
    or two, a configuration reference, maybe a tutorial. Identify each distinct piece and its type and
    audience. Do **not** keep the mixed structure.
