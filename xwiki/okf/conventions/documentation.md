@@ -231,6 +231,13 @@ These rules decide whether a page renders as intended, so they belong to authori
   `caption` — a good place for the product version the screenshot was taken in:
   `{{image reference="…" size="large" alt="…" caption="…"/}}`. `size` takes named values (`small` is
   150px wide). Present the image *before* a description of what it shows.
+- **In the `documentation` space `size` is mandatory and `width` is forbidden.** The quality checker
+  rejects the image otherwise: *"Best practice: The Image macro, when used in the "documentation"
+  space, must specify a 'size' parameter and no 'width' one."* So a screenshot **cannot** be rendered
+  at its natural width, and the consequence lands on capture rather than on authoring: **capture it at
+  exactly the pixel width of the `size` it will be shown at** (`medium` 350px, `large` 650px, `extra`
+  960px), at `devicePixelRatio` 1 — anything else is rescaled by the browser, and an undersized
+  original is upscaled and blurred.
 - **Never generate an example of rendered output — screenshot it.** A generated example (calling
   `{{displayIcon}}` to show an icon, say) silently changes when the product does.
 - **Several images side by side go in the Gallery macro**, so variations don't clutter the page.
@@ -265,6 +272,13 @@ no existing topic fits.
     `The tab uses the "Language" terminology ({{version before="16.10.12"}}Previously, the tab was using the "Locale" terminology{{/version}}).`
   - Skip the macro for trivial UI changes (no text changed, same behavior, same area) — it only
     clutters the page.
+- **Documenting a feature before it is released is accepted, and even desirable** — the documentation
+  is then ready on release day. The condition is that the unreleased content carries
+  `{{version since="…"}}`, so a reader on the current release knows it does not apply to them yet.
+  This also settles what "the perspective of the latest version" means when the newest UI ships in no
+  release yet: keep the **released** version as the baseline prose — which is also what the
+  screenshots can show — and badge the additions. Describing unreleased UI as if it were current is
+  the failure mode, not documenting it early.
 - **Maintenance** — remove content and version macros for **unsupported old versions**, and remove
   obsolete macros once the referenced version is no longer relevant.
 
