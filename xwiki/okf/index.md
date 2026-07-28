@@ -38,12 +38,16 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
 - **performance** — prefer streaming over buffering; never load an unbounded payload (attachment,
   body, upload, export, query result) fully into memory.
 - **documentation** — xwiki.org documentation rules: Diataxis types & audiences, title/page-name
-  rules (incl. title case), how much belongs on one page (a How-to is one procedure; one fact, one
-  page), page-structure xobject fields with the exact semantics of Highlights / More / Related, style,
+  rules (incl. title case), how much belongs on one page (a How-to is one procedure with a one-paragraph
+  intro; one fact, one page — plus how duplication is actually detected, by comparing pages rather than
+  writing each carefully), page-structure xobject fields with the exact semantics of
+  Highlights / More / Related, style, attachment/image/video rules (kebab-case names, `{{image}}` +
+  `alt`, **`webm` videos displayed with `{{embed}}`, never linked**, Gallery, PlantUML `bluegray`),
   location, version perspective and the `{{version}}` macro, the XWiki syntax traps that silently
   mis-render (`image:`, `--`, anchors, URLs in headings), navigation-order pinning, and handling the
-  original page after migration (the live Documentation Guide is the evolving source of truth).
-  Applied by `xwiki-doc-writing` and `xwiki-doc-convert`.
+  original page after migration — stripping the prose, **deleting its leftover attachments**, and
+  **triaging its backlinks** (which to repoint, which to leave). The live Documentation Guide is the
+  evolving source of truth. Applied by `xwiki-doc-writing` and `xwiki-doc-convert`.
 - **documentation-mechanics** — the storage side of the above, for editing xwiki.org pages
   programmatically or diagnosing a warning banner: the three `DocApp` xobjects (structure fields,
   Technical ID, quality-checker violations), how to read the checker's real findings instead of guessing

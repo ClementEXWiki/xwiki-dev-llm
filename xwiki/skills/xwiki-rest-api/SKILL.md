@@ -169,6 +169,14 @@ stuck); re-issuing it a moment later stored it byte-for-byte. **Follow every wri
 assert** and re-issue on mismatch. A rendered-page check is no substitute — a lost field that is not
 displayed renders as nothing at all.
 
+**A malformed property write also returns `202` — and blanks the property.** On the single-property
+URL the form field must be named **`property#<name>`**, not `<name>`: sending `faq=…` instead of
+`property#faq=…` is accepted, reports success, and leaves the property **empty**, destroying whatever
+was there. The same happens with a `#`-less field name on the object URL. So the read-back assert is
+not only about lost writes: it is the only thing standing between a wrong field name and silent data
+loss on a live page. Sending the raw value as a `text/plain` body works too, and has no field name to
+get wrong.
+
 `hidden` is settable as a **plain form field** on the page `PUT` (alongside `content`, `title`,
 `syntax`) — no separate object is needed.
 
