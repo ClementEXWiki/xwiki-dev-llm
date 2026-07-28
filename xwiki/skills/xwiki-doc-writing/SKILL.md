@@ -26,8 +26,10 @@ developer creates/edits the page on the wiki and submits a Change Request.
 1. **Check it doesn't already exist** elsewhere in `/documentation` (avoid duplication).
 2. **Classify** the content: pick the single Diataxis type and the audience
    (see `okf/conventions/documentation.md`). If it mixes types, split it into several pages.
-3. **Choose the location** — the most relevant existing topic/subtopic for that audience and type;
-   create a new top-level topic only when nothing fits.
+3. **Choose the location** — first, **bundled vs not**: a bundled extension's page goes under
+   `documentation.xs`, a non-bundled one under `documentation.extensions`; then the most relevant
+   existing topic/subtopic for that audience and type; create a new top-level topic only when nothing
+   fits.
 4. **Write the title and page name** per the type's rules (verb-led for How-to/Tutorial; noun phrase
    for Reference/Explanation; kebab-case page name, stop words removed, no parent/child repetition).
 5. **Fill the page-structure fields** — Content (per type), FAQ (questions with 1–2 sentence
@@ -51,7 +53,11 @@ developer creates/edits the page on the wiki and submits a Change Request.
    delete them. A How-to whose numbered list is wrapped in explanatory paragraphs fails this step.
 10. Use the [Documentation Resources](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationResources/)
     XARs to set up a realistic environment for screenshots/examples.
-11. **Save** via a Change Request (the expected way to submit edits).
+11. **Save.** A new or substantially rewritten page is a **major** change: save it via a **Change
+    Request**, adding to an existing open one on that page if there is one. A pure typo, broken-link
+    or small-rephrasing fix is a **minor** change: save it **directly**, ticked "minor", with a short
+    summary — do **not** open a Change Request for it. See `okf/conventions/documentation.md`.
+    Then read any automatic documentation-check violations the save reports.
 
 ## Flow — update an existing page
 
@@ -85,9 +91,21 @@ to; confirm against the live guide when borderline):
 - [ ] **Style** — UI elements in `"quotes"`, terminology uppercased, literals in `##…##`, code macro
       uses a `language` parameter.
 - [ ] **Links** — link-reference syntax (no hardcoded xwiki.org URLs); `{{scm}}` for GitHub files.
-- [ ] **Location** — under the most relevant existing `/documentation` topic for its audience/type.
+- [ ] **Location** — `documentation.xs` for a bundled extension, `documentation.extensions` otherwise;
+      then the most relevant existing topic for its audience/type.
 - [ ] **Versioning** — written for the latest version; `{{version}}` only for new/changed behavior;
       no obsolete macros or content for unsupported versions.
+- [ ] **FAQ size** — at most **5** entries **and at most 25 lines**; the surplus became a separate
+      troubleshooting page.
+- [ ] **Title/name has no type word** — no "How to", "Explanation", "Reference", "Tutorial" in the
+      title or the page name; disambiguation, if any, is a parenthetical in the **title only**.
+- [ ] **Understandable out of context** — the title and page name make sense from a search result.
+- [ ] **No inline styles** — no `(% style="…" %)`; no raw HTML where XWiki syntax exists.
+- [ ] **Images in list items** — wrapped in `(((…)))` so the list is not split.
+- [ ] **Screenshot standards** — latest skin, captured while using the feature, captured at the exact
+      `size` width, PNG, red (`255, 0, 0`) box around the UI element concerned.
+- [ ] **Technical ID** — `<groupId>:<artifactId>` (or the npm package), empty only when no extension
+      applies.
 
 Report findings as a list of concrete, actionable items. Do **not** flag a pure style preference:
 every finding must be justified by a rule violation (type/title/page-name/structure/style/link/

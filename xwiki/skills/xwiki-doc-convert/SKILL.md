@@ -62,7 +62,10 @@ this skill covers only what is specific to converting.
     **delete the page's leftover attachments** and **triage and repoint its backlinks**. Both
     procedures, including how to prove an attachment is safe to delete and which backlinks to leave
     alone, are in `okf/conventions/documentation.md`.
-11. **Save** each new page via a Change Request.
+11. **Save** each new page via a **Change Request** — a conversion is a major change. Group the new
+    pages and the original-page edits into the **same** Change Request where they belong to one
+    conversion, so a reviewer sees the move whole. (The minor-change exception in
+    `okf/conventions/documentation.md` does not apply to a conversion.)
 
 Refs: [Migrate and Refactor Documentation](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/),
 [Handle Original Documentation Pages](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/HandleOriginalDocumentationPages/).

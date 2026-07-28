@@ -15,10 +15,13 @@ sources:
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationStyle/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationStyle/PageTitlesNames/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/PageStructure/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/HighlightsPage/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/ChooseRightLocation/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationNavigationTree/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/HorizontalMenu/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/Versioning/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/HandleOriginalDocumentationPages/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/SaveChanges/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/WorkingAttachments/
   - https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/create-documentation-page/page-structure/
   - https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/version-macro/
@@ -78,6 +81,18 @@ the type-grouped landing pages.
 stated** on the guide's
 [Page Titles and Page Names](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationStyle/PageTitlesNames/)
 page even though existing pages follow it, so it is worth adding upstream.
+
+**Titles and page names must not contain the page type** — no "How to", "Explanation", "Reference",
+"Tutorial", etc. These are **reserved terms**: the type is already conveyed by the content, the
+structure and the badge, so repeating it is redundant. Per the guide's
+[Page Titles and Page Names](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationStyle/PageTitlesNames/)
+page.
+
+**Disambiguation is a parenthetical in the title, and is not added to the page name** — e.g. "All the
+Pages on the Wiki (for Administrators)". Same source page.
+
+**Titles and page names must be understandable out of context** — a reader may arrive from a search
+result, a bookmark or a link, none of which carry the surrounding context. Same source page.
 
 **Page-name rules** (the URL segment):
 
@@ -167,19 +182,31 @@ The fields:
   lower) headings.
 - **FAQ** — level-2 headings phrased as **questions** a user/admin/developer might have, with answers
   limited to **1–2 sentences**. If a longer answer is needed, create a dedicated Explanation page.
+  **At most 5 entries, and at most 25 lines of FAQ content**: beyond either limit the `faqEntryCount`
+  documentation check reports a **warning**, and the surplus must become a separate troubleshooting
+  documentation page. Per [Page Structure](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/PageStructure/).
 - **Highlights** — **a short list of the most important *child* pages**, to guide readers when a page
   has **many** children. It is *not* prose, and *not* a general "key points" summary. The syntax is a
-  strict two-level list — level 1 is the **link**, level 2 its **description**:
+  strict two-level list — level 1 is the **link**, level 2 its **one-line description** — written with
+  plain page references and **no `doc:` prefix**:
   ```
-  * [[Title 1>>doc:reference.to.page1.WebHome]]
-  ** Description 1
-  * [[Title 2>>doc:reference.to.page2.WebHome]]
-  ** Description 2
+  * [[Page Title 1>>reference.to.page1.WebHome]]
+  ** Description of the first page
+  * [[Page Title 2>>reference.to.page2.WebHome]]
+  ** Description of the second page
   ```
-  **Fill it only when a page has many children**, and then **only with a subset** — the "More" field
+  **Fill it only when a page has many children**, and then **only with a subset** — the "More" section
   already lists every child, so highlighting all of them defeats the purpose (on one refactored tree the
   hubs settled on 5 highlights out of 9 children, and 5 out of 7). A **leaf page's Highlights is empty**;
   so is that of a page with one or a few children. Do not "fill Highlights everywhere".
+
+  Highlights are **recommended once a page has more than 15 child pages**, with a **maximum of 6**
+  highlights — on documentation pages and landing pages alike. "Child pages", "rows of the automatic
+  *More* table" and the guide's former "pages in the LiveTable" all mean the same set. **No automatic
+  documentation check enforces any of this** (the checks cover FAQ size, images, videos, attachments,
+  page names/titles, syntax and verbs — never Highlights), so it is a convention reviewers uphold, not
+  a gate. Source of truth:
+  [Highlights on a Page](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/HighlightsPage/).
 - **More** — **automatic**; a filterable livedata table of the page's **child** pages plus a search
   box. Nothing to fill. Highlights are displayed inside this section.
 - **Related links** — links to pages with related content that are **NOT children** of this page. A
@@ -189,9 +216,12 @@ The fields:
     silently puts it in breach of the not-children rule inside that hub's `related` — the link still
     resolves, so no broken-reference sweep can detect it. The check a restructure needs is not only
     "does every reference still resolve?" but **"is every field still allowed to hold what it holds?"**
-- **Technical ID** — the id of the extension providing the documented feature (or its NPM package),
-  copied from the Extensions-wiki `ExtensionCode` xobject. Empty when no extension applies (e.g.
-  installation pages).
+- **Technical ID** — **every documentation page must be associated with an Extension**, and located
+  accordingly (see "Choose the right location" above); the Technical ID is that extension's id (or its
+  NPM package), copied from the Extensions-wiki `ExtensionCode` xobject. The format is
+  **`<groupId>:<artifactId>`** (e.g. `org.xwiki.platform:xwiki-platform-icon-api`). Empty when no
+  extension applies (e.g. installation pages). Per
+  [Apply Diataxis](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/ApplyDiataxis/).
 
 The **Documentation application's own reference** for these fields is
 [Documentation Page Structure](https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/create-documentation-page/page-structure/)
@@ -201,11 +231,19 @@ Use the guide for the authoring rules, and that page for what each structure fie
 
 ## Documentation style
 
-- **Syntax** — write content in XWiki syntax.
+- **Syntax** — write content in XWiki syntax. **Avoid HTML**; use XWiki syntax instead. Per the
+  guide's [Documentation Style](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationStyle/)
+  "Syntax" section.
+- **No inline styles** — do not write `(% style="font-family:…" %)` or similar; pages carry **content
+  only**, so they all look the same. Same source page, "No Styles" section.
 - **UI elements** — buttons, menu items, tabs, panel names go in `"quotes"` — e.g. `Click the
   "Edit" button.`
 - **XWiki terminology** — words with a special XWiki meaning (Panel, Sheet…) are written in **plain
   text with an uppercase first letter**, until a Glossary strategy exists.
+- **Glossary** — until the Glossary Application is configured, all XWiki terminology must be collected
+  on the [`dev:Drafts.Glossary.WebHome`](https://dev.xwiki.org/xwiki/bin/view/Drafts/Glossary/) page,
+  and each entry gets a Diataxis **Explanation** page, located in the place in the documentation
+  hierarchy where that explanation makes sense. Same source page, "Glossary" section.
 - **Literals / computer terms** — use the `##monospace##` notation — e.g. `the ##age## xproperty`.
 - **Linking** — do **not** hardcode xwiki.org URLs; use XWiki **link reference syntax** (copy the
   page reference from its Information tab). Use the relative reference for same-wiki links and the
@@ -229,15 +267,28 @@ These rules decide whether a page renders as intended, so they belong to authori
   `Image.png` and `Image.PNG` are two different attachments with separate version histories.
 - **Insert an image with the `{{image}}` macro**, always with an `alt` (WCAG), and optionally a
   `caption` — a good place for the product version the screenshot was taken in:
-  `{{image reference="…" size="large" alt="…" caption="…"/}}`. `size` takes named values (`small` is
-  150px wide). Present the image *before* a description of what it shows.
+  `{{image reference="…" size="large" alt="…" caption="…"/}}`. Present the image *before* a
+  description of what it shows.
 - **In the `documentation` space `size` is mandatory and `width` is forbidden.** The quality checker
   rejects the image otherwise: *"Best practice: The Image macro, when used in the "documentation"
-  space, must specify a 'size' parameter and no 'width' one."* So a screenshot **cannot** be rendered
-  at its natural width, and the consequence lands on capture rather than on authoring: **capture it at
-  exactly the pixel width of the `size` it will be shown at** (`medium` 350px, `large` 650px, `extra`
-  960px), at `devicePixelRatio` 1 — anything else is rescaled by the browser, and an undersized
-  original is upscaled and blurred.
+  space, must specify a 'size' parameter and no 'width' one."* A screenshot therefore **cannot** be
+  rendered at its natural width, which is why the capture rules below fix the width at capture time.
+- **Screenshot standards** — capture with the **latest skin**; capture while actually **using the
+  feature** (not a staged state); capture **at exactly the pixel width of the `size` it will be shown
+  at**, at `devicePixelRatio` 1 (resize the browser first) — anything else is rescaled by the browser,
+  and an undersized original is upscaled and blurred; save in **PNG** only; add a **red square, RGB
+  `255, 0, 0`**, around the UI element concerned. The `size` parameter's named values:
+
+  | Value | Width |
+  |-------|-------|
+  | `extra` | 960px (whole interface screens) |
+  | `large` | 650px |
+  | `medium` | 350px |
+  | `small` | 150px |
+
+  The capture-width constraint comes from the checker rule above; the rest is the guide's
+  [Working with Attachments](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/WorkingAttachments/)
+  "Screenshot Standards" section.
 - **Never generate an example of rendered output — screenshot it.** A generated example (calling
   `{{displayIcon}}` to show an icon, say) silently changes when the product does.
 - **Several images side by side go in the Gallery macro**, so variations don't clutter the page.
@@ -257,9 +308,16 @@ These rules decide whether a page renders as intended, so they belong to authori
 
 ## Choose the right location
 
-Place the page under the **most relevant existing topic / subtopic** of the `/documentation` tree,
-matching its audience (User / Admin / Developer) and type. Create a new top-level topic **only** when
-no existing topic fits.
+**Step 1 is bundled-vs-not.** Every documentation page must be associated with an Extension: a
+**bundled** extension's page goes under `documentation.xs`, a **non-bundled** one under
+`documentation.extensions`. This is the *first* decision an author makes, before audience or topic.
+Per the guide's
+[Choose the Right Location](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/ChooseRightLocation/)
+page.
+
+Then place the page under the **most relevant existing topic / subtopic** of the `/documentation`
+tree, matching its audience (User / Admin / Developer) and type. Create a new top-level topic **only**
+when no existing topic fits.
 
 ## Versioning and perspective
 
@@ -279,6 +337,11 @@ no existing topic fits.
   release yet: keep the **released** version as the baseline prose — which is also what the
   screenshots can show — and badge the additions. Describing unreleased UI as if it were current is
   the failure mode, not documenting it early.
+- **Version bounds** — for **XWiki itself**, only specify versions **at or after the LTS**, and only
+  while that version is within the currently supported **LTS cycle**. For **extensions**, specify the
+  **released version**. Per the guide's
+  [Versioning](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/Versioning/) page, "The Version
+  Macro" section.
 - **Maintenance** — remove content and version macros for **unsupported old versions**, and remove
   obsolete macros once the referenced version is no longer relevant.
 
@@ -307,6 +370,23 @@ Full signature (Documentation 1.7+, per
   "what happens to be current" value — delete it. If no, it marks a real behavioural boundary — badge
   it with `{{version}}`. This is what keeps the versioning rule above from colliding with the general
   preference for writing from the latest version's perspective.
+
+## Saving changes: minor directly, major via a Change Request
+
+The guide's [Save the Changes](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/SaveChanges/)
+page splits edits in two, and the split decides whether a Change Request is the right tool:
+
+- **Minor changes — fix them directly on the page, with no Change Request.** Grammar and spelling,
+  typing errors, broken links, small rephrasings for clarity, and other low-impact fixes that change
+  neither structure nor meaning. Tick **"minor"** so the page's followers are not notified, write a
+  short version summary ("fixed typo", "fix broken link"), and use **Preview** before saving. Opening
+  a Change Request for a typo is the noise this rule exists to prevent.
+- **Major changes — save via a Change Request.** New documentation, refactoring a page to the guide,
+  restructuring navigation, moving content between locations, and bulk edits across many pages. When
+  a page already has an open Change Request covering related work, add to **that** one rather than
+  opening a second.
+- **Automatic documentation checks run on save** for any page carrying the documentation object class,
+  and report guide violations inline — read them before moving on.
 
 ## Handling the original page after migration
 
@@ -437,6 +517,11 @@ rather than an error, which is why they are worth listing.
   title the link label** so the reader knows what to look for on arrival.
 - **Copy-pasted content carries non-breaking spaces (`\xa0`)**, which defeat exact-string matching and
   look like double spaces. Match on line prefixes rather than whole-string equality.
+- **An image inside a list item must be wrapped in `(((…)))`.** Writing the `{{image}}` macro on its
+  own line after a list item ends the list and starts a second one, leaving the image outside the
+  item. `* Item 2(((` + the macro + `)))` keeps it inside. Per the guide's
+  [Documentation Style](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationStyle/)
+  "List Items" section.
 
 ## Navigation order — pinning child pages
 
@@ -465,6 +550,37 @@ A node with a single child needs no pin. For the **mechanism** — where the pin
 must be verified through the tree service rather than by reading the stored value back — see
 [[documentation-mechanics]].
 
+**Documentation pages must not appear in the xwiki.org horizontal menu** — that menu is for content
+shared across all projects, not project-specific documentation — and **pages that do appear in it
+must not have left panels**. Per the guide's
+[Horizontal Menu](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/HorizontalMenu/) page.
+
+## Rules held here that the guide does not state (candidates to push upstream)
+
+Each of these is established in practice on xwiki.org but absent from the Documentation Guide, so a
+contributor reading only the guide will not apply it. Worth proposing upstream:
+
+- **English title case** for page titles (see the titles section above).
+- **Troubleshooting pages** are `type=explanation` with level-3 `=== Cause ===` / `=== Solution ===`
+  headings — the guide names no convention for them.
+- **How-to parent / Explanation child**, inverting to Explanation-as-parent for a hub — the guide's
+  [Choose the Right Location](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/ChooseRightLocation/)
+  states no rule either way.
+- **Pin a node in full or not at all**, and **the tree must not contradict the page** — the guide's
+  navigation page requires pinning top-level nodes but says neither.
+- ~~**The Highlights syntax** is documented nowhere in the guide~~ — **fixed upstream by plan 014**,
+  which added a "Highlights Syntax" section to `HighlightsPage`. Still record it in the OKF (see
+  Page-structure fields above), but it is no longer a guide gap.
+
+Two guide wordings that invite errors, worth clarifying upstream:
+
+- `ChooseRightLocation` presents the audiences as `##user##`, `##admin##`, `##developer##` in
+  monospace, which reads as the stored values. They are **path segments**; the
+  `DocApp.Code.DocumentationClass` `target` property takes **`administrator`**, not `admin`.
+- The same page says adding documentation under the old `/Documentation` space "is not recommended",
+  while its own first line says all documentation **must** be under `/documentation`. One of the two
+  should change.
+
 ## Documentation Guide — reference index
 
 The authoritative, evolving pages (left-navigation of the Documentation Guide):
@@ -477,7 +593,9 @@ The authoritative, evolving pages (left-navigation of the Documentation Guide):
 - [Documentation Style](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationStyle/)
 - [Page Titles and Page Names](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationStyle/PageTitlesNames/)
 - [Page Structure](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/PageStructure/)
+- [Highlights on a Page](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/HighlightsPage/)
 - [Documentation Navigation Panel](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationNavigationTree/)
+- [Horizontal Menu](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/HorizontalMenu/)
 - [Documentation Resources](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationResources/)
 - [Versioning](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/Versioning/)
 - [Working with Attachments](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/WorkingAttachments/)
