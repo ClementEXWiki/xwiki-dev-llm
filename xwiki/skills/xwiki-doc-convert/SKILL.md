@@ -19,8 +19,9 @@ the target structure: extract the still-useful information, update it, drop the 
 
 This skill builds on **`xwiki-doc-writing`** (the authoring procedure, review checklist, and live
 per-type examples) and on the OKF rules in **`okf/conventions/documentation.md`** (Diataxis types,
-titles/page-names, page-structure fields, style, location, versioning). Read those for the rules;
-this skill covers only what is specific to converting.
+titles/page-names, page-structure fields, style, location, versioning) plus
+**`okf/conventions/documentation-migration.md`** (what to do with the *original* page once its
+content has moved). Read those for the rules; this skill covers only what is specific to converting.
 
 ## Conversion flow
 
@@ -32,7 +33,7 @@ this skill covers only what is specific to converting.
    filter for prose**, never just `description`. `installation` and `compatibility` routinely hold
    mandatory steps and prerequisites that appear nowhere else, and missing them is invisible later:
    the "nothing lost" verification below would compare against your incomplete extraction and pass.
-   The field-by-field table is in `okf/conventions/documentation.md`.
+   The field-by-field table is in `okf/conventions/documentation-migration.md`.
 3. **Decompose by Diataxis type.** A legacy page usually mixes types — some explanation, a procedure
    or two, a configuration reference, maybe a tutorial. Identify each distinct piece and its type and
    audience. Do **not** keep the mixed structure.
@@ -61,7 +62,7 @@ this skill covers only what is specific to converting.
     then the two steps that outlive the prose and are the ones actually forgotten —
     **delete the page's leftover attachments** and **triage and repoint its backlinks**. Both
     procedures, including how to prove an attachment is safe to delete and which backlinks to leave
-    alone, are in `okf/conventions/documentation.md`.
+    alone, are in `okf/conventions/documentation-migration.md`.
 11. **Save** each new page via a **Change Request** — a conversion is a major change. Group the new
     pages and the original-page edits into the **same** Change Request where they belong to one
     conversion, so a reviewer sees the move whole. (The minor-change exception in

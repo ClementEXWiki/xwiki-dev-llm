@@ -46,10 +46,15 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
   screenshot must be captured at, **`webm` videos displayed with `{{embed}}`, never linked**, Gallery,
   PlantUML `bluegray`), location, version perspective and the `{{version}}` macro (incl. **documenting a
   feature before its release**, badged `since`), the XWiki syntax traps that silently mis-render
-  (`image:`, `--`, anchors, URLs in headings), navigation-order pinning, and handling the
-  original page after migration — stripping the prose, **deleting its leftover attachments**, and
-  **triaging its backlinks** (which to repoint, which to leave). The live Documentation Guide is the
-  evolving source of truth. Applied by `xwiki-doc-writing` and `xwiki-doc-convert`.
+  (`image:`, `--`, anchors, URLs in headings), and navigation-order pinning. The live Documentation
+  Guide is the evolving source of truth. Applied by `xwiki-doc-writing` and `xwiki-doc-convert`.
+- **documentation-migration** — the last step of a *migration* only, split out of the above so an
+  ordinary authoring task need not load it: handling the **original** page once its content has moved
+  — repointing an old `Documentation`-space page (keeping the anchors), stripping the prose from an
+  e.x.o extension page without deleting it (**every** xproperty that holds prose, not just
+  `description`) and wiring its "Documentation" button via the `ExtensionLD` URL, **deleting its
+  leftover attachments** (the one place the never-delete-an-attachment rule is inverted), and
+  **triaging its backlinks** (which to repoint, which to leave). Applied by `xwiki-doc-convert`.
 - **documentation-mechanics** — the storage side of the above, for editing xwiki.org pages
   programmatically or diagnosing a warning banner: the three `DocApp` xobjects (structure fields,
   Technical ID, quality-checker violations), how to read the checker's real findings instead of guessing

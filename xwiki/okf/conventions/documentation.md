@@ -6,27 +6,28 @@ summary: The rules for xwiki.org documentation — Diataxis page types & audienc
   actually detected), the page-structure xobject fields (Highlights/More/Related and their exact
   semantics), documentation style, attachment/image/video rules (incl. webm + the `{{embed}}` macro),
   page location, version-perspective and `{{version}}` rules, the XWiki syntax traps that silently
-  mis-render, navigation-order pinning, and handling the original page after a migration (stripping
-  prose, deleting leftover attachments, triaging backlinks). The live Documentation Guide is the
-  evolving source of truth; prefer it whenever a detail here is borderline or missing.
+  mis-render, and navigation-order pinning. Handling the *original* page after a migration is split
+  out into [[documentation-migration]]. The live Documentation Guide is the evolving source of truth;
+  prefer it whenever a detail here is borderline or missing.
 sources:
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/ApplyDiataxis/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/ChooseRightLocation/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/CreateNewDocumentation/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/CreateLandingPages/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationStyle/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationStyle/PageTitlesNames/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/PageStructure/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/HighlightsPage/
-  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/ChooseRightLocation/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationNavigationTree/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/HorizontalMenu/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationResources/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/Versioning/
-  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/HandleOriginalDocumentationPages/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/SaveChanges/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/WorkingAttachments/
   - https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/create-documentation-page/page-structure/
   - https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/version-macro/
   - https://www.xwiki.org/xwiki/bin/view/Macros/SCM
-  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/HandleExtensionPages/
   - https://diataxis.fr/
 ---
 
@@ -37,9 +38,10 @@ skills: [`xwiki-doc-writing`] (write / update / review a page) and [`xwiki-doc-c
 documentation into the new `/documentation` tree).
 
 The authoritative source of truth is the **XWiki Documentation Guide**
-(https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide and its sub-pages — indexed at the end).
-The guide is actively evolving: the rules below are a durable working summary, but **when a detail
-matters or is missing here, consult the live guide and prefer it over this file**.
+(https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide and its sub-pages — the ones this file
+derives from are listed in `sources:` above). The guide is actively evolving: the rules below are a
+durable working summary, but **when a detail matters or is missing here, consult the live guide and
+prefer it over this file**.
 
 Scope facts:
 
@@ -304,7 +306,7 @@ These rules decide whether a page renders as intended, so they belong to authori
   diagram, so the source stays in the page and stays editable.
 - **Updating an attachment means re-uploading it under the same name**, which versions it — do not
   delete and re-add. The one place attachments *are* deleted is the original page after a migration
-  (see "Handling the original page" below).
+  (see [[documentation-migration]]).
 
 ## Choose the right location
 
@@ -390,91 +392,10 @@ page splits edits in two, and the split decides whether a Change Request is the 
 
 ## Handling the original page after migration
 
-Migrating old content is not done until the **source** page is handled (see the Migrate/Handle guide
-pages below). The rules differ by origin:
-
-- **Old `Documentation`-space page** — repoint its backlinks to the new page(s). When only part of a
-  page is moved, keep the section heading and point it to the new page, preserving old anchors with
-  an `{{id name="HOldSectionName"/}}` so saved links still resolve.
-- **Extensions-wiki (e.x.o) extension page** — **never delete it**: it still carries technical
-  metadata (dependencies, prerequisites, versions). Instead:
-  1. Remove the migrated documentation from **every xproperty that holds prose** — not just
-     `description` (see "Where an e.x.o extension page keeps its prose" below) — so the page keeps
-     only technical information. An `installation` step that is genuinely **mandatory at install
-     time** is the exception: replace it with a one-line pointer at the new page rather than blanking
-     it, so it stays discoverable where the reader installs the extension.
-  2. Add the **"Documentation" button** by setting the ExtensionClass **`website`** field to
-     `https://www.xwiki.org/xwiki/bin/view/DocApp/Code/ExtensionLD?id=<extension id>&name=%22<name>%22`.
-     The `id` **must equal the new doc page's Technical ID** (its `DocApp.Code.DocumentationExtensionClass`
-     `id`) — that is what makes the generated page list the migrated docs; it need not equal the
-     extension page's own `id` field.
-  3. **Delete the page's remaining attachments** (next section).
-  4. Repoint the original page's backlinks to the new location (section after that).
-
-### Deleting the original page's attachments
-
-Whichever the origin, once a page holds **no documentation content any more**, the guide requires
-removing **every remaining attachment from its Attachments tab**. This is the step most easily
-forgotten, because stripping the prose makes the page *look* finished while the images and videos stay
-behind, orphaned and invisible — nothing on the rendered page reveals them. It is also the one place
-the "never delete an attachment, replace it" rule from
-[[documentation#attachments-images-and-videos]] does **not** apply.
-
-Deletion is not reversible, so prove the migration first, per attachment: **a counterpart exists on a
-new page, and the name no longer appears in any xproperty or in the page content of the original**.
-Note the two things that break a naive name-for-name check — the new tree renames attachments to
-kebab-case (`jiraMacroTable.png` → `jira-macro-table.png`), and a re-encoded video changes both name
-and size (`usage.mp4` → `usage.webm`) — so map old to new explicitly rather than by equality, and
-compare byte sizes only where the file was copied unchanged.
-
-### Repointing backlinks
-
-The list to work from is the **"Backlinks" entry of the original page's Information tab**
-(`<page URL>?viewer=information`); it is farm-wide, so it includes pages on the other wikis of
-xwiki.org. Most entries are **not** things to edit, and the guide's wording — "for each
-*documentation page* that appears in the Backlinks" — is what narrows it. Triage before touching
-anything:
-
-| Backlink | Action |
-|---|---|
-| A documentation page pointing at the moved content | **Repoint** at the new page |
-| A *prose* link whose intent is "read about this" | **Repoint** |
-| A link whose intent is "install this extension" (a prerequisite list) | **Keep** — the extension page is the correct target and still exists |
-| A dated blog post (release announcement, article) | **Keep** — a historical record, and it points at the extension page on purpose |
-| Registry livetables, `ChangeRequest.Data.*`, `WebPreferences`, demo/test wikis | **Keep** — generated or incidental, not documentation |
-
-So the same link text can need opposite treatment on two sibling pages, depending on whether it says
-*install the extension* or *see how to configure it*: read the surrounding sentence, not the link
-label. And scope the Information-tab parse to the Backlinks `<dd>` itself — a fixed-size window
-around the word "Backlinks" bleeds into neighbouring sections and invents backlinks that do not
-exist.
-
-### Where an e.x.o extension page keeps its prose
-
-An extension page's own **content field is empty** — everything the reader sees comes from
-xproperties of its xobjects, and **more than one of them holds documentation**. Extracting only
-`description` silently loses content, and the loss is invisible afterwards: every "nothing lost"
-sweep then compares the new pages against an already-incomplete source and reports success. So
-**enumerate all xproperties of all the page's xobjects and filter for prose**, rather than reading
-the fields you expect.
-
-| xobject | xproperty | Migrate? |
-|---|---|---|
-| `ExtensionCode.ExtensionClass` | `description` | **Yes** — the bulk of the documentation |
-| `ExtensionCode.ExtensionClass` | `installation` | **Yes** — often holds a mandatory setup step that appears nowhere else |
-| `EXOExtensionCode.ExtensionClass` | `compatibility` | **Yes** — prerequisites and supported-version constraints |
-| `ExtensionCode.ExtensionClass` | `website` | No — the "Documentation" button (see above) |
-| `ExtensionCode.ExtensionClass` | `properties`, `supportPlans` | No — Maven metadata and support-plan references |
-| `ExtensionCode.ProjectClass` | `description`, `entryPoints` | No — project overview and navigation |
-
-Two further traps:
-
-- A **project** page (`ExtensionCode.ProjectClass`) has **no `id` xproperty**, so no `ExtensionLD`
-  URL and therefore no "Documentation" button is possible — point its `description` at the new pages
-  instead.
-- The `compatibility` and `installation` fields commonly carry **long-obsolete** rows (errors on
-  XWiki versions no longer supported, ancient version tables). Those are content to **drop**, not to
-  migrate — but confirm against the repo's real minimum version rather than trusting the field.
+Migrating old content is not done until the **source** page is handled — stripping its prose without
+deleting an extension page, deleting its leftover attachments, and triaging its backlinks. Those
+rules are in [[documentation-migration]]; they apply only to a migration, so they are not repeated
+here.
 
 ## XWiki syntax traps that bite when authoring documentation
 
@@ -554,53 +475,3 @@ must be verified through the tree service rather than by reading the stored valu
 shared across all projects, not project-specific documentation — and **pages that do appear in it
 must not have left panels**. Per the guide's
 [Horizontal Menu](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/HorizontalMenu/) page.
-
-## Rules held here that the guide does not state (candidates to push upstream)
-
-Each of these is established in practice on xwiki.org but absent from the Documentation Guide, so a
-contributor reading only the guide will not apply it. Worth proposing upstream:
-
-- **English title case** for page titles (see the titles section above).
-- **Troubleshooting pages** are `type=explanation` with level-3 `=== Cause ===` / `=== Solution ===`
-  headings — the guide names no convention for them.
-- **How-to parent / Explanation child**, inverting to Explanation-as-parent for a hub — the guide's
-  [Choose the Right Location](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/ChooseRightLocation/)
-  states no rule either way.
-- **Pin a node in full or not at all**, and **the tree must not contradict the page** — the guide's
-  navigation page requires pinning top-level nodes but says neither.
-- ~~**The Highlights syntax** is documented nowhere in the guide~~ — **fixed upstream by plan 014**,
-  which added a "Highlights Syntax" section to `HighlightsPage`. Still record it in the OKF (see
-  Page-structure fields above), but it is no longer a guide gap.
-
-Two guide wordings that invite errors, worth clarifying upstream:
-
-- `ChooseRightLocation` presents the audiences as `##user##`, `##admin##`, `##developer##` in
-  monospace, which reads as the stored values. They are **path segments**; the
-  `DocApp.Code.DocumentationClass` `target` property takes **`administrator`**, not `admin`.
-- The same page says adding documentation under the old `/Documentation` space "is not recommended",
-  while its own first line says all documentation **must** be under `/documentation`. One of the two
-  should change.
-
-## Documentation Guide — reference index
-
-The authoritative, evolving pages (left-navigation of the Documentation Guide):
-
-- [Documentation Guide (root)](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide)
-- [Apply Diataxis](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/ApplyDiataxis/)
-- [Choose the Right Location](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/ChooseRightLocation/)
-- [Create New Documentation – Flow Guide](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/CreateNewDocumentation/)
-- [Landing Pages](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/CreateLandingPages/)
-- [Documentation Style](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationStyle/)
-- [Page Titles and Page Names](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationStyle/PageTitlesNames/)
-- [Page Structure](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/PageStructure/)
-- [Highlights on a Page](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/HighlightsPage/)
-- [Documentation Navigation Panel](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationNavigationTree/)
-- [Horizontal Menu](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/HorizontalMenu/)
-- [Documentation Resources](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationResources/)
-- [Versioning](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/Versioning/)
-- [Working with Attachments](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/WorkingAttachments/)
-- [Migrate and Refactor Documentation](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/)
-- [Handle Original Documentation Pages](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/HandleOriginalDocumentationPages/)
-- [Handle Extension Pages](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/HandleExtensionPages/)
-- [Save Changes](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/SaveChanges/)
-- [Diataxis methodology](https://diataxis.fr/)
