@@ -76,9 +76,10 @@ OKF map (topic files under `okf/`, described in `okf/index.md`):
   Diataxis, titles, page granularity + how cross-page duplication is detected, page structure incl.
   Highlights/More/Related semantics, style, attachments/images/videos (`{{image}}` needs a mandatory
   `size` in the `documentation` space, `webm` + the `{{embed}}` macro), versioning + the `{{version}}`
-  macro incl. documenting a feature ahead of its release, XWiki syntax traps, navigation pinning,
-  original-page handling after migration incl. deleting leftover attachments and triaging backlinks;
-  applied by `xwiki-doc-writing` / `xwiki-doc-convert`), `documentation-mechanics`
+  macro incl. documenting a feature ahead of its release, XWiki syntax traps, navigation pinning;
+  applied by `xwiki-doc-writing` / `xwiki-doc-convert`), `documentation-migration`
+  (migration only: handling the original page — stripping its prose, deleting its leftover
+  attachments, triaging its backlinks), `documentation-mechanics`
   (the storage side: the `DocApp` xobjects, reading the doc-quality checker's findings — objects *and*
   the inline error boxes that create none — how pinning and hidden `{{display}}` fragments are stored).
 - `okf/architecture/` — `component-system`, `macro-refactoring`, `wiki-user-scope`, `solr-search`.
