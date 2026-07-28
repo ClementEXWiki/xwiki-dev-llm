@@ -42,17 +42,21 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
   intro; one fact, one page — plus how duplication is actually detected, by comparing pages rather than
   writing each carefully), page-structure xobject fields with the exact semantics of
   Highlights / More / Related, style, attachment/image/video rules (kebab-case names, `{{image}}` +
-  `alt`, **`webm` videos displayed with `{{embed}}`, never linked**, Gallery, PlantUML `bluegray`),
-  location, version perspective and the `{{version}}` macro, the XWiki syntax traps that silently
-  mis-render (`image:`, `--`, anchors, URLs in headings), navigation-order pinning, and handling the
+  `alt`, **`size` mandatory and `width` forbidden in the `documentation` space**, which fixes the width a
+  screenshot must be captured at, **`webm` videos displayed with `{{embed}}`, never linked**, Gallery,
+  PlantUML `bluegray`), location, version perspective and the `{{version}}` macro (incl. **documenting a
+  feature before its release**, badged `since`), the XWiki syntax traps that silently mis-render
+  (`image:`, `--`, anchors, URLs in headings), navigation-order pinning, and handling the
   original page after migration — stripping the prose, **deleting its leftover attachments**, and
   **triaging its backlinks** (which to repoint, which to leave). The live Documentation Guide is the
   evolving source of truth. Applied by `xwiki-doc-writing` and `xwiki-doc-convert`.
 - **documentation-mechanics** — the storage side of the above, for editing xwiki.org pages
   programmatically or diagnosing a warning banner: the three `DocApp` xobjects (structure fields,
   Technical ID, quality-checker violations), how to read the checker's real findings instead of guessing
-  at the red banner, how navigation order is pinned on the parent space's `WebPreferences` page (and why
-  it must be verified through the Document Tree service), and the hidden-fragment pattern behind
+  at the red banner — **and why listing the violation objects is not enough, since some findings appear
+  only as an inline error box in the rendered page** — how navigation order is pinned on the parent
+  space's `WebPreferences` page (and why it must be verified through the Document Tree service), and the
+  hidden-fragment pattern behind
   `{{display}}`. The generic REST calls live in the `xwiki-rest-api` skill.
 
 ### architecture/

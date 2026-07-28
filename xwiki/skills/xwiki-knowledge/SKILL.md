@@ -58,10 +58,11 @@ Then:
 2. **Update `okf/index.md`** (add the topic line) **and the mirrored map in
    `instructions/xwiki-org.md`** so the always-on map stays in sync.
 3. **Bump the plugin version** so installed plugins actually pull the update — Claude Code updates a
-   plugin only when its version *increases*. Increment all four synced fields
+   plugin only when its version *increases*. Increment all five synced fields
    (`.claude-plugin/marketplace.json` `metadata.version` + the `xwiki` plugin entry's `version`,
-   `xwiki/.claude-plugin/plugin.json`, and `kimi.plugin.json` — the Kimi manifest); **patch** for an
-   OKF content edit. `node scripts/validate.mjs` verifies they stay in sync.
+   `xwiki/.claude-plugin/plugin.json`, `kimi.plugin.json` — the Kimi manifest — and the `// version:`
+   comment at the top of `opencode.jsonc`); **patch** for an OKF content edit.
+   `node scripts/validate.mjs` verifies they stay in sync, and is the authority if this list drifts.
 4. Open a PR using the `xwiki-pull-request` skill's conventions (JIRA/`[Misc]` prefix, squashed
    commit, AI-attribution trailers). The change is reviewed like code before it ships.
 

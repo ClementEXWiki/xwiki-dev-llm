@@ -3,7 +3,8 @@ title: Programming against the xwiki.org documentation tree
 stability: durable
 summary: Where the xwiki.org Documentation application stores its data and how to act on it — the
   three DocApp xobjects (structure fields, Technical ID, and the quality checker's violations), how to
-  read the checker's real findings instead of guessing at the red banner, how navigation order is
+  read the checker's real findings instead of guessing at the red banner — including the ones that never
+  become an object and show up only as an inline error box in the rendered page — how navigation order is
   pinned via the parent space's WebPreferences page, and the hidden-fragment pattern behind the
   {{display}} macro. The authoring *rules* live in [[documentation]]; the generic REST calls live in
   the `xwiki-rest-api` skill.
@@ -47,6 +48,12 @@ e.g. `context = "Image reference : "`, `message = "Use the Image macro instead."
 enough to identify the offending line immediately (here, one of the syntax traps in [[documentation]]).
 
 **Re-saving corrected content clears the objects automatically** — they need no manual cleanup.
+
+**Not every finding becomes an object.** Some surface only as an **inline error box in the rendered
+page** and create no `DocumentationViolationClass` at all — the mandatory-`size` rule on `{{image}}` (see
+[[documentation]]) is one. So a verification that lists objects only will report a **broken page as
+clean**. **Check both surfaces:** list the violation objects, *and* fetch the rendered page
+(`/xwiki/bin/view/<path>/`) and grep the HTML for `Best practice:`.
 
 ## How navigation order is pinned
 
