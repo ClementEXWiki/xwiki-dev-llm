@@ -2,11 +2,13 @@
 title: XWiki documentation conventions (Documentation Guide)
 stability: durable
 summary: The rules for xwiki.org documentation — Diataxis page types & audiences, title/page-name
-  rules, per-type content rules, how much belongs on one page (granularity & no duplication), the
-  page-structure xobject fields (Highlights/More/Related and their exact semantics), documentation
-  style, page location, version-perspective and `{{version}}` rules, the XWiki syntax traps that
-  silently mis-render, and navigation-order pinning. The live Documentation Guide is the evolving
-  source of truth; prefer it whenever a detail here is borderline or missing.
+  rules, per-type content rules, how much belongs on one page (granularity & how duplication is
+  actually detected), the page-structure xobject fields (Highlights/More/Related and their exact
+  semantics), documentation style, attachment/image/video rules (incl. webm + the `{{embed}}` macro),
+  page location, version-perspective and `{{version}}` rules, the XWiki syntax traps that silently
+  mis-render, navigation-order pinning, and handling the original page after a migration (stripping
+  prose, deleting leftover attachments, triaging backlinks). The live Documentation Guide is the
+  evolving source of truth; prefer it whenever a detail here is borderline or missing.
 sources:
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/ApplyDiataxis/
@@ -17,6 +19,7 @@ sources:
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationNavigationTree/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/Versioning/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/HandleOriginalDocumentationPages/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/WorkingAttachments/
   - https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/create-documentation-page/page-structure/
   - https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/version-macro/
   - https://www.xwiki.org/xwiki/bin/view/Macros/SCM
@@ -123,6 +126,20 @@ use, even though level 2 is the norm for ordinary section headings elsewhere —
   second copy — the shared text lives on a **hidden page nested inside one of the consuming pages** and
   is displayed from the others. Never a second copy, however short. Mechanics (hiding the page, what
   objects it must *not* carry, reference syntax, heading levels): [[documentation-mechanics]].
+- **A How-to's intro is one short paragraph.** Anything that wants to be a second or trailing
+  paragraph is misplaced content, and each kind has a home: a **prerequisite** shrinks to one clause
+  with a link, a **reader question** becomes a **FAQ** entry, the ***why*** goes to the Explanation.
+  Explanatory paragraphs wrapped around the numbered list are the most common way a How-to drifts —
+  the steps *are* the page.
+- **Duplication is found by comparing pages, not by writing each one carefully.** Every page reads
+  fine on its own; that is exactly why the duplication survives. Before finishing a tree, put the
+  intros, the FAQ entries and the hub prose **side by side** and look for *the same fact stated
+  twice*, not for repeated wording — a re-phrased sentence is still a duplicate, and re-phrasing is
+  what makes it invisible. Observed on one refactored tree: "the paste plugin must be activated by an
+  administrator" appeared in **five** places (two How-to intros, two FAQ entries, one hub) in five
+  different phrasings, and a limitation ("Jira Cloud is not supported, because …") appeared verbatim
+  on both the user and the administrator hub. Give each recurring fact **one named home**, and
+  elsewhere state it as a clause with a link — or not at all.
 
 ## Page-structure fields
 
@@ -202,6 +219,35 @@ Use the guide for the authoring rules, and that page for what each structure fie
   (omitting it is slower and mis-colors). Use the **display macro** to avoid duplicated content: put
   repeated text/steps/images on a single hidden page and display it where needed.
 
+## Attachments, images and videos
+
+The guide's own page is
+[Working with Attachments](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/WorkingAttachments/).
+These rules decide whether a page renders as intended, so they belong to authoring, not to clean-up:
+
+- **Attachment names follow the page-name rules** — kebab-case, and a **lowercase extension**:
+  `Image.png` and `Image.PNG` are two different attachments with separate version histories.
+- **Insert an image with the `{{image}}` macro**, always with an `alt` (WCAG), and optionally a
+  `caption` — a good place for the product version the screenshot was taken in:
+  `{{image reference="…" size="large" alt="…" caption="…"/}}`. `size` takes named values (`small` is
+  150px wide). Present the image *before* a description of what it shows.
+- **Never generate an example of rendered output — screenshot it.** A generated example (calling
+  `{{displayIcon}}` to show an icon, say) silently changes when the product does.
+- **Several images side by side go in the Gallery macro**, so variations don't clutter the page.
+- **No animated GIFs** — they are unmaintainable; use several PNGs instead.
+- **Tables and figures are wrapped in the figure + figureCaption macros**, with a meaningful caption.
+- **Videos: avoid them unless they carry real value** — they rot as the UI changes. When one is
+  justified it is in **`webm`** format and it is **displayed with the `{{embed}}` macro**:
+  `{{embed attachment="usage.webm" width="780"/}}`, which renders a real HTML5 player. **A video is
+  embedded, never linked.** Downgrading an embed to an `attach:` link — the tempting move when
+  converting an old page whose video you are re-encoding — loses the player, and nothing flags it:
+  the link resolves, the checker stays silent, and the page reads fine.
+- **Diagrams use the PlantUML macro with the `bluegray` theme**, never a screenshot of a rendered
+  diagram, so the source stays in the page and stays editable.
+- **Updating an attachment means re-uploading it under the same name**, which versions it — do not
+  delete and re-add. The one place attachments *are* deleted is the original page after a migration
+  (see "Handling the original page" below).
+
 ## Choose the right location
 
 Place the page under the **most relevant existing topic / subtopic** of the `/documentation` tree,
@@ -268,7 +314,46 @@ pages below). The rules differ by origin:
      The `id` **must equal the new doc page's Technical ID** (its `DocApp.Code.DocumentationExtensionClass`
      `id`) — that is what makes the generated page list the migrated docs; it need not equal the
      extension page's own `id` field.
-  3. Repoint the original page's backlinks to the new location.
+  3. **Delete the page's remaining attachments** (next section).
+  4. Repoint the original page's backlinks to the new location (section after that).
+
+### Deleting the original page's attachments
+
+Whichever the origin, once a page holds **no documentation content any more**, the guide requires
+removing **every remaining attachment from its Attachments tab**. This is the step most easily
+forgotten, because stripping the prose makes the page *look* finished while the images and videos stay
+behind, orphaned and invisible — nothing on the rendered page reveals them. It is also the one place
+the "never delete an attachment, replace it" rule from
+[[documentation#attachments-images-and-videos]] does **not** apply.
+
+Deletion is not reversible, so prove the migration first, per attachment: **a counterpart exists on a
+new page, and the name no longer appears in any xproperty or in the page content of the original**.
+Note the two things that break a naive name-for-name check — the new tree renames attachments to
+kebab-case (`jiraMacroTable.png` → `jira-macro-table.png`), and a re-encoded video changes both name
+and size (`usage.mp4` → `usage.webm`) — so map old to new explicitly rather than by equality, and
+compare byte sizes only where the file was copied unchanged.
+
+### Repointing backlinks
+
+The list to work from is the **"Backlinks" entry of the original page's Information tab**
+(`<page URL>?viewer=information`); it is farm-wide, so it includes pages on the other wikis of
+xwiki.org. Most entries are **not** things to edit, and the guide's wording — "for each
+*documentation page* that appears in the Backlinks" — is what narrows it. Triage before touching
+anything:
+
+| Backlink | Action |
+|---|---|
+| A documentation page pointing at the moved content | **Repoint** at the new page |
+| A *prose* link whose intent is "read about this" | **Repoint** |
+| A link whose intent is "install this extension" (a prerequisite list) | **Keep** — the extension page is the correct target and still exists |
+| A dated blog post (release announcement, article) | **Keep** — a historical record, and it points at the extension page on purpose |
+| Registry livetables, `ChangeRequest.Data.*`, `WebPreferences`, demo/test wikis | **Keep** — generated or incidental, not documentation |
+
+So the same link text can need opposite treatment on two sibling pages, depending on whether it says
+*install the extension* or *see how to configure it*: read the surrounding sentence, not the link
+label. And scope the Information-tab parse to the Backlinks `<dd>` itself — a fixed-size window
+around the word "Backlinks" bleeds into neighbouring sections and invents backlinks that do not
+exist.
 
 ### Where an e.x.o extension page keeps its prose
 

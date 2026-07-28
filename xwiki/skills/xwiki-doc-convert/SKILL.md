@@ -46,11 +46,23 @@ this skill covers only what is specific to converting.
 7. **Update while converting** — remove obsolete information; update deprecated terminology, UI
    names, and configuration examples; convert version-specific notes to the `{{version}}` macro and
    drop notes for versions no longer supported. **Never silently lose still-valid information.**
-8. **Handle the original page** — after the content is moved, follow the guide's
-   [Handle Original Documentation Pages](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/HandleOriginalDocumentationPages/)
-   steps (leave a link to the new location, rename the extension page / add the "Documentation"
-   button as described).
-9. **Save** each new page via a Change Request.
+8. **Move the attachments too, by the new tree's rules** — images and videos are content. Re-upload
+   them under **kebab-case, lowercase-extension** names, insert images with `{{image}}` + `alt`, and
+   **re-encode a video to `webm` and display it with `{{embed}}`**. When the legacy page *embedded* a
+   video or an image, the new page **embeds it too**: turning an embed into an `attach:` link is a
+   silent regression that no check catches. See `okf/conventions/documentation.md`.
+9. **De-duplicate across the pages you produced** — splitting one legacy page into several is exactly
+   what breeds duplication, because each new page wants to restate the context the legacy page stated
+   once. Do the cross-page comparison pass from `xwiki-doc-writing` before declaring the conversion
+   done, hub prose included.
+10. **Handle the original page** — after the content is moved, follow the guide's
+    [Handle Original Documentation Pages](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/HandleOriginalDocumentationPages/)
+    steps: strip the prose (leaving a link to the new location / adding the "Documentation" button),
+    then the two steps that outlive the prose and are the ones actually forgotten —
+    **delete the page's leftover attachments** and **triage and repoint its backlinks**. Both
+    procedures, including how to prove an attachment is safe to delete and which backlinks to leave
+    alone, are in `okf/conventions/documentation.md`.
+11. **Save** each new page via a Change Request.
 
 Refs: [Migrate and Refactor Documentation](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/),
 [Handle Original Documentation Pages](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/HandleOriginalDocumentationPages/).
@@ -74,6 +86,13 @@ After rewriting, verify against the legacy source — comparing legacy → new �
   conceptual essays inside a How-to, no configuration tables inside a Tutorial.
 - **Placement & splitting** — content sits on the right page; a page covering several unrelated
   topics/goals should be split further; over-fragmented pages on one coherent topic should be merged.
+- **Nothing duplicated** — no fact appears on two of the new pages, or in both a page's intro and its
+  own FAQ, however differently phrased. This is the check the split most often fails, and the one that
+  cannot be done page by page.
+- **Attachments carried over faithfully** — every image/video is on the new page, under a conforming
+  name, and **displayed the way the legacy page displayed it** (an embed stays an embed).
+- **Original page finished** — prose stripped, "Documentation" button set, **attachments deleted**,
+  **backlinks triaged**. A conversion that stops at the new pages is not done.
 - **Guideline compliance** — titles, page names, page-structure fields and style follow
   `okf/conventions/documentation.md` (reuse the `xwiki-doc-writing` review checklist).
 

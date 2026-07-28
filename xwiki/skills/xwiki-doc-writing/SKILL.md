@@ -38,11 +38,20 @@ developer creates/edits the page on the wiki and submits a Change Request.
 6. **Apply the style rules** — `"quotes"` for UI elements, uppercase-first XWiki terminology,
    `##literals##`, link-reference syntax (never hardcoded URLs), `{{scm}}` for GitHub files, the
    code macro with an explicit `language`, the display macro to avoid duplication.
-7. **Respect version perspective** — write for the latest version; use `{{version}}` (with `before`
+7. **Handle attachments by the rules** — kebab-case name with a lowercase extension, images via the
+   `{{image}}` macro with an `alt`, **videos in `webm` displayed with the `{{embed}}` macro and never
+   as a link**, Gallery for several images, PlantUML (`bluegray`) for diagrams. See
+   `okf/conventions/documentation.md`.
+8. **Respect version perspective** — write for the latest version; use `{{version}}` (with `before`
    for changed behavior) only for genuine new/changed behavior.
-8. Use the [Documentation Resources](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationResources/)
-   XARs to set up a realistic environment for screenshots/examples.
-9. **Save** via a Change Request (the expected way to submit edits).
+9. **Run the de-duplication pass before saving** — this is a separate step because every page reads
+   fine on its own and the duplication is only visible across pages. Lay the page's intro next to its
+   own FAQ, then next to its parent/hub and sibling pages, and hunt for **the same fact stated twice
+   in different words**. Each hit: pick one home, and reduce the others to a clause with a link or
+   delete them. A How-to whose numbered list is wrapped in explanatory paragraphs fails this step.
+10. Use the [Documentation Resources](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationResources/)
+    XARs to set up a realistic environment for screenshots/examples.
+11. **Save** via a Change Request (the expected way to submit edits).
 
 ## Flow — update an existing page
 
@@ -60,8 +69,15 @@ to; confirm against the live guide when borderline):
 - [ ] **Page name** — kebab-case, no stop words, follows the title, no parent/child path repetition.
 - [ ] **Steps** — in How-to/Tutorial each step starts with a verb and is in a numbered list, no
       inline explanations.
+- [ ] **Intro** — a How-to's intro is **one short paragraph**; no second or trailing paragraph
+      explaining the steps.
+- [ ] **No duplication** — no fact is stated on two pages (or in both a page's intro and its own FAQ),
+      *however differently it is worded*. Compare against the parent/hub and the siblings, not just
+      within the page.
 - [ ] **FAQ** — reader questions live in the FAQ field (1–2 sentence answers), not buried in steps;
       longer answers split into an Explanation page.
+- [ ] **Attachments** — kebab-case names with lowercase extensions; images use `{{image}}` with an
+      `alt`; **videos are `webm` embedded with `{{embed}}`, not links**; no animated GIFs.
 - [ ] **Structure fields** — Content, FAQ and Related links filled; Technical ID set when an extension
       applies. **Highlights empty** unless the page has many children (and then only a subset of them);
       **Related holds no children** and never links to the page itself.

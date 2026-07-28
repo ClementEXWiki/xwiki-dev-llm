@@ -73,9 +73,11 @@ OKF map (topic files under `okf/`, described in `okf/index.md`):
 
 - `okf/conventions/` — `code-style`, `code-comments`, `commit-messages`, `versioning`,
   `backward-compatibility`, `security`, `performance`, `documentation` (xwiki.org doc rules —
-  Diataxis, titles, page granularity, page structure incl. Highlights/More/Related semantics, style,
+  Diataxis, titles, page granularity + how cross-page duplication is detected, page structure incl.
+  Highlights/More/Related semantics, style, attachments/images/videos (`webm` + the `{{embed}}` macro),
   versioning + the `{{version}}` macro, XWiki syntax traps, navigation pinning, original-page handling
-  after migration; applied by `xwiki-doc-writing` / `xwiki-doc-convert`), `documentation-mechanics`
+  after migration incl. deleting leftover attachments and triaging backlinks; applied by
+  `xwiki-doc-writing` / `xwiki-doc-convert`), `documentation-mechanics`
   (the storage side: the `DocApp` xobjects, reading the doc-quality checker's findings, how pinning and
   hidden `{{display}}` fragments are stored).
 - `okf/architecture/` — `component-system`, `macro-refactoring`, `wiki-user-scope`, `solr-search`.
