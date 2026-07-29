@@ -51,7 +51,9 @@ simplification rules need no dataflow check; modernization and dead-code rules d
 Each of these is either bad ROI or a false positive against a deliberate XWiki idiom. Verify before
 "fixing" any of them:
 
-- **`S3776`** cognitive complexity — a genuine refactor, never a mechanical fix.
+- **`S3776`** cognitive complexity — a genuine refactor, never a mechanical fix. Likewise **`S2143`**
+  (migrate to `java.time`), **`S2160`** (override `equals` in a subclass) and **`S1141`** (nested
+  try) — all real design changes that deserve a JIRA issue, not a Sonar sweep.
 - **`S1186`** empty method — the empty body is usually a deliberate no-op hook.
 - **`S115`** constant naming, **`S1214`** constants-in-interface — cross-module renames, breaking.
 - **`S3252`**, **`S1845`** — static-access / name-differing-only-by-capitalization; usually
