@@ -46,6 +46,27 @@ Public API changes are checked for binary/semantic compatibility by **Revapi** (
 profile). See [[backward-compatibility]] for the policy, the `@Unstable` lifecycle, and the
 default-method pattern for evolving interfaces.
 
+## Suppressing a static-analysis warning
+
+When a SonarQube/SonarCloud rule genuinely does not apply to a piece of code, **retire it in the code,
+not in the analysis tool**: add `@SuppressWarnings("java:SXXXX")` with a `//` comment immediately
+above the annotation stating *why*. Marking the issue *Accepted* in SonarCloud alone hides the
+reasoning from the next developer, who will try to "fix" it again.
+
+Conventions (all verifiable with `grep -rn -B4 '@SuppressWarnings("java:S'`):
+
+- The annotation argument is the **rule key**, e.g. `@SuppressWarnings("java:S5785")`.
+- The justifying `//` comment goes **directly above the annotation**, which is placed last before the
+  declaration (after `@Override` / `@Test` if present).
+- **Prefer method-level scope over class-level**, so the rest of the file stays covered by the rule.
+- The comment states the reason as it applies to the code now — see [[code-comments]].
+
+A Checkstyle suppression is a different mechanism and does not affect Sonar: a class-level
+`@SuppressWarnings("checkstyle:MultipleStringLiterals")` does **not** suppress `java:S1192`.
+
+Which rules are worth suppressing rather than fixing is in [[index]] (the SonarQube corpus); the
+procedure is the `xwiki-fix-sonarqube-issue` skill.
+
 ## Related
 
 - [[code-comments]] — what to write (and never write) in code comments.

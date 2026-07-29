@@ -113,7 +113,8 @@ ln -s "$XWIKI_LLM_HOME/xwiki/opencode/plugins/xwiki-line-endings.js" ~/.config/o
     repo-specific `SONARQUBE_PROJECT_KEY` from the environment; no secrets are committed.
 - **OKF — knowledge base** (`xwiki/okf/`) — a curated, LLM-oriented corpus of XWiki *declarative*
   knowledge: conventions (`conventions/`), architecture (`architecture/`), the dev-server ecosystem
-  (`servers/`), testing strategy (`testing/`) and release process (`processes/`). It complements the
+  (`servers/`), testing strategy (`testing/`), SonarQube rule-fix correctness (`sonarqube/` — split
+  per rule family so a fix loads only the one it needs) and release process (`processes/`). It complements the
   skills (which hold task *procedures*): the OKF holds *facts*. A slimmed map of it is injected via
   `xwiki-org.md`; `okf/index.md` is the full map. Durable facts are stored inline; **volatile facts
   (versions, build/issue status, role holders) are stored as a "where to look + how to verify"
@@ -138,7 +139,8 @@ ln -s "$XWIKI_LLM_HOME/xwiki/opencode/plugins/xwiki-line-endings.js" ~/.config/o
   - `xwiki-doc-writing` — write, update or review a page of xwiki.org documentation per the XWiki Documentation Guide (Diataxis).
   - `xwiki-doc-convert` — convert old documentation (the `Documentation` space or the Extensions wiki) into the new `/documentation` tree.
   - `xwiki-contrib-release-blog-post` — create the "<Extension> Extension <version> Released" announcement on the xwiki.org Blog for an xwiki-contrib extension.
-  - `xwiki-fix-sonarqube-issue` — find and fix one SonarCloud issue, open a PR, mark it Accepted.
+  - `xwiki-fix-sonarqube-issue` — find and fix SonarCloud issues, open a PR, mark them Accepted; the
+    per-rule fix correctness and drop conditions it applies live in `xwiki/okf/sonarqube/`.
   - `xwiki-backport` — backport any change to an older branch: cherry-pick `-x`, adapt to the branch (module pom versions, Java level, style/API), verify, open the PR.
   - `xwiki-backport-testneeded` — backport `testneeded`-labelled tests to supported stable branches, adjust `@since` across branches, open the PRs (builds on `xwiki-backport`).
 

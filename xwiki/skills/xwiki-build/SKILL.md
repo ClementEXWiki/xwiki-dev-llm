@@ -112,3 +112,22 @@ definitions.
   `xwiki-increase-test-coverage` skill), there is almost no slack: removing or simplifying code —
   including a mechanical SonarQube fix — can shift the covered/total instruction ratio and fail the
   check. This failure is invisible without `-Pquality` and only surfaces in CI (which builds with it).
+
+## Reading a multi-module reactor result
+
+- **Always run `mvn` from the repo root.** A `-pl <relative-path>` build launched from anywhere else
+  fails fast with "Could not find the selected project in the reactor" — that is a path error, not a
+  code error. Relaunch from the root.
+- **A module failing mid-reactor SKIPS every module after it.** The modules marked `SUCCESS` before it
+  in the summary are genuinely verified; the ones after were never built. After fixing or dropping the
+  failing module, re-run a reactor containing the **skipped** ones — the first run did not cover them.
+- **A failure unrelated to your change → drop that module, keep the rest.** Build order means a leaf
+  failing last cannot taint the modules built before it, so every other `SUCCESS` stands and those
+  modules need no rebuild. To tell whether a failure is yours: if `git diff --name-only` does not list
+  the flagged class, it is not — confirm with `git log -1 -- <that class's file>`, which will point at
+  an unrelated recent commit. A pre-existing red module on master (a Revapi failure left by an
+  in-flight migration, say) fails your reactor without being your fault.
+- `-am` (also-make) is only needed when a `X.Y.0-SNAPSHOT` sibling is genuinely unpublished. A
+  "Could not find artifact" for a sibling is a resolution error, not a code error; otherwise SNAPSHOT
+  siblings resolve from `~/.m2` or the XWiki remote repositories, and adding `-am` needlessly slows a
+  `-Pquality` build by rebuilding the upstream tree.

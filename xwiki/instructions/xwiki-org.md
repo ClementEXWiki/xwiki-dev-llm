@@ -84,6 +84,13 @@ OKF map (topic files under `okf/`, described in `okf/index.md`):
   the inline error boxes that create none — how pinning and hidden `{{display}}` fragments are stored).
 - `okf/architecture/` — `component-system`, `macro-refactoring`, `wiki-user-scope`, `solr-search`.
 - `okf/testing/` — `strategy`.
+- `okf/sonarqube/` — which SonarCloud fixes are *correct* in XWiki and which look mechanical but
+  silently break something. Read `sonarqube/index.md` (rule → file map, the rules never worth fixing,
+  the universal drop conditions), then **only** the family file for the rule at hand: `syntax-rules`,
+  `simplification-rules`, `modernization-rules`, `dead-code-rules`, `constant-and-resource-rules`,
+  `test-code-rules`; plus `verification` (never skip the tests, `-Plegacy,quality`, why removing
+  covered instructions always lowers a JaCoCo ratio). Pool sizes are volatile and deliberately absent.
+  Applied by the `xwiki-fix-sonarqube-issue` skill, which owns the procedure.
 - `okf/servers/` — `index` (JIRA, CI, Nexus, SonarCloud, forum… and how to access/verify each, plus
   writing via REST: only `/rest` honors Basic auth, the `XWiki-Form-Token` CSRF header, the
   `extensions` subwiki id);
