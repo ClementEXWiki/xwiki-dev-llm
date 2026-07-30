@@ -3,12 +3,13 @@ title: SonarQube modernization rules
 stability: durable
 summary: Correct fixes and XWiki-specific drop conditions for the language-modernization rules —
   S6201 instanceof patterns, S6204/S6211 .toList(), S1640 EnumMap, S1604 lambda, S1643 StringBuilder,
-  S6126 text blocks. Holds the .toList() escape analysis and the EnumMap null-key break.
+  S6126 text blocks, S6485 collection factory methods. Holds the .toList() escape analysis and the
+  EnumMap null-key break.
 ---
 
 # SonarQube modernization rules
 
-S1604 · S1640 · S1643 · S6126 · S6201 · S6204 · S6211
+S1604 · S1640 · S1643 · S6126 · S6201 · S6204 · S6211 · S6485
 
 These rewrite code into a newer language or API form. They are compiler-checked in shape but **not in
 behaviour** — each has a way to break at runtime that the compiler cannot see, so each has a real drop
@@ -85,6 +86,24 @@ When reusing an **existing explicit local** (`if (x instanceof Foo) { Foo foo = 
 that local's name into the pattern and delete its declaration. If that declaration was followed by a
 blank line, deleting it leaves a stray blank right after the pattern `if {` — remove that too.
 
+**Shapes beyond the two obvious ones** (all safe, and all easy for a regex sweep to miss):
+- **`} else if (x instanceof T) {` chains** — the converter's most common site (type-dispatch
+  converters such as `InputSourceConverter` / `OutputTargetConverter` are entirely this shape). If you
+  locate the block by brace-matching from the flagged line, skip that leading `}` first or the block
+  looks one line long and every site in the chain reads as "no cast found".
+- **A bare cast in argument position** — `new DefaultFileInputSource((File) value)` → `…(file)`. Only
+  the `((T) x).m()` form needs the outer parentheses removed; a bare `(T) x` is replaced by the pattern
+  variable as-is, and a pattern variable is an atom so precedence never changes.
+- **A non-identifier operand** — `arguments[arguments.length - 1] instanceof Throwable last` and
+  `types[types.length - 1] instanceof Class clazz` are legal and clear away the duplicated index
+  expression too.
+- **An array type** — `value instanceof byte[] bytes` is valid Java 16+.
+
+**Naming, once more:** lower-casing only the first letter mangles acronyms (`URL` → `uRL`); write
+`url`. And a pattern variable name may be **reused** in sibling `if` blocks and in other methods of the
+same class, so the plain name is almost always available — prefer `logTreeNode` four times over
+inventing `theLogTreeNode` / `logTreeNodeValue`.
+
 ## S6204 / S6211 — `collect(Collectors.toList()/toSet())` → `.toList()` / `.toSet()`
 
 Mechanically trivial, but **`.toList()` returns an UNMODIFIABLE list** where `Collectors.toList()`
@@ -130,6 +149,25 @@ plain import is then wrongly kept and Checkstyle `UnusedImports` fails the build
 can coexist, and the static one being used does *not* keep the plain one alive. Keep the plain import
 when a sibling `Collectors.toSet`/`joining`/`toMap`/`groupingBy` genuinely survives. The
 `import static …Collectors.toList;` variant shows up in code as a bare `.collect(toList())`.
+
+## S6485 — use the collection factory method instead of the sizing constructor
+
+Message: "Replace this call to the constructor with the better suited static method
+`HashMap.newHashMap`." Applies to `new HashMap<>(n)`, `new HashSet<>(n)`, `new LinkedHashMap<>(n)` and
+`new LinkedHashSet<>(n)` → `HashMap.newHashMap(n)`, `HashSet.newHashSet(n)`,
+`LinkedHashMap.newLinkedHashMap(n)`, `LinkedHashSet.newLinkedHashSet(n)`. Requires **Java 19+**.
+
+The point of the rule is intent: the constructor argument is an *initial capacity*, while nearly every
+XWiki call site passes an expected element count (`new HashSet<>(references.size())`, `new HashMap<>(4)`).
+The factory sizes the table so that many mappings fit without rehashing. Nothing observable changes —
+same type, same contents, same iteration semantics — so this is one of the safest rules there is.
+
+- No import is needed (the type is already imported to be constructed) and the target type infers from
+  the assignment, so `Set<String> s = LinkedHashSet.newLinkedHashSet(n);` is fine.
+- The copy constructor `new LinkedHashMap<>(otherMap)` is **not** flagged — do not convert it; the
+  factory takes an int.
+- Sonar does not flag `new HashMap<>()`; leave the no-arg form alone.
+- The only real check is line length: the call is ~7-14 characters longer than the constructor.
 
 ## S1640 — convert a `Map` with enum keys to `EnumMap`
 

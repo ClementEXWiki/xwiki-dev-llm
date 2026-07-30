@@ -2,15 +2,34 @@
 title: SonarQube syntax and annotation rules
 stability: durable
 summary: Correct fixes and XWiki-specific drop conditions for the pure syntax/annotation rules —
-  S1116, S1124, S1128, S1161, S1197, S1611, S3878, S7476. Includes S3878's infinite-recursion trap.
+  S1116, S1124, S1128, S1161, S1197, S1611, S3878, S6208, S7476. Includes S3878's infinite-recursion
+  trap.
 ---
 
 # SonarQube syntax and annotation rules
 
-S1116 · S1124 · S1128 · S1161 · S1197 · S1611 · S3878 · S7476
+S1116 · S1124 · S1128 · S1161 · S1197 · S1611 · S3878 · S6208 · S7476
 
 The safest family: zero dataflow, and (except S3878) no way for a correct edit to change behaviour.
 Read [[index]] for the universal drop conditions first.
+
+## S6208 — merge fall-through `case` labels into one comma-separated label
+
+Message: "Merge the previous cases into this one using comma-separated label." Sonar flags the **last**
+label of a run of empty fall-through cases: `case 'a': case 'b': case 'c': BODY` → `case 'a', 'b', 'c':
+BODY`. Requires Java 14+. Behaviour is identical — the labels shared one body before and after.
+
+- **Count the group upwards from the flagged line** until a non-`case` line, and merge exactly that
+  run. Several groups in one `switch` are several issues; process them highest-line-first.
+- A long run needs wrapping: fill to 120 and continue on a `+4`-indented line, closing with the `:`
+  after the last label. A 32-label group (`TagStack`'s special-symbol set) wraps to two lines and reads
+  fine.
+- **Drop the group when a case in the run has a body**, even an empty one with a comment, or when a
+  `// fallthrough` comment marks a *non-empty* case falling into the run — that comment documents real
+  fall-through behaviour and merging it away changes what the reader is told. Labels *after* such a
+  comment can still be merged with each other.
+- Escapes are copied verbatim (`'\''`, `'\\'`, `'\"'`, `'\t'`); a numeric label (`case 160:`) can
+  join a char run.
 
 ## S1128 — unused import
 
