@@ -254,6 +254,9 @@ and a link to its REST resource — feed that link back into use case 1 to fetch
 
 ## Notes
 
+- **Deleting a page over REST bypasses the deletion wizard** — no "New target"/"Update links"
+  repointing, no automatic redirect — so on a real wiki the page's backlinks must be handled first, per
+  the OKF's `conventions/page-deletion.md`.
 - URL-encode reserved characters in page/space names (a space name with a dot, `/`, space, etc.).
   `curl --data-urlencode` handles bodies; encode path segments yourself.
 - Editing **xwiki.org documentation** pages? The tree's own specifics — the `DocApp` xobjects, reading

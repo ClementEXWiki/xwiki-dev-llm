@@ -79,7 +79,11 @@ OKF map (topic files under `okf/`, described in `okf/index.md`):
   macro incl. documenting a feature ahead of its release, XWiki syntax traps, navigation pinning;
   applied by `xwiki-doc-writing` / `xwiki-doc-convert`), `documentation-migration`
   (migration only: handling the original page — stripping its prose, deleting its leftover
-  attachments, triaging its backlinks), `documentation-mechanics`
+  attachments, triaging its backlinks), `page-deletion` (**before deleting ANY page on xwiki.org —
+  including an intermediate page you created yourself — list and fix its backlinks**: the delete
+  wizard only repoints them if given a "New target" + "Update links", never over REST, and never for
+  absolute-URL links — which the Information-tab Backlinks list does not show either),
+  `documentation-mechanics`
   (the storage side: the `DocApp` xobjects, reading the doc-quality checker's findings — objects *and*
   the inline error boxes that create none — how pinning and hidden `{{display}}` fragments are stored).
 - `okf/architecture/` — `component-system`, `macro-refactoring`, `wiki-user-scope`, `solr-search`.

@@ -5,9 +5,10 @@ summary: What to do with the **source** page once its content has been migrated 
   `/documentation` tree — repointing an old `Documentation`-space page, stripping the prose from an
   Extensions-wiki (e.x.o) extension page without deleting it (all the xproperties that hold prose,
   not just `description`), wiring the "Documentation" button through the `ExtensionLD` URL, deleting
-  the original's leftover attachments, and triaging its backlinks (which to repoint, which to leave).
-  Split out of [[documentation]], which holds the authoring rules; this file is only needed when
-  migrating, and is applied by the `xwiki-doc-convert` skill.
+  the original's leftover attachments, and triaging its backlinks (which to repoint, which to leave —
+  the generic "fix backlinks before deleting any page" rule and the mechanics of getting the list are
+  in [[page-deletion]]). Split out of [[documentation]], which holds the authoring rules; this file is
+  only needed when migrating, and is applied by the `xwiki-doc-convert` skill.
 sources:
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/HandleOriginalDocumentationPages/
@@ -60,11 +61,14 @@ compare byte sizes only where the file was copied unchanged.
 
 ## Repointing backlinks
 
-The list to work from is the **"Backlinks" entry of the original page's Information tab**
-(`<page URL>?viewer=information`); it is farm-wide, so it includes pages on the other wikis of
-xwiki.org. Most entries are **not** things to edit, and the guide's wording — "for each
-*documentation page* that appears in the Backlinks" — is what narrows it. Triage before touching
-anything:
+How to obtain the list and why it is incomplete — the **"Backlinks" entry of the original page's
+Information tab** (`<page URL>?viewer=information`, farm-wide), plus the search that catches the
+absolute-URL and macro-parameter links it never indexes — is in [[page-deletion]], which also holds the
+rule that **no page is deleted before its backlinks are handled** (that rule is generic; this section is
+only the migration-specific triage).
+
+Most entries are **not** things to edit, and the guide's wording — "for each *documentation page* that
+appears in the Backlinks" — is what narrows it. Triage before touching anything:
 
 | Backlink | Action |
 |---|---|
@@ -76,9 +80,7 @@ anything:
 
 So the same link text can need opposite treatment on two sibling pages, depending on whether it says
 *install the extension* or *see how to configure it*: read the surrounding sentence, not the link
-label. And scope the Information-tab parse to the Backlinks `<dd>` itself — a fixed-size window
-around the word "Backlinks" bleeds into neighbouring sections and invents backlinks that do not
-exist.
+label.
 
 ## Where an e.x.o extension page keeps its prose
 

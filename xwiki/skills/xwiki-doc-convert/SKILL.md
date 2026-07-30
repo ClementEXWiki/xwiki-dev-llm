@@ -63,7 +63,12 @@ content has moved). Read those for the rules; this skill covers only what is spe
     **delete the page's leftover attachments** and **triage and repoint its backlinks**. Both
     procedures, including how to prove an attachment is safe to delete and which backlinks to leave
     alone, are in `okf/conventions/documentation-migration.md`.
-11. **Save** each new page via a **Change Request** — a conversion is a major change. Group the new
+11. **Handle the backlinks of anything you delete — including the pages you created.** A conversion
+    often ends by removing a page: one superseded by the new tree, or one of the **new pages you created
+    earlier in this conversion** and then merged, moved or dropped. Every deletion follows
+    `okf/conventions/page-deletion.md` (list the backlinks, complete the list with a search, handle them,
+    then delete), and relocating a page is a rename/move rather than a delete-and-recreate.
+12. **Save** each new page via a **Change Request** — a conversion is a major change. Group the new
     pages and the original-page edits into the **same** Change Request where they belong to one
     conversion, so a reviewer sees the move whole. (The minor-change exception in
     `okf/conventions/documentation.md` does not apply to a conversion.)
@@ -97,6 +102,9 @@ After rewriting, verify against the legacy source — comparing legacy → new �
   name, and **displayed the way the legacy page displayed it** (an embed stays an embed).
 - **Original page finished** — prose stripped, "Documentation" button set, **attachments deleted**,
   **backlinks triaged**. A conversion that stops at the new pages is not done.
+- **No page was deleted with live backlinks** — for every page the conversion removed (the original, a
+  superseded page, or an intermediate page created during this conversion), the backlinks were handled
+  **before** the delete, per `okf/conventions/page-deletion.md`.
 - **Guideline compliance** — titles, page names, page-structure fields and style follow
   `okf/conventions/documentation.md` (reuse the `xwiki-doc-writing` review checklist).
 
