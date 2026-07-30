@@ -36,9 +36,9 @@ every day.
 
 | Rule keys | Family file |
 |---|---|
-| S1116 S1124 S1128 S1161 S1197 S1611 S3878 S7476 | [[syntax-rules]] |
-| S1066 S1125 S1126 S1155 S1488 S1602 S1612 S1858 S2130 S2864 S3706 S7158 | [[simplification-rules]] |
-| S1604 S1640 S1643 S6126 S6201 S6204 S6211 | [[modernization-rules]] |
+| S1116 S1124 S1128 S1161 S1197 S1611 S3878 S6208 S7476 | [[syntax-rules]] |
+| S1066 S1125 S1126 S1155 S1488 S1602 S1612 S1858 S2130 S2864 S3706 S6397 S7158 | [[simplification-rules]] |
+| S1604 S1640 S1643 S6126 S6201 S6204 S6211 S6485 | [[modernization-rules]] |
 | S1068 S1118 S1144 S1185 S1481 S1854 | [[dead-code-rules]] |
 | S1143 S1163 S1192 S2093 S2119 S2147 S3626 S5361 | [[constant-and-resource-rules]] |
 | S3415 S5785 S5786 S8924 | [[test-code-rules]] |
@@ -55,6 +55,11 @@ Each of these is either bad ROI or a false positive against a deliberate XWiki i
   (migrate to `java.time`), **`S2160`** (override `equals` in a subclass) and **`S1141`** (nested
   try) — all real design changes that deserve a JIRA issue, not a Sonar sweep.
 - **`S1186`** empty method — the empty body is usually a deliberate no-op hook.
+- **`S6213`** "rename this method/variable to not match a restricted identifier" (`record`, `yield`,
+  `var`) — a rename of a public method or field is an API change, and the XWiki pool sits on
+  `record(…)` methods of the `*QuestionRecorder` classes. Not a cleanup.
+- **`S4144`** "implementation is identical to method X" — deduplicating two methods that legitimately
+  mean different things is a design decision.
 - **`S115`** constant naming, **`S1214`** constants-in-interface — cross-module renames, breaking.
 - **`S3252`**, **`S1845`** — static-access / name-differing-only-by-capitalization; usually
   backward-compat-bearing public API.

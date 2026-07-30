@@ -2,15 +2,31 @@
 title: SonarQube simplification rules
 stability: durable
 summary: Correct fixes and XWiki-specific drop conditions for the behaviour-preserving simplification
-  rules — S1066, S1125, S1126, S1155, S1488, S1602, S1612, S1858, S2130, S2864, S3706, S7158.
+  rules — S1066, S1125, S1126, S1155, S1488, S1602, S1612, S1858, S2130, S2864, S3706, S6397, S7158.
 ---
 
 # SonarQube simplification rules
 
-S1066 · S1125 · S1126 · S1155 · S1488 · S1602 · S1612 · S1858 · S2130 · S2864 · S3706 · S7158
+S1066 · S1125 · S1126 · S1155 · S1488 · S1602 · S1612 · S1858 · S2130 · S2864 · S3706 · S6397 · S7158
 
 Behaviour-preserving rewrites that need no dataflow analysis — the best mechanical-fix fodder after
 the syntax family. Read [[index]] for the universal drop conditions first.
+
+## S6397 — redundant single-character regex character class
+
+Message: "Replace this character class by the character itself." `"[x]"` → `"x"` inside a regex
+argument (`replaceAll`, `split`, `matches`, `Pattern.compile`). One token, no dataflow, and it cannot
+change what the regex matches.
+
+- **Keep the escaping the class was carrying.** `"[\\.]"` → `"\\."` (a bare `"."` would match any
+  character) and likewise for `[\\(]`, `[\\$]`, `[\\^]`. A non-metacharacter needs no escape.
+- **Match the source *text*, not the decoded character**, when scripting the edit: XWiki's
+  transliteration tables are written as `"[\u0132]"` — six literal characters in the file — so a
+  pattern built from the decoded `Ĳ` finds nothing.
+- Only single-character classes are flagged; leave the multi-character ones (`"[\u0136\u01e8]"`)
+  alone, and do not "improve" the flagged call into `replace()` — that is S5361 and a separate issue.
+- The dense sites are the accent-stripping `replaceAll` tables duplicated in `XWiki.java` (platform)
+  and `XWikiSerializer2.java` (rendering).
 
 ## S1125 — redundant boolean literal
 
