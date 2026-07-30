@@ -55,6 +55,16 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
   `description`) and wiring its "Documentation" button via the `ExtensionLD` URL, **deleting its
   leftover attachments** (the one place the never-delete-an-attachment rule is inverted), and
   **triaging its backlinks** (which to repoint, which to leave). Applied by `xwiki-doc-convert`.
+- **page-deletion** — the rule that applies to **deleting any page on xwiki.org**, whatever the reason
+  (migrated page, duplicate, obsolete extension/blog page, or an intermediate page you created
+  yourself): **list and fix the backlinks before deleting**, since the breakage lands on *other* pages
+  that nothing names for you. What the deletion wizard does repoint (**only** with a "New target" +
+  "Update links", plus the `XWiki.RedirectClass` redirect option) and what it never does — a REST
+  `DELETE`, absolute-URL links, macro parameters without `MacroRefactoring`, xproperty-stored
+  references; how to get the backlink list (Information tab → Backlinks, farm-wide) and why it must be
+  completed with a farm-wide search; the triage table; and how to recover from a premature delete via
+  the trash. Applied by `xwiki-doc-writing` / `xwiki-doc-convert` / `xwiki-rest-api` and by any task
+  that removes a wiki page.
 - **documentation-mechanics** — the storage side of the above, for editing xwiki.org pages
   programmatically or diagnosing a warning banner: the three `DocApp` xobjects (structure fields,
   Technical ID, quality-checker violations), how to read the checker's real findings instead of guessing

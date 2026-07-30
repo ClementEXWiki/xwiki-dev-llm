@@ -7,8 +7,9 @@ summary: The rules for xwiki.org documentation — Diataxis page types & audienc
   semantics), documentation style, attachment/image/video rules (incl. webm + the `{{embed}}` macro),
   page location, version-perspective and `{{version}}` rules, the XWiki syntax traps that silently
   mis-render, and navigation-order pinning. Handling the *original* page after a migration is split
-  out into [[documentation-migration]]. The live Documentation Guide is the evolving source of truth;
-  prefer it whenever a detail here is borderline or missing.
+  out into [[documentation-migration]]; deleting any page (backlinks first) into [[page-deletion]]. The
+  live Documentation Guide is the evolving source of truth; prefer it whenever a detail here is
+  borderline or missing.
 sources:
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/ApplyDiataxis/
@@ -396,6 +397,13 @@ Migrating old content is not done until the **source** page is handled — strip
 deleting an extension page, deleting its leftover attachments, and triaging its backlinks. Those
 rules are in [[documentation-migration]]; they apply only to a migration, so they are not repeated
 here.
+
+## Deleting a page
+
+Whenever a page is **removed** — a superseded or duplicate page, an obsolete one, or a page you created
+earlier in the task and then decided against — **its backlinks are listed and handled first**, and
+relocating content is a **rename/move** rather than a delete-and-recreate. The rule and the procedure
+are in [[page-deletion]]; they are not doc-specific, so they are not repeated here.
 
 ## XWiki syntax traps that bite when authoring documentation
 

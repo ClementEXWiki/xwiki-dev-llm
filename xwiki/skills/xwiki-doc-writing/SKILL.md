@@ -1,6 +1,6 @@
 ---
 name: xwiki-doc-writing
-description: Write, update or review a page of XWiki documentation on xwiki.org, following the XWiki Documentation Guide (Diataxis type & audience, titles/page-names, page-structure fields, style, location, versioning). Use when authoring a NEW documentation page, updating an existing one, or reviewing a page for quality. New documentation lives under https://www.xwiki.org/xwiki/bin/view/documentation/. To CONVERT old documentation (the Documentation space or the Extensions wiki) into the new tree, use xwiki-doc-convert instead.
+description: Write, update or review a page of XWiki documentation on xwiki.org, following the XWiki Documentation Guide (Diataxis type & audience, titles/page-names, page-structure fields, style, location, versioning). Use when authoring a NEW documentation page, updating an existing one, or reviewing a page for quality. Also use before DELETING any page on xwiki.org — deletion requires fixing the page's backlinks first. New documentation lives under https://www.xwiki.org/xwiki/bin/view/documentation/. To CONVERT old documentation (the Documentation space or the Extensions wiki) into the new tree, use xwiki-doc-convert instead.
 ---
 
 # Writing, updating and reviewing XWiki documentation
@@ -64,6 +64,13 @@ developer creates/edits the page on the wiki and submits a Change Request.
 Keep the page a single Diataxis type. Re-check the title/page-name rules if the scope changed. Update
 for the latest version and prune version macros/content for versions no longer supported. Move any
 explanation that crept into How-to steps out to the FAQ field or a dedicated Explanation page.
+
+## Flow — delete a page
+
+**Never delete a page on xwiki.org before listing and handling its backlinks** — including a page you
+created yourself earlier in the task and then decided to remove. The breakage lands on *other* pages and
+nothing in the delete flow names them for you. Follow `okf/conventions/page-deletion.md`, which holds
+the procedure, what the deletion wizard does and does not repoint, and the triage.
 
 ## Review checklist
 
