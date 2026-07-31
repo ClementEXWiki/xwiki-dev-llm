@@ -208,6 +208,15 @@ abstract method is `iterator()`).
   in scope. Where an anonymous-class method parameter had its own scope and could shadow freely, the
   lambda is a compile error — rename the lambda parameter (for example a `BlockFilter` lambda inside
   `createLink(Block block, …)` needs its parameter renamed from `block`).
+- **The target method is overloaded on two functional interfaces with the same descriptor** — the
+  anonymous class names which one it implements, an implicitly-typed lambda cannot, and the call
+  becomes `reference to … is ambiguous`. The XWiki instance is
+  `AccessController.doPrivileged(new PrivilegedAction<T>() {…}, acc)` in the legacy
+  `URIClassLoader`: `doPrivileged(PrivilegedAction, AccessControlContext)` and
+  `doPrivileged(PrivilegedExceptionAction, AccessControlContext)` both match, so **every
+  `doPrivileged` site is a permanent drop** (a disambiguating cast would be worse code than the
+  anonymous class). Where the enclosing method is overloaded like this, either check the JDK
+  signature or settle it with a ten-line `javac` probe before editing.
 
 Remove the now-unused interface import only after a word-boundary check that the simple name is truly
 gone — it often survives as a method return type or field type. Delete any dangling `@Override` or
