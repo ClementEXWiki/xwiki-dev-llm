@@ -41,7 +41,9 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
   rules (incl. title case), how much belongs on one page (a How-to is one procedure with a one-paragraph
   intro; one fact, one page — plus how duplication is actually detected, by comparing pages rather than
   writing each carefully), page-structure xobject fields with the exact semantics of
-  Highlights / More / Related, style, attachment/image/video rules (kebab-case names, `{{image}}` +
+  Highlights / More / Related, style (incl. **never hard-wrapping prose** — one paragraph is one
+  unbroken line, on xwiki.org pages and forum.xwiki.org posts alike; 120 chars is a Java-source rule),
+  attachment/image/video rules (kebab-case names, `{{image}}` +
   `alt`, **`size` mandatory and `width` forbidden in the `documentation` space**, which fixes the width a
   screenshot must be captured at, **`webm` videos displayed with `{{embed}}`, never linked**, Gallery,
   PlantUML `bluegray`), location, version perspective and the `{{version}}` macro (incl. **documenting a

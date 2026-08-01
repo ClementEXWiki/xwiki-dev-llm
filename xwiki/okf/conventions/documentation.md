@@ -4,7 +4,8 @@ stability: durable
 summary: The rules for xwiki.org documentation — Diataxis page types & audiences, title/page-name
   rules, per-type content rules, how much belongs on one page (granularity & how duplication is
   actually detected), the page-structure xobject fields (Highlights/More/Related and their exact
-  semantics), documentation style, attachment/image/video rules (incl. webm + the `{{embed}}` macro),
+  semantics), documentation style (incl. never hard-wrapping prose — on xwiki.org pages and forum
+  posts alike), attachment/image/video rules (incl. webm + the `{{embed}}` macro),
   page location, version-perspective and `{{version}}` rules, the XWiki syntax traps that silently
   mis-render, and navigation-order pinning. Handling the *original* page after a migration is split
   out into [[documentation-migration]]; deleting any page (backlinks first) into [[page-deletion]]. The
@@ -259,6 +260,13 @@ Use the guide for the authoring rules, and that page for what each structure fie
 - **Macros** — use the **code macro with an explicit `language` parameter** for code snippets
   (omitting it is slower and mis-colors). Use the **display macro** to avoid duplicated content: put
   repeated text/steps/images on a single hidden page and display it where needed.
+- **Never hard-wrap prose** — write each paragraph (and each list item) as a **single unbroken line**,
+  however long. This holds for xwiki.org page content *and* for forum.xwiki.org (Discourse) posts:
+  both reflow prose themselves, so manual line breaks inside a paragraph gain nothing and actively
+  hurt — they are painful to re-wrap in the web editor and can leak into the rendered output. The
+  **120-character limit is a Java-source rule** ([[code-style]]), enforced by Checkstyle; applying it
+  to prose bound for a web editor is a category error. Only fenced/`{{code}}` blocks keep their own
+  line structure, since there the code's formatting rules apply.
 
 ## Attachments, images and videos
 
