@@ -2,12 +2,14 @@
 title: SonarQube simplification rules
 stability: durable
 summary: Correct fixes and XWiki-specific drop conditions for the behaviour-preserving simplification
-  rules — S1066, S1125, S1126, S1155, S1488, S1602, S1612, S1858, S2130, S2864, S3706, S6397, S7158.
+  rules — S1066, S1125, S1126, S1155, S1264, S1488, S1602, S1612, S1858, S2130, S2864, S3012, S3024,
+  S3706, S6397, S7158.
 ---
 
 # SonarQube simplification rules
 
-S1066 · S1125 · S1126 · S1155 · S1488 · S1602 · S1612 · S1858 · S2130 · S2864 · S3706 · S6397 · S7158
+S1066 · S1125 · S1126 · S1155 · S1264 · S1488 · S1602 · S1612 · S1858 · S2130 · S2864 ·
+S3012 · S3024 · S3706 · S6397 · S7158
 
 Behaviour-preserving rewrites that need no dataflow analysis — the best mechanical-fix fodder after
 the syntax family. Read [[index]] for the universal drop conditions first.
@@ -37,6 +39,28 @@ An operand that is a boxed `Boolean` auto-unboxes — still correct.
 ## S1488 — inline an immediately-returned local
 
 Delete the local and return the expression directly.
+
+## S1264 — a `for` with neither initializer nor update is a `while`
+
+`for (; cond; ) {` → `while (cond) {`. The loop variable stays where it is (it is mutated in the
+body, which is why the `for` had no update clause). Nothing else changes.
+
+## S3012 — replace a manual array/collection copy loop with a library call
+
+Message: "Use `Arrays.copyOf`, `Arrays.asList`, `Collections.addAll` or `System.arraycopy` instead."
+
+- Copying a whole array into a collection → `Collections.addAll(target, array)`.
+- Copying a *sub-range* of an array into a new list →
+  `new ArrayList<>(Arrays.asList(array).subList(from, to))`. Keep the `new ArrayList<>(…)` wrapper
+  whenever the result is later mutated or handed on as a mutable list — `subList` returns a view and
+  `Arrays.asList` a fixed-size list, so dropping the wrapper is a behaviour change, not a cleanup.
+- Check the import: `Arrays` / `Collections` are frequently *not* yet imported in the file.
+
+## S3024 — do not concatenate inside a `StringBuilder.append`
+
+`buf.append("a" + x + "b")` → `buf.append("a").append(x).append("b")`. Use a **char** literal for a
+single-character fragment (`append('%')`, `append(';')`) — that selects the `append(char)` overload
+and is what the rule is after.
 
 ## S1858 — pointless `toString()` on a `String`
 

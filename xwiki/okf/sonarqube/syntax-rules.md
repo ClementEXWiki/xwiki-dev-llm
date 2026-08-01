@@ -2,13 +2,13 @@
 title: SonarQube syntax and annotation rules
 stability: durable
 summary: Correct fixes and XWiki-specific drop conditions for the pure syntax/annotation rules —
-  S1116, S1124, S1128, S1161, S1197, S1611, S3878, S6208, S7476. Includes S3878's infinite-recursion
-  trap.
+  S1116, S1124, S1128, S1161, S1197, S1611, S2209, S3878, S6208, S7476. Includes S3878's
+  infinite-recursion trap and why S2209 is safe where the denylisted S3252 is not.
 ---
 
 # SonarQube syntax and annotation rules
 
-S1116 · S1124 · S1128 · S1161 · S1197 · S1611 · S3878 · S6208 · S7476
+S1116 · S1124 · S1128 · S1161 · S1197 · S1611 · S2209 · S3878 · S6208 · S7476
 
 The safest family: zero dataflow, and (except S3878) no way for a correct edit to change behaviour.
 Read [[index]] for the universal drop conditions first.
@@ -69,6 +69,18 @@ already `@Override`.
 
 Pairs with S1602 (see [[simplification-rules]]) — the *same* lambda is often flagged by both rules,
 so make one combined edit rather than two.
+
+## S2209 — a `static` member should be accessed statically
+
+Message: "Change this instance-reference to a static reference." A `static` field or method is being
+read through `this.` or through an instance variable. Fix: drop the `this.` (or the instance
+qualifier) and leave the bare name.
+
+**Do not confuse this with the denylisted `S3252`.** S3252 is about qualifying a static member with a
+*subclass* name and is usually backward-compat-bearing; S2209 changes nothing but the qualifier of a
+resolution the compiler already performed, so it is a pure syntax fix. The typical XWiki site is a
+subclass reading a `protected static final` constant of its parent as `this.CONSTANT` — the XWiki
+style's mandatory `this.` for *instance* fields does not apply to static ones.
 
 ## S1124 — modifier order
 

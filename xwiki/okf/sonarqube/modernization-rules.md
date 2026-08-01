@@ -104,6 +104,22 @@ blank line, deleting it leaves a stray blank right after the pattern `if {` — 
 same class, so the plain name is almost always available — prefer `logTreeNode` four times over
 inventing `theLogTreeNode` / `logTreeNodeValue`.
 
+### Three traps when SCRIPTING the cast replacement
+
+Each of these produces code that looks plausible in a summary table and is obvious in `git diff -U0`.
+
+- **`((T) x)` only owns its outer paren when a `.` follows it.** Replacing the bare string `((T) x)`
+  turns `compareTo((Element) obj)` into `compareToelement` — the outer `(` there belongs to the
+  *enclosing call*. Replace `((T) x).` → `name.` first, then the bare `(T) x` → `name`; never the
+  parenthesized form on its own.
+- **Brace-count the block from the `{`, not from the start of the line.** On the very common
+  `} else if (x instanceof T) {` the leading `}` cancels the opening brace, the scope collapses to a
+  single line, and every site in an else-if chain reports "no cast found in scope".
+- **A `\b` after the type name does not match an array type.** `String[]` is followed by `)`, and
+  `]` is already a non-word character, so `instanceof\s+([\w.]+(?:\[\])?)\b` silently backtracks
+  to capture `String` and then looks for a `(String) x` cast that does not exist. Use a negative
+  lookahead (`(?![\w\[])`) instead.
+
 ## S6204 / S6211 — `collect(Collectors.toList()/toSet())` → `.toList()` / `.toSet()`
 
 Mechanically trivial, but **`.toList()` returns an UNMODIFIABLE list** where `Collectors.toList()`
@@ -283,6 +299,16 @@ exact content is not asserted anywhere; there a subtle whitespace slip ships sil
   whitespace per line, so a fragment like `"| row | 12 | 13 | 14 \n"` cannot be reproduced. Table, CSV
   and chart-data test strings are usually a whole-file drop for this reason. An all-whitespace row
   breaches both this and the length rule.
+- **`\r\n` in the string.** A text block's line terminators are always `\n`; there is no way to
+  emit a `\r` from a content line. Any fixture asserting CRLF input is a permanent drop.
+- **No content line sits at the baseline indent.** Java strips the *minimum* indentation over all
+  content lines, so a "ladder" fixture whose shallowest line still carries one meaningful leading
+  space (`"            a\n" + "  a c\n" + " a c  d\n" + " e"`) loses that space. Reproducing it
+  needs `\s` escapes on the shallowest lines, which reads worse than the concatenation — drop.
+
+**A whole module's pool can be a single drop.** All 13 `xwiki-rendering-wikimodel` parser-test sites
+fail one of the three conditions above; before triaging such a pool site by site, check whether its
+fixtures share a shape (wiki tables with trailing spaces, CRLF input, indent ladders).
 - The string's exact content is not test-asserted **and** you cannot prove byte-identity by inspection.
 
 ## Related
