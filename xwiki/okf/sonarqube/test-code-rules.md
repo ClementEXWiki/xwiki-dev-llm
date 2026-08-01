@@ -1,14 +1,14 @@
 ---
 title: SonarQube test-code rules
 stability: durable
-summary: Correct fixes and XWiki-specific drop conditions for S5786, S5785, S3415 and S8924 —
-  including why S5785 must not be applied inside equals()/hashCode() contract tests and why S3415's
-  operand swap is usually unsafe.
+summary: Correct fixes and XWiki-specific drop conditions for S5786, S5785, S3415, S6068 and
+  S8924 — including why S5785 must not be applied inside equals()/hashCode() contract tests, why
+  S3415's operand swap is usually unsafe, and how far an S6068 eq() unwrap may reach.
 ---
 
 # SonarQube test-code rules
 
-S3415 · S5785 · S5786 · S8924
+S3415 · S5785 · S5786 · S6068 · S8924
 
 These touch only test code, so production behaviour is untouched and review risk is low. But the
 module's tests actually run during verification, so a wrong edit fails the build rather than shipping
@@ -146,6 +146,35 @@ Lines only get shorter, so the 120-column check never fires.
 
 Not yet established: whether S8924 also fires for non-Mockito statics such as
 `Assertions.assertEquals`. Read the messages before assuming.
+
+## S6068 — remove a useless Mockito `eq()` matcher
+
+Message: "Remove this useless `eq(...)` invocation; pass the values directly" (or "Remove this and
+every subsequent useless `eq(...)` invocation"). Fix: unwrap `eq(x)` back to `x`.
+
+**The safety argument is the whole rule.** Mockito forbids mixing raw values and matchers in one
+invocation, so `eq()` is only *required* when some other argument is a matcher. Sonar raises S6068
+only when **every** argument of the stubbed/verified call is an `eq()`, and in that case Mockito
+treats the raw values exactly as `eq()` did — the rewrite is behaviour-preserving. It follows that:
+
+- **Unwrap the whole statement, not just the flagged argument.** One issue key can cover several
+  `eq()` calls (the "and every subsequent" message variant), and a partially-unwrapped call is an
+  `InvalidUseOfMatchersException` at runtime, not a compile error. Locate the enclosing statement
+  (scan up until the previous line ends in `;`/`{`/`}`, down until the line ends in `;`) and unwrap
+  everything in it.
+- **Never touch a call Sonar did not flag.** A call mixing `eq()` with `any()`/`argThat()`/`isNull()`
+  genuinely needs its `eq()`s; those are not reported and removing one breaks the test.
+- `never()`, `times(n)` and `atLeastOnce()` inside `verify(mock, …)` are not arguments of the
+  verified call — they neither block nor need unwrapping.
+
+**Scripting it:** match `eq(` only when the preceding character is not `[\w.$]` (so `Matchers.eq(`
+and an identifier ending in `eq` are left alone), then find the matching `)` with a scanner that
+skips string and char literals. Drop `import static org.mockito.ArgumentMatchers.eq;` only when no
+`eq(` survives **outside the import lines** — files usually keep some mixed-matcher calls.
+
+Test sources only, so there is no coverage or API risk, and the module's own test suite is the
+complete verification. Lines only get shorter; where the shortened statement now fits, re-join its
+continuation line rather than leaving a one-token orphan.
 
 ## Related
 
