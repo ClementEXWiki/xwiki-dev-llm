@@ -37,6 +37,11 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
   script services, configurable HTML sanitizer.
 - **performance** — prefer streaming over buffering; never load an unbounded payload (attachment,
   body, upload, export, query result) fully into memory.
+- **logging** — a log argument is an **object**: it is captured in the `LogEvent`, XStream-serialized
+  into the job log and rendered later by type. So an explicit `toString()` is usually deliberate and
+  must not be "cleaned up" — with the decision table for when to pass the object (references,
+  extension ids, enums) and when to force the String (arbitrary sources, live resources, builders,
+  requests, a masked `toString()`, a `Class` from an extension jar), and the `java:S2629` exemptions.
 - **documentation** — xwiki.org documentation rules: Diataxis types & audiences, title/page-name
   rules (incl. title case), how much belongs on one page (a How-to is one procedure with a one-paragraph
   intro; one fact, one page — plus how duplication is actually detected, by comparing pages rather than
