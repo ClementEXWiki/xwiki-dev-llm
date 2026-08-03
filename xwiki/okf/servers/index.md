@@ -25,7 +25,7 @@ https://dev.xwiki.org/xwiki/bin/view/Community/DevelopmentPractices#HServers
 |--------|---------|-----------------------------------|
 | [github.com/xwiki](https://github.com/xwiki) | All `xwiki` and `xwiki-contrib` source repos. | `gh` CLI / git. PRs are the contribution unit (see the `xwiki-pull-request` skill). |
 | [jira.xwiki.org](https://jira.xwiki.org) | Issue tracker (NOT GitHub Issues). Per-repo keys: `XWIKI`, `XCOMMONS`, `XRENDERING`, plus a key per contrib extension. | No MCP. `jira-cli` (recommended) or REST API (`Authorization: Bearer $JIRA_API_TOKEN`); details + issue-field conventions in [[jira]], procedure in the `xwiki-jira` skill. Reference issues by key (`XWIKI-12345`). |
-| [ci.xwiki.org](https://ci.xwiki.org) | Jenkins CI — builds every repo on source change. | No MCP. WebFetch a job/build URL for status (volatile). |
+| [ci.xwiki.org](https://ci.xwiki.org) | Jenkins CI — builds every repo on source change. | No MCP, but a full **REST API** (anonymous read): append `/api/json?tree=…` to any job/build URL — do **not** scrape the UI. Status is volatile. Recipes + the Cloudflare User-Agent trap in [[jenkins]]. |
 | [ge.xwiki.org](https://ge.xwiki.org) | Develocity — stores CI build scans and provides build caching for CI and local builds. | No MCP. Build scans at `https://ge.xwiki.org/scans`. |
 | [sonar.xwiki.org](https://sonar.xwiki.org) → [sonarcloud.io (org `xwiki`)](https://sonarcloud.io/organizations/xwiki/projects/) | Code-quality analysis + quality gate (fails CI on gate failure). `sonar.xwiki.org` redirects to the SonarCloud `xwiki` organization, where analysis now runs. | **MCP: `sonarqube`** (this plugin) — needs `SONARQUBE_TOKEN` + per-repo `SONARQUBE_PROJECT_KEY`. See the `xwiki-fix-sonarqube-issue` skill. |
 | [nexus.xwiki.org](https://nexus.xwiki.org) | Maven artifacts: CI snapshots + official releases. Used by the Extension Manager. | No MCP. Snapshot/release jar names also resolvable under `~/.m2`. Good source to *verify* the current dev version. |
@@ -66,5 +66,6 @@ The procedure lives in the `xwiki-rest-api` skill; the durable gotchas are:
 
 - **Current dev version** → read the repo's root `pom.xml` `<version>`, or check SNAPSHOT jar names
   under `~/.m2` / nexus. Do not trust any cached number (see [[versioning]]).
-- **Build / quality status** → WebFetch the relevant ci.xwiki.org job or query the `sonarqube` MCP.
+- **Build / test status** → query the ci.xwiki.org REST API (`/api/json?tree=…`, see [[jenkins]]);
+  **quality status** → the `sonarqube` MCP.
 - **Current role holders (infra/perf managers), release plans** → fetch the dev wiki; these change.

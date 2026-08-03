@@ -141,6 +141,14 @@ Applied by `xwiki-fix-sonarqube-issue`, which owns the *procedure*.
   (Component, Affects Version = oldest affected/else last LTS, Fix Version); values are volatile;
   resolving/closing (Fixed vs. Cannot Reproduce for already-covered issues, assign to yourself); and
   wiki-markup gotchas (wrap literals in `{{…}}`, don't over-escape prose, never escape inside `{code}`).
+- **jenkins** — querying ci.xwiki.org through the Jenkins REST API (`/api/json?tree=…`, anonymous
+  read) instead of scraping the UI: the multibranch URL shape, the endpoints for builds / failing
+  tests / changesets / built SHA / artifacts / `consoleText`, and the **Cloudflare trap where a
+  spoofed browser User-Agent gets a 403 while plain `curl` gets 200**. Plus the traps in reading a
+  result: `FAILURE` (broke outside the tests) vs `UNSTABLE` (tests failed), why a test case's
+  `age`/`failedSince` is not a reliable first-failure, empty `changeSets`, and diagnosing a docker-test
+  failure from its archived screenshot — including a UI failure with no source change caused by
+  `parent-platform` moving `${platform.version}`.
 
 ### processes/
 - **release** — how XWiki versions/releases (Commons+Rendering+Platform together); detailed steps are
