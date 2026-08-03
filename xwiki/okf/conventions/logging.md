@@ -17,9 +17,12 @@ the XWiki-specific part that the generic SLF4J advice gets wrong.
 
 ## Why an argument is not just something to render
 
-- `AbstractJobStatus` pushes a log listener, so **every** `warn`/`error` executed on a job thread is
-  captured into that job's log, whatever class emitted it — a class needs to know nothing about jobs
-  to end up in one.
+- `AbstractJobStatus` pushes a `LoggerListener`, which forwards **any** `LogEvent` regardless of
+  level, so every log call *enabled at its level* on a job thread is captured into that job's log,
+  whatever class emitted it — a class needs to know nothing about jobs to end up in one. `warn` and
+  `error` are always enabled with the default configuration and so are **always** captured; a `debug`
+  call is captured too whenever debug is on, which is why an eager String under a `debug` guard still
+  has to follow the rules below.
 - The captured `LogEvent` keeps the raw `Object[]`; nothing is formatted at log time.
 - The job log is XStream-serialized to disk (`XStreamFileLoggerTail`) argument by argument in
   `SafeMessageConverter.marshal()`: an argument whose class `XStreamUtils.isSerializable()` accepts is
