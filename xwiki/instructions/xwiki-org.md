@@ -100,7 +100,11 @@ OKF map (topic files under `okf/`, described in `okf/index.md`):
 - `okf/servers/` — `index` (JIRA, CI, Nexus, SonarCloud, forum… and how to access/verify each, plus
   writing via REST: only `/rest` honors Basic auth, the `XWiki-Form-Token` CSRF header, the
   `extensions` subwiki id);
-  `jira` (jira.xwiki.org access via jira-cli/REST + issue-field conventions + resolving/closing conventions + wiki-markup gotchas — see the `xwiki-jira` skill).
+  `jira` (jira.xwiki.org access via jira-cli/REST + issue-field conventions + resolving/closing conventions + wiki-markup gotchas — see the `xwiki-jira` skill);
+  `jenkins` (query ci.xwiki.org via the Jenkins REST API `/api/json?tree=…` rather than scraping the
+  UI — endpoints for failing tests, changesets, built SHA and artifacts; the Cloudflare trap where a
+  spoofed browser User-Agent 403s and plain `curl` succeeds; `FAILURE` vs `UNSTABLE`; and why a test
+  case's `age` is not a reliable first-failure).
 - `okf/processes/` — `release`, `security-policy`.
 - `okf/decisions/` — ADRs (the *why* behind durable architectural choices).
 
