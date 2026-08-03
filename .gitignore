@@ -17,3 +17,10 @@ node_modules/
 # LLM
 .qodo
 CLAUDE.md
+
+# Local scratch / working notes
+.scratch/
+
+# Eval suite — untracked while the harness is being tried out. It carries its own package.json,
+# so the repo itself stays dependency-free in git.
+evals/
