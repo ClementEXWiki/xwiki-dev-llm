@@ -111,6 +111,8 @@ ln -s "$XWIKI_LLM_HOME/xwiki/opencode/plugins/xwiki-line-endings.js" ~/.config/o
   - `discourse` — forum.xwiki.org search/read (no auth).
   - `sonarqube` — SonarCloud code-quality analysis (Docker). Reads `SONARQUBE_TOKEN` and the
     repo-specific `SONARQUBE_PROJECT_KEY` from the environment; no secrets are committed.
+    `SONARQUBE_PROJECT_KEY` is optional (it defaults to empty), so repos that have no SonarCloud
+    project do not fail to load the server.
 - **OKF — knowledge base** (`xwiki/okf/`) — a curated, LLM-oriented corpus of XWiki *declarative*
   knowledge: conventions (`conventions/`), architecture (`architecture/`), the dev-server ecosystem
   (`servers/`), testing strategy (`testing/`), SonarQube rule-fix correctness (`sonarqube/` — split
@@ -150,7 +152,7 @@ ln -s "$XWIKI_LLM_HOME/xwiki/opencode/plugins/xwiki-line-endings.js" ~/.config/o
 |-------------------------|-----------|----------------------------------------------------|
 | `XWIKI_LLM_HOME`        | opencode  | Absolute path to your `xwiki-dev-llm` checkout. **opencode only** (Claude Code and Kimi Code resolve paths themselves). |
 | `SONARQUBE_TOKEN`       | sonarqube | Your personal SonarCloud token (same for all repos). |
-| `SONARQUBE_PROJECT_KEY` | sonarqube | The SonarCloud project key — **differs per repo**.   |
+| `SONARQUBE_PROJECT_KEY` | sonarqube | The SonarCloud project key — **differs per repo**. Optional: leave it unset in repos that have no SonarCloud project. |
 | `JIRA_API_TOKEN`        | `xwiki-jira` (jira-cli / REST) | Your jira.xwiki.org personal access token. Optional — only needed to act on JIRA issues. See "JIRA access" below. |
 | `JIRA_AUTH_TYPE`        | jira-cli  | Set to `bearer` (PAT auth) for the self-hosted XWiki JIRA.       |
 

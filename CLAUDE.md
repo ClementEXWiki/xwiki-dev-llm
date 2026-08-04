@@ -51,6 +51,8 @@ Inside `xwiki/`:
 - **`.mcp.json`** — MCP servers: `discourse` (forum.xwiki.org, no auth) and `sonarqube`
   (SonarCloud via Docker). The sonarqube server reads `SONARQUBE_TOKEN` and the per-repo
   `SONARQUBE_PROJECT_KEY` from the environment via `${VAR}` expansion — never hardcode these.
+  `SONARQUBE_PROJECT_KEY` uses the `${VAR:-}` default form on purpose: Claude Code refuses to load
+  a server whose `${VAR}` is unset, and many repos (including this one) have no SonarCloud project.
 - **`skills/*/SKILL.md`** — one skill per directory; the `name`/`description` frontmatter is what
   Claude matches against. Every skill's `name` (and its directory) is prefixed `xwiki-`. The skills
   cross-reference each other (e.g. `xwiki-convert-tests` vs `xwiki-convert-tests-docker`,
