@@ -25,6 +25,11 @@ content has moved). Read those for the rules; this skill covers only what is spe
 
 ## Conversion flow
 
+0. **Ask the developer the four setup questions from `xwiki-doc-writing` first** — Change Request vs
+   direct save, the xwiki.org write credentials, a **running local XWiki instance (which version?)** for
+   the screenshots, and its credentials (suggest `Admin`/`admin`). A conversion needs the local instance
+   even more than fresh authoring does: legacy screenshots are usually stale or absent, so most of the
+   images on the new pages have to be **re-captured**, not moved.
 1. **Check for existing Change Requests** on the target first, so two people don't refactor the same
    page in parallel.
 2. **Read the legacy page in source mode** so you capture its real syntax, links, macros and version
@@ -47,15 +52,25 @@ content has moved). Read those for the rules; this skill covers only what is spe
 7. **Update while converting** — remove obsolete information; update deprecated terminology, UI
    names, and configuration examples; convert version-specific notes to the `{{version}}` macro and
    drop notes for versions no longer supported. **Never silently lose still-valid information.**
-8. **Move the attachments too, by the new tree's rules** — images and videos are content. Re-upload
+8. **Move the attachments too — and add the visuals the legacy page never had.** A legacy page is rarely
+   illustrated to the new tree's standard, so carrying its images over is the floor, not the goal: the
+   converted User/Administrator pages want **screenshots** of the UI they describe (re-captured on the
+   local instance, since legacy ones show old skins), the Developer pages **code examples**, and an
+   Explanation you extracted about design/architecture a **PlantUML `bluegray` diagram** where the legacy
+   page described the structure in prose. Don't add a visual that clarifies nothing. Then, by the new
+   tree's rules — images and videos are content. Re-upload
    them under **kebab-case, lowercase-extension** names, insert images with `{{image}}` + `alt`, and
    **re-encode a video to `webm` and display it with `{{embed}}`**. When the legacy page *embedded* a
    video or an image, the new page **embeds it too**: turning an embed into an `attach:` link is a
    silent regression that no check catches. See `okf/conventions/documentation.md`.
-9. **De-duplicate across the pages you produced** — splitting one legacy page into several is exactly
-   what breeds duplication, because each new page wants to restate the context the legacy page stated
-   once. Do the cross-page comparison pass from `xwiki-doc-writing` before declaring the conversion
-   done, hub prose included.
+9. **De-duplicate and trim across the pages you produced** — splitting one legacy page into several is
+   exactly what breeds duplication, because each new page wants to restate the context the legacy page
+   stated once. Do the cross-page comparison **and trimming** pass from `xwiki-doc-writing` before
+   declaring the conversion done, hub prose included. Legacy pages are typically far more verbose than the
+   new tree allows, and copying their prose across imports that verbosity: keep only what the reader needs
+   in order to act. A **How-to/Tutorial** you extracted also gets its **result step** (legacy procedures
+   almost never have one), and the **hub page** you create over the split must **link every page it
+   introduces** rather than re-tell the legacy page's introduction.
 10. **Handle the original page** — after the content is moved, follow the guide's
     [Handle Original Documentation Pages](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/HandleOriginalDocumentationPages/)
     steps: strip the prose (leaving a link to the new location / adding the "Documentation" button),
@@ -100,6 +115,12 @@ After rewriting, verify against the legacy source — comparing legacy → new �
   cannot be done page by page.
 - **Attachments carried over faithfully** — every image/video is on the new page, under a conforming
   name, and **displayed the way the legacy page displayed it** (an embed stays an embed).
+- **Illustrated to the new standard** — the converted pages show as well as tell (screenshots for
+  User/Administrator, code examples for Developer, a diagram where an Explanation describes a structure),
+  whether or not the legacy page had any, and without adding visuals that clarify nothing; each
+  How-to/Tutorial ends on a **result step**; the hub page links every page below it.
+- **Not more verbose than it needs to be** — the rewrite cut the legacy prose rather than reflowing it;
+  no sentence survives that the reader does not need in order to act.
 - **Original page finished** — prose stripped, "Documentation" button set, **attachments deleted**,
   **backlinks triaged**. A conversion that stops at the new pages is not done.
 - **No page was deleted with live backlinks** — for every page the conversion removed (the original, a

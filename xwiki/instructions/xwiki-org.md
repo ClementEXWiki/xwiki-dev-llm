@@ -73,7 +73,10 @@ OKF map (topic files under `okf/`, described in `okf/index.md`):
 
 - `okf/conventions/` — `code-style`, `code-comments`, `commit-messages`, `versioning`,
   `backward-compatibility`, `security`, `performance`, `logging`, `documentation` (xwiki.org doc rules —
-  Diataxis, titles, page granularity + how cross-page duplication is detected, page structure incl.
+  Diataxis, titles, the **result step** closing a How-to/Tutorial, **show don't only tell** (screenshots
+  for User/Admin, code examples for Developer, diagrams for Explanations — without forcing it),
+  page granularity incl. **low verbosity** and
+  a hub page routing rather than narrating + how cross-page duplication is detected, page structure incl.
   Highlights/More/Related semantics, style incl. **never hard-wrapping prose** (one paragraph = one
   unbroken line, on xwiki.org pages and forum posts alike; 120 chars is a Java-source rule),
   attachments/images/videos (`{{image}}` needs a mandatory

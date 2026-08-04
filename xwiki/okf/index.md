@@ -43,8 +43,13 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
   extension ids, enums) and when to force the String (arbitrary sources, live resources, builders,
   requests, a masked `toString()`, a `Class` from an extension jar), and the `java:S2629` exemptions.
 - **documentation** — xwiki.org documentation rules: Diataxis types & audiences, title/page-name
-  rules (incl. title case), how much belongs on one page (a How-to is one procedure with a one-paragraph
-  intro; one fact, one page — plus how duplication is actually detected, by comparing pages rather than
+  rules (incl. title case), per-type content rules — including the **result step** that must close a
+  How-to/Tutorial and **show, don't only tell** (aim for screenshots on User/Administrator pages, code
+  examples on Developer ones, an architecture or concept diagram on an Explanation — plus when not to
+  force a visual), how much belongs on one page (a How-to is one procedure with a
+  one-paragraph intro; one fact, one page; **keep verbosity low** since readers skim, and a **hub page
+  routes rather than narrates** — it links every page it introduces — plus how duplication is actually
+  detected, by comparing pages rather than
   writing each carefully), page-structure xobject fields with the exact semantics of
   Highlights / More / Related, style (incl. **never hard-wrapping prose** — one paragraph is one
   unbroken line, on xwiki.org pages and forum.xwiki.org posts alike; 120 chars is a Java-source rule),

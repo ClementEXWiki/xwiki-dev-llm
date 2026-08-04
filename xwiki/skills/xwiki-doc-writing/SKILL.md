@@ -21,6 +21,28 @@ Well-structured **page content in XWiki syntax** plus, when reviewing, a list of
 Documentation pages are wiki pages, not files in a git repo: this skill does not commit files — the
 developer creates/edits the page on the wiki and submits a Change Request.
 
+## Before writing anything — ask the developer these four things
+
+Ask **before** starting the work, in one go, because each answer changes what you produce and two of
+them cannot be recovered later (a page saved directly cannot become a Change Request, and a screenshot
+cannot be taken without a running instance). Ask for authoring, updating **and** converting:
+
+1. **Change Request or direct save?** Whether the changes go into a **Change Request** on xwiki.org or
+   are saved **directly** on the page. Default to a Change Request for anything but a genuine minor fix
+   (see step "Save" below and `okf/conventions/documentation.md`), but let the developer decide.
+2. **xwiki.org write credentials** — which account to use, or where to find the credentials
+   (environment variable, password manager entry, `~/.netrc`…). Without this the whole task stops at the
+   save step, so it is not a question to leave for the end.
+3. **A running local XWiki instance for the screenshots** — ask the developer to start one and to state
+   **which version** it runs (the screenshots must show the latest skin, and the version belongs in the
+   image `caption`). Suggest the [Documentation Resources](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationResources/)
+   XARs to get realistic content in it. Pages need images (see `okf/conventions/documentation.md`), and
+   xwiki.org itself is **not** the place to capture them.
+4. **Local instance credentials** — suggest **`Admin`/`admin`** (the default), and confirm.
+
+If the developer declines the local instance, say plainly which images the page will be missing rather
+than shipping a page with none.
+
 ## Flow — create a new page
 
 1. **Check it doesn't already exist** elsewhere in `/documentation` (avoid duplication).
@@ -37,23 +59,40 @@ developer creates/edits the page on the wiki and submits a Change Request.
    **Leave Highlights empty unless the page has many children**: it is a two-level list of the most
    important *child* pages, not a "key points" summary, and the automatic "More" table already lists
    every child — see `okf/conventions/documentation.md`.
-6. **Apply the style rules** — `"quotes"` for UI elements, uppercase-first XWiki terminology,
+6. **End a How-to / Tutorial with a result step** — the last numbered item shows the reader *what they
+   should now see*: a short "The macro is inserted in the page, as follows:" plus a **screenshot** (or,
+   on a Developer page, the produced output). A procedure that stops at the last action leaves the
+   reader unable to tell whether it worked.
+7. **Apply the style rules** — `"quotes"` for UI elements, uppercase-first XWiki terminology,
    `##literals##`, link-reference syntax (never hardcoded URLs), `{{scm}}` for GitHub files, the
    code macro with an explicit `language`, the display macro to avoid duplication.
-7. **Handle attachments by the rules** — kebab-case name with a lowercase extension, images via the
-   `{{image}}` macro with an `alt`, **videos in `webm` displayed with the `{{embed}}` macro and never
-   as a link**, Gallery for several images, PlantUML (`bluegray`) for diagrams. See
-   `okf/conventions/documentation.md`.
-8. **Respect version perspective** — write for the latest version; use `{{version}}` (with `before`
-   for changed behavior) only for genuine new/changed behavior.
-9. **Run the de-duplication pass before saving** — this is a separate step because every page reads
-   fine on its own and the duplication is only visible across pages. Lay the page's intro next to its
-   own FAQ, then next to its parent/hub and sibling pages, and hunt for **the same fact stated twice
-   in different words**. Each hit: pick one home, and reduce the others to a clause with a link or
-   delete them. A How-to whose numbered list is wrapped in explanatory paragraphs fails this step.
-10. Use the [Documentation Resources](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationResources/)
-    XARs to set up a realistic environment for screenshots/examples.
-11. **Save.** A new or substantially rewritten page is a **major** change: save it via a **Change
+8. **Give the page something to look at, wherever it earns its place** — **screenshots** on
+   User/Administrator pages (every UI element or screen the reader must find), **code examples** on
+   Developer pages, and on an Explanation about design/architecture a **PlantUML `bluegray` diagram**
+   (components and flows for developers; a lifecycle, workflow or decision diagram for users — be
+   creative about what clarifies the concept). An image replaces a paragraph of "click the menu at the top
+   right", a snippet replaces a paragraph of API prose. **Don't force it**: a short Explanation or a small
+   Reference table can be complete with no visual, and a decorative one costs the reader attention and a
+   maintainer an update. Capture screenshots on the local instance agreed above, using the
+   [Documentation Resources](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationResources/)
+   XARs for realistic content.
+9. **Handle attachments by the rules** — kebab-case name with a lowercase extension, images via the
+   `{{image}}` macro with an `alt` and the mandatory `size`, captured at exactly that size's pixel width
+   with a red (`255, 0, 0`) box around the element concerned, **videos in `webm` displayed with the
+   `{{embed}}` macro and never as a link**, Gallery for several images, PlantUML (`bluegray`) for
+   diagrams. See `okf/conventions/documentation.md`.
+10. **Respect version perspective** — write for the latest version; use `{{version}}` (with `before`
+    for changed behavior) only for genuine new/changed behavior.
+11. **Run the de-duplication *and trimming* pass before saving** — this is a separate step because every
+    page reads fine on its own and both defects are invisible while writing. Lay the page's intro next
+    to its own FAQ, then next to its parent/hub and sibling pages, and hunt for **the same fact stated
+    twice in different words**. Each hit: pick one home, and reduce the others to a clause with a link or
+    delete them. Then **cut verbosity**: take each sentence and ask *does the reader lose something they
+    need in order to act if I delete it?* — if not, delete it rather than compress it. Readers skim, so
+    length itself hides content. A How-to whose numbered list is wrapped in explanatory paragraphs, and
+    a hub page that narrates the feature instead of **linking every page it introduces**, both fail this
+    step.
+12. **Save.** A new or substantially rewritten page is a **major** change: save it via a **Change
     Request**, adding to an existing open one on that page if there is one. A pure typo, broken-link
     or small-rephrasing fix is a **minor** change: save it **directly**, ticked "minor", with a short
     summary — do **not** open a Change Request for it. See `okf/conventions/documentation.md`.
@@ -63,7 +102,10 @@ developer creates/edits the page on the wiki and submits a Change Request.
 
 Keep the page a single Diataxis type. Re-check the title/page-name rules if the scope changed. Update
 for the latest version and prune version macros/content for versions no longer supported. Move any
-explanation that crept into How-to steps out to the FAQ field or a dedicated Explanation page.
+explanation that crept into How-to steps out to the FAQ field or a dedicated Explanation page. An update
+is also the moment to fix what the page is **missing**: add the **result step** if the procedure has
+none, add the **screenshots / code examples / diagram** the prose is doing badly, cut the prose the reader
+does not need, and add the links a hub page owes the pages below it.
 
 ## Flow — delete a page
 
@@ -82,6 +124,16 @@ to; confirm against the live guide when borderline):
 - [ ] **Page name** — kebab-case, no stop words, follows the title, no parent/child path repetition.
 - [ ] **Steps** — in How-to/Tutorial each step starts with a verb and is in a numbered list, no
       inline explanations.
+- [ ] **Result step** — a How-to/Tutorial's **last step shows the result** (what the reader should now
+      see), normally with a screenshot; the list does not stop at the final action.
+- [ ] **Shows, not only tells** — User/Administrator pages have **screenshots** of the UI they describe;
+      Developer pages have **code examples**; an Explanation about design/architecture has a diagram where
+      there is a structure to show. Flag a *missing* visual only where it would replace or clarify prose —
+      and flag a **gratuitous** one too.
+- [ ] **Verbosity** — no sentence survives that the reader does not need in order to act; no paragraph
+      restates the next section, motivates the feature at length, or describes what a screenshot shows.
+- [ ] **Hub pages link** — a landing/hub page **names and links every page it introduces** (in the prose
+      or Highlights) instead of narrating the feature and leaving the "More" table to do the routing.
 - [ ] **Intro** — a How-to's intro is **one short paragraph**; no second or trailing paragraph
       explaining the steps.
 - [ ] **No duplication** — no fact is stated on two pages (or in both a page's intro and its own FAQ),

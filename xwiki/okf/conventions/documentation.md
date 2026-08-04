@@ -2,8 +2,11 @@
 title: XWiki documentation conventions (Documentation Guide)
 stability: durable
 summary: The rules for xwiki.org documentation — Diataxis page types & audiences, title/page-name
-  rules, per-type content rules, how much belongs on one page (granularity & how duplication is
-  actually detected), the page-structure xobject fields (Highlights/More/Related and their exact
+  rules, per-type content rules (incl. the mandatory result step closing a How-to/Tutorial), showing
+  rather than only telling — screenshots for User/Admin pages, code examples for Developer ones,
+  architecture/concept diagrams for Explanations, and when *not* to force a visual, how much belongs on
+  one page (granularity, keeping verbosity low, a hub page routing rather than narrating & how
+  duplication is actually detected), the page-structure xobject fields (Highlights/More/Related and their exact
   semantics), documentation style (incl. never hard-wrapping prose — on xwiki.org pages and forum
   posts alike), attachment/image/video rules (incl. webm + the `{{embed}}` macro),
   page location, version-perspective and `{{version}}` rules, the XWiki syntax traps that silently
@@ -112,8 +115,42 @@ result, a bookmark or a link, none of which carry the surrounding context. Same 
 - **How-to / Tutorial** — every step **starts with a verb** and is an item of a **numbered list**.
   Do **not** add extra explanations inside the steps; reader questions and clarifications go in the
   **FAQ** field instead. Tutorials may include short concrete examples.
+- **The last step of a How-to / Tutorial shows the result.** A procedure that ends on the last action
+  leaves the reader unable to tell whether it worked. Close with a step that *shows what they should now
+  see* — "The macro is inserted in the page, as follows:" plus a **screenshot** (or, for a Developer
+  page, the produced output). This is a step of the numbered list, not a trailing paragraph, so it does
+  not violate the one-short-intro / no-explanations-in-steps rules. A How-to whose numbered list stops
+  at "Click Save" is incomplete, and nothing in the automatic checks says so.
 - **Reference** — prefer **tables**, keep information concise; use **code examples** for API references.
 - **Explanation** — explain concepts, limitations, consequences, and background.
+
+### Show, don't only tell — images, code and diagrams
+
+Prose alone is the weakest form of documentation: an image is worth a thousand words, and so is a code
+example. **Aim for every page to show something**, and reach for a visual or a snippet wherever one would
+replace a paragraph:
+
+- **User and Administrator pages: screenshots.** Every UI element or screen the reader has to find is
+  worth a **screenshot** — it beats a paragraph of "click the three-dot menu at the top right of the
+  second panel". A whole page of steps through a UI with **not one screenshot** is the typical miss.
+- **Developer pages: code examples.** A runnable snippet (script macro, Java API call, REST request,
+  configuration file) shows in five lines what a paragraph struggles to say. Use the code macro with an
+  explicit `language`.
+- **Explanation pages: a diagram, when there is a structure to show.** An Explanation has no UI steps to
+  screenshot, but one that discusses **design or architecture** is often carried by an **architecture
+  diagram** — components and what flows between them — especially for a Developer audience. For a User
+  audience, prefer a diagram that reads without technical vocabulary: a lifecycle, a state or workflow
+  diagram, a decision tree between alternatives, a before/after. Be creative about what actually
+  clarifies the concept. Diagrams use the **PlantUML macro with the `bluegray` theme** (see below), so
+  the source stays editable in the page.
+- **Do not force it.** This is a strong default, not a checkbox: a short Explanation of a single concept,
+  a small Reference table, a FAQ-shaped page can be perfectly complete with no visual at all. A
+  decorative screenshot, a diagram of something that is not a structure, or a snippet added to satisfy
+  the rule each cost the reader attention and cost a maintainer an update. The test is **does it replace
+  or clarify something the prose does badly?** — if not, leave it out.
+- Screenshots have hard mechanical rules (mandatory `size`, capture width, red box, PNG, `{{image}}`
+  + `alt`) — see "Attachments, images and videos" below. Those rules govern *how*; this section is the
+  *whether*.
 
 ### Troubleshooting pages
 
@@ -150,6 +187,20 @@ use, even though level 2 is the norm for ordinary section headings elsewhere —
   with a link, a **reader question** becomes a **FAQ** entry, the ***why*** goes to the Explanation.
   Explanatory paragraphs wrapped around the numbered list are the most common way a How-to drifts —
   the steps *are* the page.
+- **Keep verbosity low — readers skim, they do not read.** Length is itself a defect: a wall of text is
+  skipped, so a fact buried in the fourth paragraph is a fact the reader never gets. The test for each
+  sentence is **"does the reader lose something they need in order to act if I delete it?"** — if not,
+  delete it, and do not "compress" it into a subordinate clause. Restating what the next section
+  already says, motivating the feature at length, and describing what the reader can see on screen are
+  the three that inflate a page most. Prefer a **screenshot or a code example** over a paragraph
+  wherever one will do (see "Every page shows something" above), a **table** over prose in a Reference,
+  and a **link** over a summary.
+- **A hub page's job is to route, not to narrate.** An extension/topic landing page that explains the
+  feature in several paragraphs but never links to its own How-to, Reference and Explanation pages has
+  failed at the one thing it exists for. Every page it introduces is **named and linked** (in the prose,
+  in **Highlights**, or both); the prose around those links stays a short orienting sentence each.
+  Observed failure mode: an extension hub whose intro read as a mini-manual, with the pages documenting
+  each of its features reachable only through the automatic "More" table.
 - **Duplication is found by comparing pages, not by writing each one carefully.** Every page reads
   fine on its own; that is exactly why the duplication survives. Before finishing a tree, put the
   intros, the FAQ entries and the hub prose **side by side** and look for *the same fact stated
