@@ -31,6 +31,7 @@ sources:
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/SaveChanges/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/WorkingAttachments/
   - https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/create-documentation-page/page-structure/
+  - https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/documentation-xwiki-org/page-structure-xwikiorg/
   - https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/version-macro/
   - https://www.xwiki.org/xwiki/bin/view/Macros/SCM
   - https://diataxis.fr/
@@ -273,10 +274,19 @@ The fields:
     "does every reference still resolve?" but **"is every field still allowed to hold what it holds?"**
 - **Technical ID** — **every documentation page must be associated with an Extension**, and located
   accordingly (see "Choose the right location" above); the Technical ID is that extension's id (or its
-  NPM package), copied from the Extensions-wiki `ExtensionCode` xobject. The format is
-  **`<groupId>:<artifactId>`** (e.g. `org.xwiki.platform:xwiki-platform-icon-api`). Empty when no
-  extension applies (e.g. installation pages). Per
-  [Apply Diataxis](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/ApplyDiataxis/).
+  NPM package), copied from the Extensions-wiki `ExtensionCode` xobject. The value is
+  **prefixed by how the feature is distributed** — the bare `<groupId>:<artifactId>` is *not* the
+  format:
+  - an XWiki Extension → **`xwiki:<extension id>`**, e.g. `xwiki:org.xwiki.platform:xwiki-platform-icon-macro`
+  - an NPM package → **`npm:<package id>`**, e.g. `npm:@xwiki/platform-dsapi` (Documentation 1.7+)
+
+  The prefix is what makes the badge at the bottom of the page resolve to the Extensions wiki, so an
+  unprefixed id renders no badge. Empty when no extension applies (e.g. installation pages).
+  **Older pages carrying an unprefixed id are the non-conformant ones** — do not "fix" a prefixed id
+  to match them. The generic
+  [Apply Diataxis](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/ApplyDiataxis/) page does
+  not state this xwiki.org-specific prefix; the authority is
+  [Page Structure on xwiki.org](https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/documentation-xwiki-org/page-structure-xwikiorg/).
 
 The **Documentation application's own reference** for these fields is
 [Documentation Page Structure](https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/create-documentation-page/page-structure/)
