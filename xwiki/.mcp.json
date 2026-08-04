@@ -21,7 +21,7 @@
         "SONARQUBE_URL": "https://sonarcloud.io",
         "SONARQUBE_TOKEN": "${SONARQUBE_TOKEN}",
         "SONARQUBE_ORG": "xwiki",
-        "SONARQUBE_PROJECT_KEY": "${SONARQUBE_PROJECT_KEY}",
+        "SONARQUBE_PROJECT_KEY": "${SONARQUBE_PROJECT_KEY:-}",
         "SONARQUBE_TOOLSETS": "cag,projects,analysis,issues",
         "SONARQUBE_ADVANCED_ANALYSIS_ENABLED": "true"
       }
