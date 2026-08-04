@@ -55,7 +55,7 @@ than shipping a page with none.
 4. **Write the title and page name** per the type's rules (verb-led for How-to/Tutorial; noun phrase
    for Reference/Explanation; kebab-case page name, stop words removed, no parent/child repetition).
 5. **Fill the page-structure fields** — Content (per type), FAQ (questions with 1–2 sentence
-   answers), Related links (**non-child** pages only), Technical ID (the extension id, or empty).
+   answers), Related links (**non-child** pages only), Technical ID (`xwiki:<extension id>`, or empty).
    **Leave Highlights empty unless the page has many children**: it is a two-level list of the most
    important *child* pages, not a "key points" summary, and the automatic "More" table already lists
    every child — see `okf/conventions/documentation.md`.
@@ -163,8 +163,8 @@ to; confirm against the live guide when borderline):
 - [ ] **Images in list items** — wrapped in `(((…)))` so the list is not split.
 - [ ] **Screenshot standards** — latest skin, captured while using the feature, captured at the exact
       `size` width, PNG, red (`255, 0, 0`) box around the UI element concerned.
-- [ ] **Technical ID** — `<groupId>:<artifactId>` (or the npm package), empty only when no extension
-      applies.
+- [ ] **Technical ID** — prefixed: `xwiki:<extension id>` (or `npm:<package id>`), empty only when no
+      extension applies. An unprefixed id is the defect; do not "fix" a prefixed one.
 
 Report findings as a list of concrete, actionable items. Do **not** flag a pure style preference:
 every finding must be justified by a rule violation (type/title/page-name/structure/style/link/
