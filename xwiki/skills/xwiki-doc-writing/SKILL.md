@@ -25,20 +25,32 @@ developer creates/edits the page on the wiki and submits a Change Request.
 
 Ask **before** starting the work, in one go, because each answer changes what you produce and two of
 them cannot be recovered later (a page saved directly cannot become a Change Request, and a screenshot
-cannot be taken without a running instance). Ask for authoring, updating **and** converting:
+cannot be taken without a running instance). Ask for authoring, updating **and** converting.
 
-1. **Change Request or direct save?** Whether the changes go into a **Change Request** on xwiki.org or
-   are saved **directly** on the page. Default to a Change Request for anything but a genuine minor fix
-   (see step "Save" below and `okf/conventions/documentation.md`), but let the developer decide.
-2. **xwiki.org write credentials** — which account to use, or where to find the credentials
-   (environment variable, password manager entry, `~/.netrc`…). Without this the whole task stops at the
-   save step, so it is not a question to leave for the end.
-3. **A running local XWiki instance for the screenshots** — ask the developer to start one and to state
-   **which version** it runs (the screenshots must show the latest skin, and the version belongs in the
-   image `caption`). Suggest the [Documentation Resources](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationResources/)
-   XARs to get realistic content in it. Pages need images (see `okf/conventions/documentation.md`), and
-   xwiki.org itself is **not** the place to capture them.
-4. **Local instance credentials** — suggest **`Admin`/`admin`** (the default), and confirm.
+**First look for `~/.xwiki-credentials`** — when that file exists it answers question 2, so drop that
+question. Its format, and how to use it without pulling the password into the conversation, are in
+`okf/servers/index.md`.
+
+Ask the remaining questions in a **single `AskUserQuestion` call** so the developer clicks options
+instead of typing answers back (fall back to a numbered list in a message only on a host without that
+tool). Question headers and options:
+
+1. **`Save mode`** — Change Request or direct save? **Change Request (Recommended)** for anything but
+   a genuine minor fix, **Save directly** for a typo / broken link / small rephrasing (see step "Save"
+   below and `okf/conventions/documentation.md`) — but let the developer decide.
+2. **`Credentials`** — which xwiki.org account to write with, and where to find its credentials?
+   **Create `~/.xwiki-credentials` (Recommended)** (you re-read the file afterwards), **They are
+   elsewhere** (environment variable, password manager entry, `~/.netrc`…), **Don't save** (you
+   produce the content and the developer pastes it). Without this the whole task stops at the save
+   step, so it is not a question to leave for the end.
+3. **`Screenshots`** — is a local XWiki instance running for the screenshots? **Yes**, **I will start
+   one**, **No — skip the screenshots**. Suggest the [Documentation Resources](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationResources/)
+   XARs to get realistic content in it. Pages need images (see `okf/conventions/documentation.md`),
+   and xwiki.org itself is **not** the place to capture them. Don't *ask* which **version** it runs —
+   read it from the `xwiki-version` header of any `/rest` response (the screenshots must show the
+   latest skin, and the version belongs in the image `caption`).
+4. **`Local login`** — credentials for the local instance: **`Admin`/`admin` (Recommended)**, the
+   default, or **Other**. These are never the xwiki.org credentials.
 
 If the developer declines the local instance, say plainly which images the page will be missing rather
 than shipping a page with none.

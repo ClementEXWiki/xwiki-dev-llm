@@ -61,6 +61,12 @@ The procedure lives in the `xwiki-rest-api` skill; the durable gotchas are:
   restart). An XML page `PUT` is exempt; form-encoded object `POST`/property writes are not.
 - **Wiki ids differ:** www.xwiki.org's main wiki is `xwiki` (`/rest/wikis/xwiki/…`);
   **extensions.xwiki.org is a subwiki named `extensions`** (`/rest/wikis/extensions/…`), not `xwiki`.
+- **Credentials convention: `~/.xwiki-credentials`** — the developer's xwiki.org write credentials, two
+  lines, no quotes and no `export`: `XWIKI_USER=…` / `XWIKI_PASSWORD=…`. Look for that file before
+  asking for credentials, and don't read its contents into the conversation — source it inside each
+  command that needs it (shell state does not persist between commands), so the password never enters
+  the context or the transcript: `set -a; . ~/.xwiki-credentials; set +a` then
+  `curl -u "$XWIKI_USER:$XWIKI_PASSWORD" …`.
 
 ## Verifying volatile facts
 
