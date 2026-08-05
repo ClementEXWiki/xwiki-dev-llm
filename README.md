@@ -216,6 +216,17 @@ export JIRA_API_TOKEN="<your-jira-personal-access-token>"
 The token is read from the environment and never committed. Issue-field conventions (Component,
 Affects/Fix Version) are documented once in `xwiki/okf/servers/jira.md`.
 
+## xwiki.org credentials (for the documentation skills)
+
+**Optional.** The documentation skills write to xwiki.org over REST; put your xwiki.org credentials in
+**`~/.xwiki-credentials`** (`chmod 600`) and they are found instead of asked for. Two lines, no quotes
+and no `export` — the file is sourced:
+
+```
+XWIKI_USER=MyUserName
+XWIKI_PASSWORD=<your-xwiki.org-password>
+```
+
 ## Validate
 
 ```

@@ -25,11 +25,10 @@ content has moved). Read those for the rules; this skill covers only what is spe
 
 ## Conversion flow
 
-0. **Ask the developer the four setup questions from `xwiki-doc-writing` first** — Change Request vs
-   direct save, the xwiki.org write credentials, a **running local XWiki instance (which version?)** for
-   the screenshots, and its credentials (suggest `Admin`/`admin`). A conversion needs the local instance
-   even more than fresh authoring does: legacy screenshots are usually stale or absent, so most of the
-   images on the new pages have to be **re-captured**, not moved.
+0. **Ask the developer the four setup questions from `xwiki-doc-writing` first** (that skill's "Before
+   writing anything" section owns the credentials-file lookup and the exact questions). A conversion
+   needs the local instance even more than fresh authoring does: legacy screenshots are usually stale
+   or absent, so most of the images on the new pages have to be **re-captured**, not moved.
 1. **Check for existing Change Requests** on the target first, so two people don't refactor the same
    page in parallel.
 2. **Read the legacy page in source mode** so you capture its real syntax, links, macros and version
