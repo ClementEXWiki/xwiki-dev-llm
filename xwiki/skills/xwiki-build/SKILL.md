@@ -45,6 +45,44 @@ here unless you explicitly want to bypass those checks. It does **not**, however
 test-coverage check — add `-Pquality` for that (see Notes); do so whenever the change touches
 production code.
 
+## Validate **every** module the change touched
+
+A change that spans many modules (a cross-cutting sweep, a refactoring) is only verified for the
+modules you actually ran the checks on. Build them all in one reactor rather than picking a
+representative few:
+
+```bash
+mvn clean install -B -ntp -Plegacy,quality -fae -pl <comma-separated module paths>
+```
+
+`-fae` (fail-at-end) keeps going so one broken module doesn't hide the state of the rest. Derive the
+list mechanically from the diff (`git show --name-only`, then walk up to the nearest `pom.xml`) —
+not from memory of what you edited.
+
+Two ways `-pl` rejects a path with *"Could not find the selected project in the reactor"* even when
+the path is correct: the module is only activated by a profile (`*-test-docker` modules need
+`-Pdocker,integration-tests`), or it is not in the root reactor at all (`xwiki-platform-distribution/**`
+builds from its own `pom.xml`). Add the profiles, or build that module from its own tree.
+
+## Checkstyle alone — `mvn checkstyle:check` is NOT the check CI runs
+
+A single-module `install`/`verify` runs the real Checkstyle. When you want Checkstyle feedback on its
+own — it needs no compilation, so it is seconds per module instead of minutes — you must name the
+**execution**, not the bare goal:
+
+```bash
+mvn -B -ntp checkstyle:check@default checkstyle:check@test -pl <module-path>
+```
+
+> **`mvn checkstyle:check` (no `@…`) silently checks almost nothing.** A goal invoked from the
+> command line takes the *plugin-level* `<configuration>`, and in the XWiki parent POM that sets
+> `configLocation=checkstyle-blocker.xml` — a handful of blocker rules. The real rulesets live in the
+> plugin's **executions**: `default` → `checkstyle.xml` over `src/main/java` (the one CI reports as
+> "N errors reported by Checkstyle X with checkstyle.xml ruleset"), `test` → `checkstyle-test.xml`
+> over `src/test/java`, `blocker` → `checkstyle-blocker.xml`. So a bare `checkstyle:check` prints
+> `You have 0 Checkstyle violations` / `BUILD SUCCESS` on code that fails CI: a green run of it is
+> evidence of nothing, and reporting it as "Checkstyle passes" is wrong.
+
 ## Also rebuild any legacy module that weaves the changed module
 
 Some modules are wrapped by a `-legacy` module that re-adds deprecated/removed APIs by weaving the
