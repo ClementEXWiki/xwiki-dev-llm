@@ -177,6 +177,37 @@ null), not a defect to chase.
 issue, so per file the change in open-brace count must equal the change in close-brace count must
 equal that file's issue count. Any mismatch means a stray or missing brace — inspect before building.
 
+## S6353 — use the concise character class
+
+`[0-9]` → `\\d` (likewise `[a-zA-Z0-9_]` → `\\w`, `[ \\t\\n…]` → `\\s`) inside a regex literal.
+The sibling of S6397 and just as safe: the two forms are identical in Java's regex engine **unless
+`UNICODE_CHARACTER_CLASS` is set**, which XWiki never does — verify with a grep for
+`UNICODE_CHARACTER_CLASS` / `(?U)` before a large batch and then stop worrying about it.
+
+Remember the source text carries a doubled backslash: the file contains `"\\d"`. Several issues on
+one line are normal (a pattern with two `[0-9]` groups gives two keys) — combine them into one edit.
+
+## S1905 — remove an unnecessary cast
+
+Usually a genuine no-op: a cast to the declared type of the expression, or `(String)` on an
+`Iterator<String>.next()`.
+
+**Drop when the cast is an argument of an OVERLOADED method.** Removing it can silently re-dispatch
+to a different overload and still compile, so the build will not catch the mistake. Read the callee's
+overload set first; a cast such as `write(x, filter, (Map<String, Object>) properties)` where `write`
+has several 3-argument forms is not a mechanical fix.
+
+## S4201 — remove a null check made redundant by `instanceof`
+
+`x != null && x instanceof T` → `x instanceof T`; `x == null || !(x instanceof T)` →
+`!(x instanceof T)`. `instanceof` is `false` for `null` by definition, so this is exact. Nearly every
+site is the head of an `equals()` or a `remove(Object)`, and the observed drop rate is zero.
+
+## S1596 — `Collections.EMPTY_LIST` → `Collections.emptyList()`
+
+Also `EMPTY_MAP`/`EMPTY_SET`. The typed factory infers its type argument from the target, so a call
+site that passed the raw constant keeps compiling; it just stops being a raw type.
+
 ## Related
 
 - [[index]] — rule map, denylist, universal drop conditions.

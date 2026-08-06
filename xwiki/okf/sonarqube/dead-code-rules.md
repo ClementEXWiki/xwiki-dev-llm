@@ -129,6 +129,21 @@ preserved. A write-only field or variable assigned in exactly one place **is** f
 declaration and that assignment. An `@Override` setter's now-unused parameter is not re-flagged
 (S1172 skips overrides).
 
+## S1130 — remove a `throws` for an exception that cannot be thrown
+
+**The `/src/test/` vs `/src/main/` split decides this rule, and it decides it completely.**
+
+- **Test sources: fix, and expect a 0% drop rate.** A JUnit method declaring `throws Exception` (or
+  `IOException`, `ComponentLookupException`) whose body cannot throw it is pure noise — nothing calls
+  the method, so nothing can be broken. The compiler is the whole verification: had the exception
+  actually been throwable, the build would not compile.
+- **`src/main`: permanent drop.** Narrowing a `throws` on a published method breaks every caller that
+  catches it, and on an overridable method it also breaks subclasses that declare the wider clause.
+
+Two follow-ons: removing the exception usually orphans its import (drop it in the same edit), and a
+Javadoc `@throws` tag for the removed exception must go with it. When a signature loses two flagged
+exceptions it often fits back on one line — re-join it.
+
 ## Related
 
 - [[index]] — rule map, denylist, universal drop conditions.
