@@ -176,6 +176,23 @@ Test sources only, so there is no coverage or API risk, and the module's own tes
 complete verification. Lines only get shorter; where the shortened statement now fits, re-join its
 continuation line rather than leaving a one-token orphan.
 
+## S2133 — an object instantiated only to get its class
+
+Message: "Remove this object instantiation and use `X.class` instead." The XWiki shape is a test that
+builds an event purely to feed `any(event.getClass())` to a Mockito verification:
+
+```java
+final Event event = new CommentAddedEvent("wiki:space.page", "0");
+…
+verify(this.observationManager)
+    .notify(any(event.getClass()), same(this.document), same(this.oldcore.getXWikiContext()));
+```
+
+Fix: delete the local and pass the class literal — `any(CommentAddedEvent.class)`. `getClass()` on a
+`new X(...)` is exactly `X.class`, so this is behaviour-identical. The declaration usually was the
+only use of an interface-typed import (`org.xwiki.observation.event.Event`); remove it too, or you
+trade the issue for an `S1128`.
+
 ## Related
 
 - [[index]] — rule map, denylist, universal drop conditions.

@@ -139,6 +139,17 @@ Gotcha: a standalone separator (blank line / banner / blank line, common in test
 consecutive blank lines once the banner is deleted. Collapse the pair, and check the diff for an
 introduced triple newline.
 
+## S1659 — declare each local variable on its own line
+
+`String a = "", b = "", c = "";` → one `String x = …;` statement per variable, at the same indent.
+Sonar names the **second** declaration ("Declare `b` and all following declarations on a separate
+line"), so one issue can cover several variables — count resolved issues by key.
+
+The dense sites are the declaration preamble of long legacy methods (`XWiki.java`,
+`DBListClass`, `StaticListClass`), where the list is often already wrapped onto a continuation line;
+un-wrap it entirely rather than keeping a half-split declaration. Nothing about scoping or
+initialisation order changes, so there is no drop condition beyond a comment on the line.
+
 ## Related
 
 - [[index]] — rule map, denylist, universal drop conditions.

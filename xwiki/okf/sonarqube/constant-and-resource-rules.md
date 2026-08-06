@@ -147,6 +147,35 @@ Clean only for a genuinely trailing jump: the last statement of a `void` method,
 **Drop** when the jump is the branch's *only* statement — removing it leaves an empty block and
 Checkstyle `EmptyBlock` fails — or when it sits inside a complex nested try/catch/finally.
 
+## S4719 — use a `StandardCharsets` constant instead of a charset name
+
+Two message variants — "Replace charset name argument with `StandardCharsets.UTF_8`" and "Replace
+`Charset.forName()` call with …". Both mean: pass the `Charset` constant rather than a `String`
+(`"UTF-8"`, `"UTF8"`, `"ISO-8859-1"`, or a local constant holding one).
+
+**The build-breaking trap: the `String` overloads throw `UnsupportedEncodingException` and the
+`Charset` overloads do not.** If the flagged call sits inside a `try` whose `catch` covers *only*
+that exception, the catch becomes unreachable and the module fails to **compile**
+(`exception … is never thrown in body of corresponding try statement`). So the fix includes deleting
+the dead `try`/`catch` and dedenting the body — which is a good change (the catch was uncovered, so
+coverage goes up), just not a one-liner. Check the enclosing `try` before applying:
+
+- catch is only `UnsupportedEncodingException` → remove the whole try/catch (and, if that leaves a
+  static initializer with a single assignment, fold it into the field declaration).
+- catch is wider (`IOException` around a `getOutputStream()`, or `Exception`) → it stays; only the
+  argument changes.
+
+**Retype a private charset constant rather than editing its call sites.** A
+`private static final String X = "UTF-8"` used only as a charset becomes
+`private static final Charset X = StandardCharsets.UTF_8;` — one line, every call site unchanged, and
+it clears every issue on that constant at once. Do **not** do this to a `public static final String`:
+a compile-time constant changing type or value is a Revapi break (see [[backward-compatibility]]).
+`XWiki.DEFAULT_ENCODING` is the reference example — leave the constant alone and change only the
+flagged call sites inside its own class.
+
+Adding `import java.nio.charset.StandardCharsets;` may also orphan `java.nio.charset.Charset` or
+`java.io.UnsupportedEncodingException`; check both before committing.
+
 ## Related
 
 - [[index]] — rule map, denylist, universal drop conditions.
