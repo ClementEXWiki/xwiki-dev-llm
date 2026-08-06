@@ -18,8 +18,11 @@ below).
 
 ## Commit messages
 
-- Prefix the summary with the JIRA issue key when there is one: `XWIKI-12345: <summary>` (use the
-  repo's own key — `XCOMMONS-…`, `XRENDERING-…`, etc.). Use `[Misc]` when there is no issue.
+- When there is an issue, the summary line is the key followed by **the issue's title, verbatim** —
+  not a summary you write: `XWIKI-12345: <the JIRA issue title>` (use the repo's own key —
+  `XCOMMONS-…`, `XRENDERING-…`, etc.). What *this* commit does goes in the body as `*` bullets.
+- Use `[Misc]` only for trivial changes with no issue; anything affecting users or extension
+  developers needs an issue. Full rule: `okf/conventions/commit-messages.md`.
 
 ## Building & tests
 

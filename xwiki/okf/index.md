@@ -30,7 +30,8 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
 ### conventions/
 - **code-style** — line length (120), LGPL headers, component system, javax→jakarta, `-legacy` rules.
 - **code-comments** — comment about the code as-is; never reference history or transient links.
-- **commit-messages** — JIRA-key prefix (`XWIKI-12345:`) or `[Misc]`.
+- **commit-messages** — summary = JIRA key + the issue's title *verbatim*, details as `*` bullets in
+  the body; `[Misc]` only when there is genuinely no issue.
 - **versioning** — `@since`/`@Deprecated(since=…)` use `<X.Y.0>RC1`; current version is volatile.
 - **backward-compatibility** — Revapi, the `@Unstable` lifecycle, evolve interfaces via default methods.
 - **security** — escaping APIs, untrusted user input & translations, context-author right checks in

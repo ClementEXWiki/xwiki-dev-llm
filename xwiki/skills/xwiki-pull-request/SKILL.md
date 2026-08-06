@@ -7,8 +7,10 @@ description: Create a GitHub pull request for an XWiki repo (xwiki-platform, xwi
 
 ## Commit messages & PR title
 
-- Reference the JIRA issue: `XWIKI-NNNNN: <short description>` (use `XCOMMONS-NNNNN:` in
-  xwiki-commons, `XRENDERING-NNNNN:` in xwiki-rendering).
+- Reference the JIRA issue, and make the summary line **the issue's title, verbatim** rather than a
+  description you compose: `XWIKI-NNNNN: <the JIRA issue title>` (use `XCOMMONS-NNNNN:` in
+  xwiki-commons, `XRENDERING-NNNNN:` in xwiki-rendering). Put what the commit actually does in the
+  body, as `*` bullets. See `okf/conventions/commit-messages.md`.
 - For trivial changes that do not warrant a JIRA issue, prefix with `[Misc] <description>`.
   Do not create unnecessary JIRA issues
   (see https://dev.xwiki.org/xwiki/bin/view/Community/DevelopmentPractices).
