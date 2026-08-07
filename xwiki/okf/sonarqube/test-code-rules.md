@@ -1,14 +1,15 @@
 ---
 title: SonarQube test-code rules
 stability: durable
-summary: Correct fixes and XWiki-specific drop conditions for S5786, S5785, S3415, S6068 and
-  S8924 — including why S5785 must not be applied inside equals()/hashCode() contract tests, why
-  S3415's operand swap is usually unsafe, and how far an S6068 eq() unwrap may reach.
+summary: Correct fixes and XWiki-specific drop conditions for S5786, S5785, S3415, S5778, S6068,
+  S8714 and S8924 — including why S5785 must not be applied inside equals()/hashCode() contract
+  tests, why S3415's operand swap is usually unsafe, how far an S6068 eq() unwrap may reach, and why
+  an S5778 hoist must never move the throwing call out of the lambda.
 ---
 
 # SonarQube test-code rules
 
-S3415 · S5785 · S5786 · S6068 · S8924
+S3415 · S5778 · S5785 · S5786 · S6068 · S8714 · S8924
 
 These touch only test code, so production behaviour is untouched and review risk is low. But the
 module's tests actually run during verification, so a wrong edit fails the build rather than shipping
@@ -192,6 +193,42 @@ Fix: delete the local and pass the class literal — `any(CommentAddedEvent.clas
 `new X(...)` is exactly `X.class`, so this is behaviour-identical. The declaration usually was the
 only use of an interface-typed import (`org.xwiki.observation.event.Event`); remove it too, or you
 trade the issue for an `S1128`.
+
+## S5778 — only one method invocation may throw inside an `assertThrows` lambda
+
+Message: "Refactor the code of the lambda to have only one invocation possibly throwing a runtime
+exception." The fix is to hoist the *other* invocations into locals above the assertion:
+
+```java
+WordBlock notExisting = new WordBlock("not existing");
+assertThrows(InvalidParameterException.class, () -> parentBlock.replaceChild(word3, notExisting));
+```
+
+**The one check that decides the fix: read the call you are about to hoist and confirm it is not the
+thrower.** That is the entire point of the rule — with two candidates in the lambda the test does not
+say which one it is asserting on. When the hoisted call is what actually throws, moving it out puts
+the exception *outside* `assertThrows` and the test fails. `BlobPath.relative("..", "bad/name")` is
+the canonical example: the `IllegalArgumentException` comes from `relative()`, not from the
+`resolve()` it is fed to, so that site is a drop — cleaning it up means rewriting what the test
+asserts.
+
+Hoisted locals must be effectively final (the compiler enforces it), and the shortened
+`assertThrows(...)` call usually fits back on one line — re-join it.
+
+## S8714 — replace a try/catch/`fail` with `assertThrows`
+
+Not a drop has been seen for this rule; three shapes cover the whole pool.
+
+- **Single-call try** (~90%): `try { call(); fail("…"); } catch (T e) { assertEquals(…, e.getMessage()); }`
+  becomes `T e = assertThrows(T.class, () -> call());` followed by the original assertions.
+- **`catch { fail() }` with nothing else** — the test is asserting the call does *not* throw:
+  `assertDoesNotThrow(() -> call())`.
+- **Multi-statement try where only the last call throws** — hoist the setup statements above the
+  assertion; locals stay effectively final, so the lambda still compiles.
+
+Two follow-ons: `fail` usually becomes an unused static import (remove it, or you trade the issue for
+an `S1128`), and **two sites in the same test method collide** — `T e = assertThrows(…)` twice is a
+duplicate local. Declare once and assign on the second site.
 
 ## Related
 

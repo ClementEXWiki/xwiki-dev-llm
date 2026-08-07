@@ -1,14 +1,15 @@
 ---
 title: SonarQube dead-code and unused-code rules
 stability: durable
-summary: Correct fixes and XWiki-specific drop conditions for S1118, S1144, S1185, S1068, S1481 and
-  S1854 — including the XWikiPluginManager reflective-dispatch false positive, Hibernate-mapped
-  accessors, and the Revapi/FinalClass follow-ons of adding a private constructor.
+summary: Correct fixes and XWiki-specific drop conditions for S1118, S1130, S1144, S1185, S1068,
+  S1481, S1854 and S125 — including the XWikiPluginManager reflective-dispatch false positive,
+  Hibernate-mapped accessors, the Revapi/FinalClass follow-ons of adding a private constructor, and
+  why most commented-out blocks are anchored by a TODO and must be kept.
 ---
 
 # SonarQube dead-code and unused-code rules
 
-S1068 · S1118 · S1144 · S1185 · S1481 · S1854
+S125 · S1068 · S1118 · S1130 · S1144 · S1185 · S1481 · S1854
 
 Removing code is where Sonar is least able to see XWiki's actual runtime behaviour: the framework
 reaches into classes reflectively in several places, and what looks dead to a static analyser is
@@ -133,16 +134,48 @@ declaration and that assignment. An `@Override` setter's now-unused parameter is
 
 **The `/src/test/` vs `/src/main/` split decides this rule, and it decides it completely.**
 
-- **Test sources: fix, and expect a 0% drop rate.** A JUnit method declaring `throws Exception` (or
-  `IOException`, `ComponentLookupException`) whose body cannot throw it is pure noise — nothing calls
-  the method, so nothing can be broken. The compiler is the whole verification: had the exception
-  actually been throwable, the build would not compile.
+- **Test sources, on a method carrying `@Test` / `@ParameterizedTest` / `@BeforeEach` /
+  `@AfterEach` / `@BeforeAll` / `@AfterAll`: fix, and expect a 0% drop rate.** A JUnit method
+  declaring `throws Exception` (or `IOException`, `ComponentLookupException`) whose body cannot throw
+  it is pure noise — JUnit invokes it reflectively and nothing else calls it, so nothing can be
+  broken. The compiler is the whole verification: had the exception actually been throwable, the
+  build would not compile.
+- **A test-source method with NO such annotation is a different risk class — drop it unless you
+  prove otherwise.** A protected/public helper on an abstract test base is overridable, and when the
+  module publishes a `test-jar` the overriding subclass lives in *another* module: it may still
+  declare the wider `throws`, which stops compiling once the parent narrows its clause — and the
+  in-module build you run will not catch it. Classify every site by the annotation above the flagged
+  line before batching (walking up over `@…`/comment/blank lines), not by "it is under `/src/test/`".
 - **`src/main`: permanent drop.** Narrowing a `throws` on a published method breaks every caller that
   catches it, and on an overridable method it also breaks subclasses that declare the wider clause.
 
 Two follow-ons: removing the exception usually orphans its import (drop it in the same edit), and a
 Javadoc `@throws` tag for the removed exception must go with it. When a signature loses two flagged
 exceptions it often fits back on one line — re-join it.
+
+## S125 — remove a block of commented-out code
+
+Comment-only, so it cannot change behaviour — but **roughly four sites in five are not dead code**,
+and the triage is the whole job. Two shapes are permanent drops:
+
+- **A `TODO`/`FIXME` next to the block names the JIRA issue that will restore it.** This is the
+  dominant XWiki shape: `// TODO: put back when https://jira.xwiki.org/browse/XCOMMONS-3028 is fixed`
+  above the commented-out line, with the current workaround right underneath. Deleting the comment
+  silently drops the record of what has to change when that issue lands.
+- **The block documents what the code under it covers**, rather than being disabled code — e.g. a
+  test that repeats the `@Inject` declaration it is asserting on:
+  ```java
+  // Test the following injection:
+  // @Inject
+  // private GenericFieldRole<String> genericFieldRole;
+  dep = it.next();
+  ```
+  Same for a commented-out call kept beside the reason it is not used (`// Note: DO NOT USE
+  String.split since it requires a regexp…`).
+
+**Fix only an unanchored leftover**: a commented-out debug helper and its call sites, with no
+`TODO`/`FIXME` and no explanatory prose. Delete the surrounding blank line too, and check the block
+was not the only user of an `import` (which would otherwise stay behind as a real S1128).
 
 ## Related
 
