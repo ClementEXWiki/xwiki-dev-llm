@@ -33,7 +33,8 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
 - **commit-messages** — summary = JIRA key + the issue's title *verbatim*, details as `*` bullets in
   the body; `[Misc]` only when there is genuinely no issue.
 - **versioning** — `@since`/`@Deprecated(since=…)` use `<X.Y.0>RC1`; current version is volatile.
-- **backward-compatibility** — Revapi, the `@Unstable` lifecycle, evolve interfaces via default methods.
+- **backward-compatibility** — Revapi (incl. where it does *not* look), the `@Unstable` lifecycle,
+  evolve interfaces via default methods.
 - **security** — escaping APIs, untrusted user input & translations, context-author right checks in
   script services, configurable HTML sanitizer.
 - **performance** — prefer streaming over buffering; never load an unbounded payload (attachment,

@@ -114,8 +114,9 @@ main artifact the moment it must modify an existing type. Mirror `xwiki-commons-
 ## 5. Add the Revapi ignore
 
 Removing the API from the main module is a break Revapi will flag. Add a `<revapi.differences>` entry
-(commons: in `xwiki-commons-core/pom.xml` under `<analysisConfiguration>`) with `criticality`
-`allowed` and a justification that the API moved to the legacy module, e.g.
+under `<analysisConfiguration>` of the repo's core aggregator pom — commons:
+`xwiki-commons-core/pom.xml`, platform: `xwiki-platform-core/pom.xml` — with `criticality` `allowed`
+and a justification that the API moved to the legacy module, e.g.
 
 ```xml
 <item>
@@ -125,8 +126,12 @@ Removing the API from the main module is a break Revapi will flag. Add a `<revap
 </item>
 ```
 
-Use `java.class.removed` for a whole type. Add one item per removed member (interface + each impl if
-Revapi tracks it — the build tells you exactly which).
+Use `java.class.removed` for a whole type, and `&lt;init&gt;` for a constructor:
+`method void com.acme.store.Store::&lt;init&gt;(com.acme.Context)`.
+
+**Enumerate the items from your own diff, not from the build** — for some modules the build reports
+nothing at all (step 8), and a member unreported today breaks a downstream module tomorrow. Add the
+interface *and* each impl when Revapi tracks them separately.
 
 ## 6. Fix the legacy module's coverage ratio
 
@@ -164,8 +169,20 @@ mvn clean install -B -ntp -Pquality,legacy \
   -pl <main-module-path>,<legacy-module-path>
 ```
 
-`-Pquality` is mandatory: it runs Revapi (confirms your ignore) **and** the JaCoCo check (confirms the
-lowered ratio). Then sanity-check the outcome with `javap` on the woven legacy classes: the main jar
-must no longer expose the API, and the legacy jar must re-add it.
+`-Pquality` is mandatory: it runs Revapi **and** the JaCoCo check (confirms the lowered ratio). Then
+sanity-check the outcome with `javap` on the woven legacy classes: the main jar must no longer expose
+the API, and the legacy jar must re-add it.
+
+**This build cannot validate your Revapi ignore, so never read its silence as "no ignore needed".** The
+main module may skip Revapi (`grep revapi.skip <main-module>/pom.xml` — `xwiki-platform-oldcore` does),
+and the legacy weaver is green by construction since its jar re-adds the API. The break only shows up on
+a downstream consumer (the `backward-compatibility` OKF topic explains why), so verify there:
+
+```bash
+cd <a module depending on the main artifact> && mvn compile revapi:check -B -ntp -Pquality
+```
+
+Run it with **and** without your ignore (`git stash push -- <core-pom>`): failing without and passing
+with is the only proof the `<old>` signature matches Revapi's own rendering.
 
 Open the PR with the `xwiki-pull-request` conventions (`[Misc]` prefix when there is no JIRA issue).

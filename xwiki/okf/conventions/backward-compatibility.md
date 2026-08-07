@@ -1,8 +1,9 @@
 ---
 title: Backward compatibility policy
 stability: durable
-summary: Revapi enforces binary/semantic compatibility of public APIs; @Unstable marks not-yet-stable
-  API with a max 1-cycle lifetime; evolve interfaces with default methods, not new interfaces.
+summary: Revapi enforces binary/semantic compatibility of public APIs, though not uniformly per module;
+  @Unstable marks not-yet-stable API with a max 1-cycle lifetime; evolve interfaces with default
+  methods, not new interfaces.
 sources:
   - https://dev.xwiki.org/xwiki/bin/view/Community/DevelopmentPractices#HBackwardCompatibility
 ---
@@ -66,3 +67,15 @@ Removing the API from the main module is itself a Revapi break, so it needs a `<
 ignore (`java.method.removed` / `java.class.removed`) justified by the move to legacy. The full
 procedure — migrate callers, remove, re-add, ignore, ban in the WAR, verify — is the `xwiki-legacy`
 skill.
+
+## Where Revapi does and does not look
+
+Revapi analyses the primary artifact **and its transitive dependencies**, but only reports differences
+on dependency classes the primary artifact's own API *reaches*. Its coverage is therefore **not uniform
+per module**: a module can opt out with `<xwiki.revapi.skip>true</xwiki.revapi.skip>`
+(`xwiki-platform-oldcore` does), and a weaving `-legacy` module is green by construction since its jar
+re-adds whatever the main jar dropped. A break in such a module is invisible both on the module and on
+its legacy wrapper, and surfaces instead on an arbitrary **downstream consumer** — whichever one's API
+reaches the changed class, often far from the change (removing the `XWikiHibernateStore` constructors
+failed `xwiki-platform-extension-script`, which reaches the class via `XWiki.getHibernateStore()`). A
+green build on the changed module therefore never means "compatible".
