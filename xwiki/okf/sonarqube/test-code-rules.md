@@ -1,7 +1,7 @@
 ---
 title: SonarQube test-code rules
 stability: durable
-summary: Correct fixes and XWiki-specific drop conditions for S5786, S5785, S3415, S5778, S6068,
+summary: Correct fixes and XWiki-specific drop conditions for S5786, S5785, S3415, S5778, S5783, S6068,
   S8714 and S8924 — including why S5785 must not be applied inside equals()/hashCode() contract
   tests, why S3415's operand swap is usually unsafe, how far an S6068 eq() unwrap may reach, and why
   an S5778 hoist must never move the throwing call out of the lambda.
@@ -9,7 +9,7 @@ summary: Correct fixes and XWiki-specific drop conditions for S5786, S5785, S341
 
 # SonarQube test-code rules
 
-S3415 · S5778 · S5785 · S5786 · S6068 · S8714 · S8924
+S3415 · S5778 · S5783 · S5785 · S5786 · S6068 · S8714 · S8924
 
 These touch only test code, so production behaviour is untouched and review risk is low. But the
 module's tests actually run during verification, so a wrong edit fails the build rather than shipping
@@ -32,14 +32,20 @@ at the class declaration. Key the fix **by file** instead: strip the leading `pu
 Keep the other modifiers (`@BeforeAll public static void` → `static void`).
 
 **Do not touch** fields, unannotated helper methods, or methods carrying an XWiki-specific (non-JUnit)
-lifecycle annotation — `@BeforeComponent` and `@AfterComponent` methods stay public.
+lifecycle annotation — `@BeforeComponent` and `@AfterComponent` methods stay public. **Nor an
+`@Override`**: a JUnit-annotated method that also overrides a public parent method (`@BeforeEach
+@Override void setUp()` of an abstract base test) cannot have its visibility reduced — that does not
+compile. If it is the only thing left public in the file, the issue cannot be cleared; drop it rather
+than shipping a half fix.
 
 A class-level flag means the whole file's test methods get stripped, so a dense file yields far more
 removals than its issue count. That is expected.
 
 **Cross-module compile check.** `xwiki-platform-oldcore` publishes a widely used test-jar, so making a
 class package-private can break another module that extends it. For each class you make
-package-private, grep for `extends <Class>` across the source tree outside its own module. The risk is
+package-private, grep for `extends <Class>` across the source tree outside its own module. Grep for the **bare
+class name** too: a sibling test in another package reading a constant off it
+(`DefaultHTMLCleanerTest.HEADER`) blocks the change just as hard and is easier to miss. The risk is
 only with `abstract` or base test classes — and note that a class *named* `Abstract*Test` is often not
 actually abstract, so read the declaration rather than the name.
 
@@ -194,10 +200,11 @@ Fix: delete the local and pass the class literal — `any(CommentAddedEvent.clas
 only use of an interface-typed import (`org.xwiki.observation.event.Event`); remove it too, or you
 trade the issue for an `S1128`.
 
-## S5778 — only one method invocation may throw inside an `assertThrows` lambda
+## S5778 / S5783 — only one method invocation may throw inside an `assertThrows` lambda
 
-Message: "Refactor the code of the lambda to have only one invocation possibly throwing a runtime
-exception." The fix is to hoist the *other* invocations into locals above the assertion:
+Two messages, one rule in practice: S5778 is "…only one invocation possibly throwing a **runtime**
+exception", S5783 "…multiple invocations throwing the same **checked** exception". Same fix, same
+check. Hoist the *other* invocations into locals above the assertion:
 
 ```java
 WordBlock notExisting = new WordBlock("not existing");
@@ -215,6 +222,14 @@ asserts.
 Hoisted locals must be effectively final (the compiler enforces it), and the shortened
 `assertThrows(...)` call usually fits back on one line — re-join it.
 
+**S5783 is the trap an S8714 conversion sets for itself.** A `try` body that *constructs* an argument
+inline — `this.printer.print(new URL("http://…"))` — has two checked-exception throwers
+(`MalformedURLException` from the constructor, `IOException` from the call) the moment you wrap it in
+a lambda, so a clean S8714 fix ships a fresh S5783 BUG that only surfaces on the next scan. When
+converting, look at the try body before wrapping it: any `new X(…)` or helper call that itself throws
+a checked exception goes into a local above the assertion, named after the value
+(`URL printPreviewURL = new URL(…)`), leaving exactly one throwing invocation in the lambda.
+
 ## S8714 — replace a try/catch/`fail` with `assertThrows`
 
 Not a drop has been seen for this rule; three shapes cover the whole pool.
@@ -226,9 +241,11 @@ Not a drop has been seen for this rule; three shapes cover the whole pool.
 - **Multi-statement try where only the last call throws** — hoist the setup statements above the
   assertion; locals stay effectively final, so the lambda still compiles.
 
-Two follow-ons: `fail` usually becomes an unused static import (remove it, or you trade the issue for
-an `S1128`), and **two sites in the same test method collide** — `T e = assertThrows(…)` twice is a
-duplicate local. Declare once and assign on the second site.
+Three follow-ons: `fail` usually becomes an unused static import (remove it, or you trade the issue
+for an `S1128`); **two sites in the same test method collide** — `T e = assertThrows(…)` twice is a
+duplicate local, so declare once and assign on the second site; and a try body that builds an argument
+inline (`print(new URL(…))`) trades the S8714 for an **`S5783`** unless the constructor is hoisted out
+of the lambda — see [[#s5778--s5783--only-one-method-invocation-may-throw-inside-an-assertthrows-lambda]].
 
 ## Related
 
