@@ -2,15 +2,17 @@
 title: Programming against the xwiki.org documentation tree
 stability: durable
 summary: Where the xwiki.org Documentation application stores its data and how to act on it — the
-  three DocApp xobjects (structure fields, Technical ID, and the quality checker's violations), how to
-  read the checker's real findings instead of guessing at the red banner — including the ones that never
-  become an object and show up only as an inline error box in the rendered page — how navigation order is
-  pinned via the parent space's WebPreferences page, and the hidden-fragment pattern behind the
+  DocApp xobjects (structure fields, Technical ID, and the quality checker's violations), the separate
+  LandingPageClass that landing pages carry instead of DocumentationClass and the audit trap it sets, how
+  to read the checker's real findings instead of guessing at the red banner — including the ones that
+  never become an object and show up only as an inline error box in the rendered page — how navigation
+  order is pinned via the parent space's WebPreferences page, and the hidden-fragment pattern behind the
   {{display}} macro. The authoring *rules* live in [[documentation]]; the generic REST calls live in
   the `xwiki-rest-api` skill.
 sources:
   - https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/create-documentation-page/page-structure/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationNavigationTree/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/CreateLandingPages/
 ---
 
 # Programming against the xwiki.org documentation tree
@@ -27,9 +29,34 @@ diagnosing why a page renders a warning.
 | `DocApp.Code.DocumentationClass` | The Diataxis `type` and `target` audience, plus the page-structure fields (`faq`, `highlights`, `related`) |
 | `DocApp.Code.DocumentationExtensionClass` | The **Technical ID** (`id` property), empty when no extension applies (e.g. installation pages) |
 | `DocApp.Code.DocumentationViolationClass` | **One object per problem** found by the doc-quality checker; present only when the page has violations |
+| `DocApp.Code.LandingPageClass` | The **landing page** equivalent of `DocumentationClass` — carries `highlights`, `summary`, `type`, `target`, `listChildren` |
 
 A documentation page carries the **first two**, and a newly created one needs **both** — a page missing
 the `DocumentationExtensionClass` object is incomplete even though nothing visibly breaks.
+
+## Landing pages carry a different class
+
+A **landing page** is not a documentation page with extra objects: it carries
+`DocApp.Code.LandingPageClass` **instead of** `DocumentationClass`, and no
+`DocumentationExtensionClass` at all. Both kinds named by the guide's
+[Create Landing Pages](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/CreateLandingPages/) use
+it — the **target** landing pages (`documentation.xs.user`, `…admin`, `…dev`) and the **Diataxis type**
+landing pages nested under each of them (`documentation.xs.user.howto`, `.tutorial`, `.reference`,
+`.explanation`).
+
+On a type landing page, `type` and `target` are **the filter its table applies**, not a classification of
+the page itself: the page lists every page of that Diataxis type for that audience, drawn from across the
+whole `documentation.xs` tree rather than from its own children — so a type landing page normally has no
+child pages at all.
+
+**The audit trap:** any sweep that selects pages by `DocumentationClass` — checking Highlights, `type`,
+`target`, or the structure fields across a tree — **silently skips every landing page**, and landing pages
+are precisely the ones that carry the tree's most visible Highlights. A sweep that reports "nothing to
+fix" may simply never have looked at them. Select on **both** classes, or enumerate the tree and read
+whichever of the two each page carries.
+
+Landing pages and their Highlights are **managed by the Documentation Team** (same source page), so a
+change to one is proposed, not just made — see [[documentation]].
 
 For the exact allowed values of `type` and `target`, and what each structure field means, see
 [[documentation]]. Read them from the class definition rather than assuming:

@@ -80,8 +80,10 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
   the trash. Applied by `xwiki-doc-writing` / `xwiki-doc-convert` / `xwiki-rest-api` and by any task
   that removes a wiki page.
 - **documentation-mechanics** — the storage side of the above, for editing xwiki.org pages
-  programmatically or diagnosing a warning banner: the three `DocApp` xobjects (structure fields,
-  Technical ID, quality-checker violations), how to read the checker's real findings instead of guessing
+  programmatically or diagnosing a warning banner: the `DocApp` xobjects (structure fields,
+  Technical ID, quality-checker violations), **the separate `LandingPageClass` that landing pages carry
+  instead of `DocumentationClass` — which makes any sweep selecting on `DocumentationClass` skip every
+  landing page silently**, how to read the checker's real findings instead of guessing
   at the red banner — **and why listing the violation objects is not enough, since some findings appear
   only as an inline error box in the rendered page** — how navigation order is pinned on the parent
   space's `WebPreferences` page (and why it must be verified through the Document Tree service), and the
