@@ -41,7 +41,7 @@ every day.
 | S1604 S1640 S1643 S6126 S6201 S6204 S6211 S6485 | [[modernization-rules]] |
 | S125 S1068 S1118 S1130 S1144 S1185 S1481 S1854 | [[dead-code-rules]] |
 | S1143 S1163 S1192 S2093 S2119 S2147 S3626 S4719 S5361 | [[constant-and-resource-rules]] |
-| S2133 S3415 S5778 S5785 S5786 S6068 S8714 S8924 | [[test-code-rules]] |
+| S2133 S3415 S5778 S5783 S5785 S5786 S6068 S8714 S8924 | [[test-code-rules]] |
 
 Ordered roughly safest-first: comment-only and pure-syntax rules cannot change behaviour;
 simplification rules need no dataflow check; modernization and dead-code rules do.
