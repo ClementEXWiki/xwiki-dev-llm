@@ -63,10 +63,16 @@ The procedure lives in the `xwiki-rest-api` skill; the durable gotchas are:
   **extensions.xwiki.org is a subwiki named `extensions`** (`/rest/wikis/extensions/…`), not `xwiki`.
 - **Credentials convention: `~/.xwiki-credentials`** — the developer's xwiki.org write credentials, two
   lines, no quotes and no `export`: `XWIKI_USER=…` / `XWIKI_PASSWORD=…`. Look for that file before
-  asking for credentials, and don't read its contents into the conversation — source it inside each
-  command that needs it (shell state does not persist between commands), so the password never enters
-  the context or the transcript: `set -a; . ~/.xwiki-credentials; set +a` then
-  `curl -u "$XWIKI_USER:$XWIKI_PASSWORD" …`.
+  asking for credentials, but **never print its contents** — not `Read`, not `cat`/`head`/`less`, not
+  an `ls`-then-dump of its directory, not a "keys only" probe: the format is documented right here, so
+  opening it teaches nothing, while anything printed enters the context *and* the session transcript
+  on disk, which outlives the file. Test the *effect* instead: `test -f ~/.xwiki-credentials` answers
+  "is it there", an authenticated `/rest` GET answers "does it work". Source it **inside** each command
+  that needs it (shell state does not persist between commands), so the password never reaches the
+  context: `set -a; . ~/.xwiki-credentials; set +a` then `curl -u "$XWIKI_USER:$XWIKI_PASSWORD" …`.
+  If a password does leak into the conversation, say so plainly and tell the developer to rotate it —
+  a transcript cannot be un-sent. Same rule for any other secret store the developer points at
+  (`~/.netrc`, an env file, a password-manager export).
 
 ## Verifying volatile facts
 
