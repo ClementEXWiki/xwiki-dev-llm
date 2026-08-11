@@ -145,7 +145,8 @@ Applied by `xwiki-fix-sonarqube-issue`, which owns the *procedure*.
 ### servers/
 - **index** — the xwiki.org server ecosystem (JIRA, CI, Nexus, SonarCloud, forum, …) and how to
   access/verify each (MCP vs. WebFetch); plus writing via REST (only `/rest` honors Basic auth, the
-  `XWiki-Form-Token` CSRF header, and the `extensions` subwiki id).
+  `XWiki-Form-Token` CSRF header, and the `extensions` subwiki id) and the `~/.xwiki-credentials`
+  convention (never printed, only sourced).
 - **jira** — accessing jira.xwiki.org (jira-cli or REST), the durable issue-field conventions
   (Component, Affects Version = oldest affected/else last LTS, Fix Version); values are volatile;
   resolving/closing (Fixed vs. Cannot Reproduce for already-covered issues, assign to yourself); and

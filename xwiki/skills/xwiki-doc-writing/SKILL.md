@@ -27,9 +27,9 @@ Ask **before** starting the work, in one go, because each answer changes what yo
 them cannot be recovered later (a page saved directly cannot become a Change Request, and a screenshot
 cannot be taken without a running instance). Ask for authoring, updating **and** converting.
 
-**First look for `~/.xwiki-credentials`** — when that file exists it answers question 2, so drop that
-question. Its format, and how to use it without pulling the password into the conversation, are in
-`okf/servers/index.md`.
+**First look for `~/.xwiki-credentials`** (`test -f`, **never print it**) — when that file exists it
+answers question 2, so drop that question. Its format, and how to use it without pulling the password
+into the conversation, are in `okf/servers/index.md`.
 
 Ask the remaining questions in a **single `AskUserQuestion` call** so the developer clicks options
 instead of typing answers back (fall back to a numbered list in a message only on a host without that

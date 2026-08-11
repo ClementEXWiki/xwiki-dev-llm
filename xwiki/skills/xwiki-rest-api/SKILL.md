@@ -13,7 +13,8 @@ Interact with a running XWiki over its REST API using `curl`.
 - **Auth:** HTTP Basic — `curl -u Admin:admin ...`. With no credentials you act as `XWiki.Guest`
   (read-only on public pages; writes get `401`). Always authenticate for write operations.
   For a **remote** instance (xwiki.org…), look for the `~/.xwiki-credentials` file before asking the
-  developer for credentials — see `okf/servers/index.md`.
+  developer for credentials — **never print that file**, source it inside each command; its format and
+  the full rule are in `okf/servers/index.md`.
 - **Format:** responses are XML by default. Ask for JSON with `?media=json` on the URL **or** an
   `Accept: application/json` header. Send bodies with `-H "Content-Type: application/xml"` (or
   `application/x-www-form-urlencoded`).
