@@ -37,7 +37,7 @@ every day.
 | Rule keys | Family file |
 |---|---|
 | S1116 S1124 S1128 S1161 S1197 S1611 S1659 S2209 S3878 S6208 S7476 | [[syntax-rules]] |
-| S1066 S1125 S1126 S1155 S1264 S1488 S1596 S1602 S1612 S1858 S1905 S2130 S2629 S2864 S3012 S3024 S3358 S3706 S4201 S6353 S6397 S7158 | [[simplification-rules]] |
+| S1066 S1125 S1126 S1155 S1264 S1488 S1596 S1602 S1612 S1858 S1905 S2130 S2864 S3012 S3024 S3358 S3706 S4201 S6353 S6397 S7158 | [[simplification-rules]] |
 | S1604 S1640 S1643 S6126 S6201 S6204 S6211 S6485 | [[modernization-rules]] |
 | S125 S1068 S1118 S1130 S1144 S1185 S1481 S1854 | [[dead-code-rules]] |
 | S1143 S1163 S1192 S2093 S2119 S2147 S3626 S4719 S5361 | [[constant-and-resource-rules]] |
@@ -55,6 +55,13 @@ Each of these is either bad ROI or a false positive against a deliberate XWiki i
   (migrate to `java.time`), **`S2160`** (override `equals` in a subclass) and **`S1141`** (nested
   try) — all real design changes that deserve a JIRA issue, not a Sonar sweep.
 - **`S1186`** empty method — the empty body is usually a deliberate no-op hook.
+- **`S2629`** "logging arguments should not require evaluation" — **read [[logging]] before touching
+  a single site.** In XWiki a log argument is *stored as an object*: a job captures the `LogEvent`
+  with its raw `Object[]` and XStream-serializes it into the job log, so an explicit `toString()` at
+  the call site is usually a deliberate snapshot, not redundancy. "SLF4J calls `toString()` itself"
+  is the wrong justification for deleting one — SLF4J is not the only consumer. The rule is only ever
+  resolved here by `@SuppressWarnings("java:S2629")` plus the inline reason, never by removing the
+  eager String.
 - **`javabugs:S2259`** "fix this access that will throw a NullPointerException" — the largest
   untouched pool in every repo, and not a sweep. It is 100% `src/main`, every site needs its own
   dataflow argument, and the fix changes behaviour. The clusters are where Sonar's analysis cannot
