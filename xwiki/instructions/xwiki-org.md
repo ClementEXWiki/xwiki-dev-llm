@@ -92,8 +92,10 @@ OKF map (topic files under `okf/`, described in `okf/index.md`):
   wizard only repoints them if given a "New target" + "Update links", never over REST, and never for
   absolute-URL links — which the Information-tab Backlinks list does not show either),
   `documentation-mechanics`
-  (the storage side: the `DocApp` xobjects, reading the doc-quality checker's findings — objects *and*
-  the inline error boxes that create none — how pinning and hidden `{{display}}` fragments are stored).
+  (the storage side: the `DocApp` xobjects — incl. the separate `LandingPageClass` that makes a
+  `DocumentationClass` sweep skip every landing page — reading the doc-quality checker's findings —
+  objects *and* the inline error boxes that create none — how pinning and hidden `{{display}}` fragments
+  are stored).
 - `okf/architecture/` — `component-system`, `macro-refactoring`, `wiki-user-scope`, `solr-search`.
 - `okf/testing/` — `strategy`.
 - `okf/sonarqube/` — which SonarCloud fixes are *correct* in XWiki and which look mechanical but
