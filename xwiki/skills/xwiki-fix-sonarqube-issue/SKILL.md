@@ -22,9 +22,15 @@ rule-specific. It lives in the OKF at `okf/sonarqube/` (resolve from this skill'
    fixing, and the drop conditions that apply to every rule.
 2. **Then read only the one family file** for the rule you commit to fixing. Do not read the others.
 3. Read `okf/sonarqube/verification.md` before building.
+4. **When the rule is about a CONVENTION rather than a code shape, the knowledge lives in
+   `okf/conventions/`, not in `okf/sonarqube/`** — and the index entry will say so. Logging rules
+   (`S2629`, `S2589` on log guards, anything about what to pass a logger) are owned by
+   `okf/conventions/logging.md`; follow the pointer before deciding the fix.
 
 A fix applied without its family file is how a batch ships an infinite recursion (S3878), a dead
 reflective callback (S1185), or an NPE on a `null` enum key (S1640) — all of which compile cleanly.
+A fix applied without the *convention* file is how a batch "removes a redundant `toString()`" from a
+log call and silently changes what gets written into the job log.
 
 ## Finding an issue (most token-expensive phase — keep it cheap)
 

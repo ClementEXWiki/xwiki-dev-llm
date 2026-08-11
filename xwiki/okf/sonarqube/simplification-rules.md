@@ -2,14 +2,14 @@
 title: SonarQube simplification rules
 stability: durable
 summary: Correct fixes and XWiki-specific drop conditions for the behaviour-preserving simplification
-  rules — S1066, S1125, S1126, S1155, S1264, S1488, S1602, S1612, S1858, S2130, S2864, S3012, S3024,
-  S3706, S6397, S7158.
+  rules — S1066, S1125, S1126, S1155, S1264, S1488, S1602, S1612, S1858, S2130, S2864, S3012,
+  S3024, S3358, S3706, S6397, S7158.
 ---
 
 # SonarQube simplification rules
 
 S1066 · S1125 · S1126 · S1155 · S1264 · S1488 · S1602 · S1612 · S1858 · S2130 · S2864 ·
-S3012 · S3024 · S3706 · S6397 · S7158
+S3012 · S3024 · S3358 · S3706 · S6397 · S7158
 
 Behaviour-preserving rewrites that need no dataflow analysis — the best mechanical-fix fodder after
 the syntax family. Read [[index]] for the universal drop conditions first.
@@ -207,6 +207,24 @@ site is the head of an `equals()` or a `remove(Object)`, and the observed drop r
 
 Also `EMPTY_MAP`/`EMPTY_SET`. The typed factory infers its type argument from the target, so a call
 site that passed the raw constant keeps compiling; it just stops being a raw type.
+
+## S3358 — extract a nested ternary into its own statement
+
+Give the *inner* ternary a name; leave the outer one alone.
+
+```java
+- compare = included1 ? (upper ? -1 : 1) : (upper ? 1 : -1);
++ int inclusionOrder = upper ? -1 : 1;
++ compare = included1 ? inclusionOrder : -inclusionOrder;
+```
+
+Safe whenever no operand has a side effect (which is nearly always — the XWiki pool is
+comparator/ordering arithmetic). Two branches that are exact **negations** of each other collapse to
+one local plus a unary minus, which clears both flagged ternaries in one edit.
+
+The caveat is that this is a **readability judgement, not a mechanical fix**: the reviewer has to
+agree that the invented name reads better than the expression it replaces. Ship it on its own branch
+rather than inside a mechanical batch, so a disagreement about the naming cannot hold up the rest.
 
 ## Related
 
