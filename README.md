@@ -126,6 +126,10 @@ ln -s "$XWIKI_LLM_HOME/xwiki/opencode/plugins/xwiki-line-endings.js" ~/.config/o
   - `xwiki-knowledge` — read and extend the OKF knowledge base (declarative XWiki knowledge).
   - `xwiki-build` — canonical Maven build/test commands.
   - `xwiki-pull-request` — conventions for creating a PR (template, commit format, squash/backport).
+  - `xwiki-review` — multi-angle XWiki-aware review of a PR, a commit range or the working tree: one
+    specialist reviewer per angle (conventions, architecture, backward compatibility, defensive
+    conventions, performance, tests, accessibility, i18n/UX, documentation, data & migration, spec
+    conformance), each finding confidence-scored and dropped below the bar before anything is posted.
   - `xwiki-jira` — view/search/create/update/transition issues on jira.xwiki.org (jira-cli or REST).
   - `xwiki-test-guidelines` — testing best practices and the XWiki test frameworks.
   - `xwiki-javadoc` — write clear, useful Javadoc following the XWiki Java Code Style and Oracle conventions.

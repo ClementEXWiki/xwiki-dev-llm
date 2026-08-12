@@ -8,10 +8,13 @@
 //      plugin, opencode config comment).
 //   4. Every OKF topic file is referenced in xwiki/okf/index.md AND in the injected mirror
 //      xwiki/instructions/xwiki-org.md.
+//   5. Every `okf/...md` path a skill cites actually exists. Skills delegate their rules to the OKF
+//      rather than restating them, so a renamed or deleted topic would otherwise leave a skill
+//      pointing at nothing — and a reviewer that cannot read its rule source fails silently.
 // Node built-ins only. Run from anywhere: `node scripts/validate.mjs`.
 // Exit 0 = all invariants hold; exit 1 = violations (each printed on its own line).
 
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, basename } from "node:path";
 
@@ -82,6 +85,18 @@ for (const abs of walk(okfRoot)) {
   }
   if (!orgMd.includes(base)) {
     errors.push(`xwiki/instructions/xwiki-org.md: OKF topic '${base}' is not referenced in the mirror map`);
+  }
+}
+
+// ---- Invariant 5: OKF paths cited by skills resolve ------------------------------------------
+// Matches `okf/<dir>/<topic>.md` wherever it appears in a SKILL.md, in backticks or bare.
+const okfRefPattern = /okf\/[a-z0-9-]+\/[a-z0-9-]+\.md/g;
+for (const skill of skills) {
+  const skillMd = read(`xwiki/skills/${skill}/SKILL.md`);
+  for (const ref of new Set(skillMd.match(okfRefPattern) ?? [])) {
+    if (!existsSync(join(repoRoot, "xwiki", ref))) {
+      errors.push(`xwiki/skills/${skill}/SKILL.md: cites '${ref}', which does not exist`);
+    }
   }
 }
 
