@@ -88,6 +88,17 @@ other's context. Each gets the context pack, its own brief below, and this share
 > breaks, cited by path or URL | why it matters in practice`. Severity is `blocker`, `major` or
 > `minor`.
 >
+> Cite the **terminal** source — the file or page where the rule's words actually are. Some skills
+> are only *pointer* files: they hold a list of URLs rather than the rules themselves. When your
+> rule lives behind such a pointer, follow it, and cite both hops
+> (`xwiki-test-guidelines/SKILL.md:11 → <URL>`), quoting from the page. Citing the pointer file
+> alone gets the finding thrown out in §5, because the words are not in it.
+>
+> Quote the rule with **any clause that limits its scope** — the file types it applies to, the
+> module kinds it excludes, the "unless" at the end. A quote cut off before its restriction reads
+> as a broader rule than the one written down, and a finding resting on that reading is a false
+> positive.
+>
 > A finding is only worth reporting if a competent XWiki committer, reading it, would change the
 > code. Report **nothing** rather than padding. Zero findings is a normal, good outcome.
 >
@@ -115,6 +126,14 @@ The OKF ships inside this plugin at `okf/` — resolve it from this skill's dire
 opencode `$XWIKI_LLM_HOME/xwiki/okf/`). Give every agent the resolved absolute path in its brief;
 an agent that cannot read its sources must report that as its single finding and stop, never fall
 back on its own idea of what XWiki requires.
+
+**Not every source holds its own rules.** An OKF topic states its rules inline, but a skill may be a
+*pointer* file — `xwiki-test-guidelines/SKILL.md` is twenty-odd lines that mostly name URLs on
+dev.xwiki.org, and the testing strategy an angle is asked to enforce is on the far side of those
+links. Reading only the pointer leaves that angle with nothing to enforce, which is the same silent
+failure a stale paraphrase causes. So when a brief names a skill, load it **and** follow the links
+that carry the rules the brief asks about; tell the reviewer in its brief that the skill may be a
+pointer and that a `WebFetch` of the page it names is part of reading its sources, not exploring.
 
 A handful of checks below have **no OKF or skill home** and are therefore stated here. Each is
 marked *(skill-owned)*. That marking is a to-do list, not a licence: anything general enough to
@@ -164,6 +183,11 @@ unbounded cache, and per-request work whose result never changes.
 `xwiki-increase-test-coverage` when a module's tests changed. Look at: what behaviour the change
 introduces and whether a test now covers it, which level of test was chosen, and — for functional
 tests — the patterns those skills call out as flicker-prone.
+
+`xwiki-test-guidelines` is a pointer file: the rule for **which level of test to write** is not in
+it but on the page it links, `dev.xwiki.org/.../Community/Testing/#HTestingStrategy`. Fetch that
+page before judging a test-level choice, and cite it as the terminal source. Judging the level from
+the skill alone means judging it from nothing.
 
 **Accessibility.** *(skill-owned — the OKF has no accessibility topic yet; adding one under
 `conventions/` would let this brief shrink to a citation like the others.)*
@@ -215,6 +239,20 @@ confidence score 0–100 using this rubric verbatim:
 
 For a finding citing a rule, the skeptic must **open the cited file and confirm the rule actually
 says that**. A citation that does not check out scores 0.
+
+Two ways that check goes wrong, both of which have happened, and both of which fail toward a silent
+0 rather than a visible mistake:
+
+- **The cited file is a pointer.** If the words are not in it, look for a link that would carry them
+  — a `dev.xwiki.org` URL in the skill, a `verify:` recipe in an OKF topic — and follow **one**
+  hop before scoring. Only score 0 for a bad citation once the pointer has been followed and the
+  rule is still not there. A rule quoted accurately from the page a skill points at is properly
+  cited even when the finding labelled it with the skill's path; score the substance, and note the
+  mislabelling.
+- **The quote is real but truncated.** Read the whole sentence and the lines around it. A rule that
+  opens broadly and then narrows ("… in `.xml`, `.vm`, `Translations` documents, or
+  `ApplicationResources*.properties`") does not support a finding about a file type it excludes. If
+  the restriction is what decides the finding, say so explicitly and score 0.
 
 **Drop everything below 80.** If nothing survives, say so — that is a good review, not a failed one.
 Cap the report at the 10 highest-scoring findings and state the count that was truncated.
