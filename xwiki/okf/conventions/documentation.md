@@ -2,21 +2,26 @@
 title: XWiki documentation conventions (Documentation Guide)
 stability: durable
 summary: The rules for xwiki.org documentation — Diataxis page types & audiences, title/page-name
-  rules, per-type content rules (incl. the mandatory result step closing a How-to/Tutorial), showing
+  rules, per-type content rules (a How-to opening on a link to an Explanation, a screenshot on *most*
+  steps and a mandatory one on the result step, a topic page being an Explanation that links to its
+  Extensions-wiki page), showing
   rather than only telling — screenshots for User/Admin pages, code examples for Developer ones,
   architecture/concept diagrams for Explanations, and when *not* to force a visual, how much belongs on
   one page (granularity, keeping verbosity low, a hub page routing rather than narrating & how
   duplication is actually detected), the page-structure xobject fields (Highlights/More/Related and their exact
   semantics), documentation style (incl. never hard-wrapping prose — on xwiki.org pages and forum
-  posts alike), attachment/image/video rules (incl. webm + the `{{embed}}` macro),
-  page location, version-perspective and `{{version}}` rules, the XWiki syntax traps that silently
-  mis-render, and navigation-order pinning. Handling the *original* page after a migration is split
+  posts alike), attachment/image/video rules (incl. webm + the `{{embed}}` macro, what `caption` is
+  and is *not* for, and drawing the red box as an overlay so no ancestor clips it),
+  page location — settled with the developer up front, as concrete alternatives — version-perspective
+  and `{{version}}` rules, the XWiki syntax traps that silently
+  mis-render (incl. linking a farm subwiki by URL instead of `doc:<wiki>:<ref>`), and navigation-order
+  pinning. Handling the *original* page after a migration is split
   out into [[documentation-migration]]; deleting any page (backlinks first) into [[page-deletion]]. The
   live Documentation Guide is the evolving source of truth; prefer it whenever a detail here is
   borderline or missing.
 sources:
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide
-  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/ApplyDiataxis/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/Diataxis/ApplyDiataxis/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/ChooseRightLocation/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/CreateNewDocumentation/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/CreateLandingPages/
@@ -30,6 +35,7 @@ sources:
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/Versioning/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/SaveChanges/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/WorkingAttachments/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/WorkingAttachments/wcag/
   - https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/create-documentation-page/page-structure/
   - https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/documentation-xwiki-org/page-structure-xwikiorg/
   - https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/version-macro/
@@ -94,7 +100,9 @@ page even though existing pages follow it, so it is worth adding upstream.
 
 **Titles and page names must not contain the page type** — no "How to", "Explanation", "Reference",
 "Tutorial", etc. These are **reserved terms**: the type is already conveyed by the content, the
-structure and the badge, so repeating it is redundant. Per the guide's
+structure and the badge, so repeating it is redundant. Nor may they repeat the **audience**: a topic
+page is titled just "AntiSpam" under `…admin.` *and* under `…dev.` — never "AntiSpam for Developers" —
+since the path and the badge already carry it. Per the guide's
 [Page Titles and Page Names](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationStyle/PageTitlesNames/)
 page.
 
@@ -118,14 +126,27 @@ result, a bookmark or a link, none of which carry the surrounding context. Same 
 - **How-to / Tutorial** — every step **starts with a verb** and is an item of a **numbered list**.
   Do **not** add extra explanations inside the steps; reader questions and clarifications go in the
   **FAQ** field instead. Tutorials may include short concrete examples.
-- **The last step of a How-to / Tutorial shows the result.** A procedure that ends on the last action
-  leaves the reader unable to tell whether it worked. Close with a step that *shows what they should now
-  see* — "The macro is inserted in the page, as follows:" plus a **screenshot** (or, for a Developer
-  page, the produced output). This is a step of the numbered list, not a trailing paragraph, so it does
-  not violate the one-short-intro / no-explanations-in-steps rules. A How-to whose numbered list stops
-  at "Click Save" is incomplete, and nothing in the automatic checks says so.
-- **Reference** — prefer **tables**, keep information concise; use **code examples** for API references.
-- **Explanation** — explain concepts, limitations, consequences, and background.
+  Its **opening sentence** says what the reader will achieve and **links to a relevant Explanation**.
+- **Most steps carry a screenshot** — skip only those a picture adds nothing to (a generic *Click
+  Edit* / *Click Save*, or a control already boxed in the previous step's image). **One screenshot on
+  a seven-step UI procedure is a miss**, even though the page technically has one.
+- **The last step shows the result, and its screenshot is mandatory.** A procedure that ends on the
+  last action leaves the reader unable to tell whether it worked. Close with a step that *shows what
+  they should now see* — "The macro is inserted in the page, as follows:" plus the screenshot (or, for
+  a Developer page, the produced output). Being a list step, it breaks neither the one-short-intro nor
+  the no-explanations-in-steps rule. A How-to stopping at "Click Save" is incomplete, and no automatic
+  check says so.
+- **Reference** — prefer **tables**, keep information concise; use **code examples** for API
+  references, documenting each element's parameters, types, supported/default values and return value.
+- **Explanation** — explain concepts, limitations, consequences, and background; link to the How-tos
+  applying the concept and the References pinning down its details.
+- **A topic page** — top of a tree, with children — **must be an Explanation whose first sentence
+  links to its Extensions-wiki page** (the one named by the tree's Technical ID).
+- **Several routes to one goal** (several installation methods, say) → **one How-to per route, plus an
+  Explanation above them** helping the reader choose.
+
+Source: the guide's
+[Apply Diataxis](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/Diataxis/ApplyDiataxis/).
 
 ### Show, don't only tell — images, code and diagrams
 
@@ -135,7 +156,7 @@ replace a paragraph:
 
 - **User and Administrator pages: screenshots.** Every UI element or screen the reader has to find is
   worth a **screenshot** — it beats a paragraph of "click the three-dot menu at the top right of the
-  second panel". A whole page of steps through a UI with **not one screenshot** is the typical miss.
+  second panel". On a procedure this is per-step; see "Content rules per type" above.
 - **Developer pages: code examples.** A runnable snippet (script macro, Java API call, REST request,
   configuration file) shows in five lines what a paragraph struggles to say. Use the code macro with an
   explicit `language`.
@@ -286,7 +307,7 @@ The fields:
   unprefixed id renders no badge. Empty when no extension applies (e.g. installation pages).
   **Older pages carrying an unprefixed id are the non-conformant ones** — do not "fix" a prefixed id
   to match them. The generic
-  [Apply Diataxis](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/ApplyDiataxis/) page does
+  [Apply Diataxis](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/Diataxis/ApplyDiataxis/) page does
   not state this xwiki.org-specific prefix; the authority is
   [Page Structure on xwiki.org](https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/documentation-xwiki-org/page-structure-xwikiorg/).
 
@@ -339,10 +360,14 @@ These rules decide whether a page renders as intended, so they belong to authori
 
 - **Attachment names follow the page-name rules** — kebab-case, and a **lowercase extension**:
   `Image.png` and `Image.PNG` are two different attachments with separate version histories.
-- **Insert an image with the `{{image}}` macro**, always with an `alt` (WCAG), and optionally a
-  `caption` — a good place for the product version the screenshot was taken in:
-  `{{image reference="…" size="large" alt="…" caption="…"/}}`. Present the image *before* a
-  description of what it shows.
+- **Insert an image with the `{{image}}` macro**, always with an `alt` (WCAG):
+  `{{image reference="…" size="large" alt="…"/}}`. Present the image *before* a description of what
+  it shows. Optional `title` adds context but never replaces `alt`; optional `caption` shows brief text
+  under the image and is for **meaningful context only — never the version the screenshot was taken
+  in**, a misuse the guide's
+  [WCAG](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/WorkingAttachments/wcag/) page names
+  explicitly (the capture version belongs nowhere on the page: a stale screenshot is replaced, not
+  dated).
 - **In the `documentation` space `size` is mandatory and `width` is forbidden.** The quality checker
   rejects the image otherwise: *"Best practice: The Image macro, when used in the "documentation"
   space, must specify a 'size' parameter and no 'width' one."* A screenshot therefore **cannot** be
@@ -363,6 +388,14 @@ These rules decide whether a page renders as intended, so they belong to authori
   The capture-width constraint comes from the checker rule above; the rest is the guide's
   [Working with Attachments](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/WorkingAttachments/)
   "Screenshot Standards" section.
+- **Draw the red box as a `position: absolute` div appended to `document.body`** (at the target's
+  `getBoundingClientRect()` plus the scroll offsets), never as a CSS `outline`/`box-shadow` on the
+  target: those are **clipped by any ancestor with `overflow: hidden`** — XWiki's
+  `.xwikipanelcontents` is one — leaving a three-sided box nothing else flags. Then assert the box
+  lies inside the captured region (one touching the viewport edge is cut by the capture itself), and
+  check the saved PNG holds a **closed** rectangle: two long horizontal red runs of equal extent
+  joined by verticals. A whole-image red bounding box is not a usable test — red page content
+  stretches it.
 - **Never generate an example of rendered output — screenshot it.** A generated example (calling
   `{{displayIcon}}` to show an icon, say) silently changes when the product does.
 - **Several images side by side go in the Gallery macro**, so variations don't clutter the page.
@@ -392,6 +425,14 @@ page.
 Then place the page under the **most relevant existing topic / subtopic** of the `/documentation`
 tree, matching its audience (User / Admin / Developer) and type. Create a new top-level topic **only**
 when no existing topic fits.
+
+**Have the developer confirm the placement before creating the first page**, and present it as **two
+or three written-out page trees** (page names, titles, types, audiences) with each one's cost and your
+recommendation — not as an open question. Placement is expensive to undo once pages are saved and
+linked (relocating is a rename/move with its own backlink handling, [[page-deletion]]), and the rules
+under-determine it: the same extension can defensibly be filed audience-first
+(`…admin.<ext>`/`…user.<ext>`/`…dev.<ext>`) or as one topic tree with the other audiences nested under
+it. For a conversion, the split into pages *is* that decision.
 
 ## Versioning and perspective
 
@@ -499,6 +540,15 @@ rather than an error, which is why they are worth listing.
 - **`##…##` does not work around a URL.** `##http://localhost:8080/##` renders as
   `http://localhost:8080/#` plus a stray `#`, because the autolinker eats one hash. Use
   `{{code language="none"}}` for URLs.
+- **Never link a page of the xwiki.org farm by URL — use `doc:<wiki>:<ref>`.** `extensions`, `dev`,
+  `design`, `snippets`, `rendering`, `commons`, `contrib`, `cristal` and `test` are **subwikis of the
+  same farm** as `www.xwiki.org` (`GET /rest/wikis` lists them), so write
+  `[[label>>doc:extensions:Extension.Some Extension.WebHome]]` and let XWiki generate the URL. The
+  absolute form renders as an *external* link, breaks on any move, and — the damaging part — is
+  **never indexed as a backlink** ([[page-deletion]]), so the target can be deleted leaving it
+  dangling. The trap: neighbouring conventions legitimately *do* use absolute URLs (the ExtensionClass
+  `website` field, the `ExtensionLD` URL in [[documentation-migration]]), which makes carrying that
+  form into page content feel consistent.
 - **Never escape the hashes of a monospace span.** `~#~#1/1~#~#` renders as a *literal* `##1/1##`.
   Plain `##1/1##` works fine, even directly after a sentence.
 - **Never put a bare URL in a heading** — the autolinker absorbs the trailing punctuation into the

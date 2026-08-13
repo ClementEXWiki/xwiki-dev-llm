@@ -48,6 +48,12 @@ When a session establishes a fact worth keeping, run the **gate checklist** befo
 - [ ] **Right home** — a convention/architecture/process *fact* → the matching `okf/` subdirectory;
       an *architectural decision* (a choice made between options, with rationale) → an **ADR** in
       `okf/decisions/` (see below); a task procedure → a skill, not the OKF.
+- [ ] **Minimal** — the OKF is read into context, so **every line costs tokens in every session that
+      loads the file**. Write the rule plus the non-obvious trap and stop: no restating it in other
+      words, no example the reader does not need, no rationale beyond the clause that makes it stick.
+      When the new fact touches an existing bullet, **edit that bullet or cross-reference it** rather
+      than stating the fact in two sections. Re-read your diff and cut whatever can go without losing
+      a rule or a trap.
 
 Then:
 
