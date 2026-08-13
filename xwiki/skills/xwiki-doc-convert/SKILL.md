@@ -23,6 +23,11 @@ titles/page-names, page-structure fields, style, location, versioning) plus
 **`okf/conventions/documentation-migration.md`** (what to do with the *original* page once its
 content has moved). Read those for the rules; this skill covers only what is specific to converting.
 
+A conversion is also the case the **`tools/` scripts of `xwiki-doc-writing`** exist for: several pages
+drafted together as data, linted offline, published idempotently, then audited. Start from
+`xwiki-doc-writing/tools/README.md` — hand-rolling REST calls for a whole tree re-earns every trap it
+already handles.
+
 ## Conversion flow
 
 0. **Ask the developer the four setup questions from `xwiki-doc-writing` first** (that skill's "Before

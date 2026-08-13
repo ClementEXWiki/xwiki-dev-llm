@@ -264,7 +264,10 @@ and a link to its REST resource — feed that link back into use case 1 to fetch
   `curl --data-urlencode` handles bodies; encode path segments yourself.
 - Editing **xwiki.org documentation** pages? The tree's own specifics — the `DocApp` xobjects, reading
   the doc-quality checker's findings, navigation pinning, hidden `{{display}}` fragments — are in the
-  OKF's `conventions/documentation-mechanics.md`, not here.
+  OKF's `conventions/documentation-mechanics.md`, not here. For more than a one-field edit, the
+  `xwiki-doc-writing` skill ships a client and a publish/audit CLI in its `tools/` directory that
+  already handle the traps below (session-bound token, read-back asserts) — prefer them over fresh
+  `curl` calls.
 - On a write failure, add `-i` and read the status line and `xwiki-user` header — a `401` almost
   always means you posted as guest (wrong/missing `-u`), a `403` means either the authenticated user
   lacks edit rights on that page or (body `Invalid or missing form token.`) a missing/stale CSRF
