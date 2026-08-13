@@ -34,6 +34,8 @@ sources:
   - https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/documentation-xwiki-org/page-structure-xwikiorg/
   - https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/version-macro/
   - https://www.xwiki.org/xwiki/bin/view/Macros/SCM
+  - https://www.xwiki.org/xwiki/bin/view/Documentation/UserGuide/Features/XWikiSyntax/?syntax=2.1&section=Links
+  - https://www.xwiki.org/xwiki/bin/view/Documentation/UserGuide/Features/XWikiSyntax/?syntax=2.0&section=Links
   - https://diataxis.fr/
 ---
 
@@ -506,16 +508,17 @@ rather than an error, which is why they are worth listing.
   consecutive lines.
 - **Angle brackets inside `##…##` are safe** — `##<prefix>_xwiki-data##` renders as literal monospace.
   XWiki 2.1 does not accept raw HTML outside `{{html}}`, so `<…>` placeholders need no escaping.
-- **Section anchors barely work on www.xwiki.org.** The syntax is
-  `[[label>>doc:PageA.PageB||anchor="HMyheading"]]` (the id is `H` + the heading with only
-  alphanumerics kept), but the fragment **is only serialized when a `queryString` is also present** —
-  `||anchor="…"` alone never reaches the `href`; it surfaces as a
-  `data-xwiki-translated-attribute-anchor="…"` attribute on the `<a>` instead, so writing it is
-  harmless (the link still resolves, just to the top of the page) but it does not take the reader to
-  the section. Appending `#HMySection` to the
-  reference is **not** an alternative: it is parsed as part of the page name and yields a red
-  `wikicreatelink` to a non-existent page. Until this is fixed, **link to the page and make the section
-  title the link label** so the reader knows what to look for on arrival.
+- **Section anchors work, but the syntax differs per page syntax — check which one the page uses.**
+  The anchor id is `H` + the heading text with only alphanumerics kept (so `== My heading ==` gives
+  `HMyheading`). In **xwiki/2.1** the anchor is a link *parameter*:
+  `[[label>>PageA.PageB||anchor="HMyheading"]]`. In **xwiki/2.0** it is appended to the *reference*
+  itself: `[[label>>PageA.PageB#HMyheading]]`. Both forms serialize the fragment into the rendered
+  `href`. Do not carry one form over to the other syntax: on a 2.1 page, `#HMyheading` appended to the
+  reference is parsed as part of the page **name** and yields a red `wikicreatelink` to a non-existent
+  page. A page's syntax is not guessable from its age or location — read it (the `syntax` field of
+  `GET …/rest/…/pages/{page}?media=json`, or the editor's syntax selector) before editing links.
+  Anchors survive on cross-wiki references too — `[[label>>xwiki:Space.Page||anchor="HFoo"]]` from a
+  subwiki keeps its fragment.
 - **Copy-pasted content carries non-breaking spaces (`\xa0`)**, which defeat exact-string matching and
   look like double spaces. Match on line prefixes rather than whole-string equality.
 - **An image inside a list item must be wrapped in `(((…)))`.** Writing the `{{image}}` macro on its
