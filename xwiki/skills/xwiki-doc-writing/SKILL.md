@@ -47,13 +47,39 @@ tool). Question headers and options:
    one**, **No — skip the screenshots**. Suggest the [Documentation Resources](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationResources/)
    XARs to get realistic content in it. Pages need images (see `okf/conventions/documentation.md`),
    and xwiki.org itself is **not** the place to capture them. Don't *ask* which **version** it runs —
-   read it from the `xwiki-version` header of any `/rest` response (the screenshots must show the
-   latest skin, and the version belongs in the image `caption`).
+   read it from the `xwiki-version` header of any `/rest` response, and check it is recent enough for
+   the screenshots to show the latest skin. The version is **not** recorded on the page: putting it in
+   an image `caption` is a misuse the guide names explicitly (`okf/conventions/documentation.md`).
 4. **`Local login`** — credentials for the local instance: **`Admin`/`admin` (Recommended)**, the
    default, or **Other**. These are never the xwiki.org credentials.
 
 If the developer declines the local instance, say plainly which images the page will be missing rather
 than shipping a page with none.
+
+**Placement is a fifth question, asked separately** — once you know what pages there will be, and
+before the first one is created. It is not a yes/no: propose two or three **written-out page trees**
+with their costs and your recommendation, per "Choose the right location" in
+`okf/conventions/documentation.md`. Getting it wrong is a rename/move with backlink handling, not an
+edit.
+
+## Tooling — `tools/`
+
+For anything larger than a single page edit, use the scripts in this skill's `tools/` directory rather
+than hand-rolling REST calls: draft the pages as a `pages.py` data module, then
+
+```bash
+set -a; . ~/.xwiki-credentials; set +a
+python3 tools/docpages.py lint      # offline; the mechanical rules of documentation.md
+python3 tools/docpages.py save      # idempotent publish, every field read back
+python3 tools/docpages.py pin       # child order, verified via the tree service
+python3 tools/docpages.py verify    # audit + BOTH doc-checker surfaces
+```
+
+plus `tools/docshot.sh` and `tools/checkredbox.py` for screenshots. `tools/README.md` documents the
+page-set contract and, for each step, the silent failure it protects against — a lost `202`, an object
+write blanked by a `#`-less field name, a finding that creates no violation object, a red box clipped
+into three sides. Read it before writing the first page; the review checklist below still applies to
+everything a regex cannot decide.
 
 ## Flow — create a new page
 
