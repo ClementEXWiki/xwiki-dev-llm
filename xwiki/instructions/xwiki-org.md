@@ -93,7 +93,8 @@ OKF map (topic files under `okf/`, described in `okf/index.md`):
   `size` in the `documentation` space, `caption` is never the capture version, the red box is an
   overlay not an `outline`, `webm` + the `{{embed}}` macro),
   **placement confirmed with the developer up front as concrete trees**, versioning + the `{{version}}`
-  macro incl. documenting a feature ahead of its release, XWiki syntax traps, navigation pinning;
+  macro incl. documenting a feature ahead of its release, XWiki syntax traps (incl. the links that must
+  stay absolute URLs), navigation pinning;
   applied by `xwiki-doc-writing` / `xwiki-doc-convert`), `documentation-migration`
   (migration only: handling the original page — stripping its prose, deleting its leftover
   attachments, triaging its backlinks), `page-deletion` (**before deleting ANY page on xwiki.org —
