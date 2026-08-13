@@ -1,9 +1,15 @@
 ---
 name: xwiki-review
-description: Run a multi-angle, XWiki-aware review of a change set — a pull request, a range of commits pushed directly to a branch, or the working tree. Fans out one specialist reviewer per angle (conventions, architecture, backward compatibility, security, performance, tests, accessibility, i18n/UX, documentation, data & migration, spec conformance), scores every finding for confidence, drops everything below the bar, and posts one grouped comment. Use when asked to review a PR or a set of commits, when a CI routine invokes an automated review, or before opening a PR. For opening the PR itself use xwiki-pull-request; for the conventions it enforces use xwiki-knowledge; for Sonar findings use xwiki-fix-sonarqube-issue.
+description: "EXPLICIT INVOCATION ONLY — never load this skill for a plain review request. A deliberately expensive multi-angle, XWiki-aware review of a change set (pull request, commit range, or working tree): it fans out one specialist reviewer per angle (conventions, architecture, backward compatibility, security, performance, tests, accessibility, i18n/UX, documentation, data & migration, spec conformance), confidence-scores every finding, drops everything below the bar, and posts one grouped comment. Use ONLY when the user names it — `/xwiki-review`, \"run xwiki-review\", \"do the multi-angle/full/deep review\" — or when a CI routine invokes it by name. Do NOT use it for \"review this PR\", \"review my changes\", \"review the working tree\" or any other unqualified review request: those are answered directly, without this skill, because it costs far more tokens and time than a normal review. For opening the PR itself use xwiki-pull-request; for the conventions it enforces use xwiki-knowledge; for Sonar findings use xwiki-fix-sonarqube-issue."
 ---
 
 # XWiki multi-angle review
+
+**This skill is opt-in.** It is never the answer to a plain "review this" — a normal review is done
+directly, without it. It runs only when the developer asks for it by name (`/xwiki-review`, "run
+xwiki-review", "the full multi-angle review") or when a CI routine invokes it. It spawns eleven
+reviewers over the same diff, so it costs an order of magnitude more tokens and wall-clock than a
+single-pass review; that price only buys something when the developer has decided they want it.
 
 A review that is *XWiki-aware*: every finding must trace to a rule this project actually holds —
 an OKF file, a skill, a `CLAUDE.md`, or a code fact — never to generic best-practice folklore.
