@@ -82,14 +82,17 @@ OKF map (topic files under `okf/`, described in `okf/index.md`):
   `compatibility.js`; WCAG 2.2 AA), `translations` (key lifecycle: en_US only, registering a new
   bundle, deprecating/renaming a key, never moving one), `dependencies` (the checklist a new
   third-party dependency must pass), `documentation` (xwiki.org doc rules —
-  Diataxis, titles, the **result step** closing a How-to/Tutorial, **show don't only tell** (screenshots
+  Diataxis, titles, the **result step** closing a How-to/Tutorial and a **screenshot on most steps** of
+  a UI procedure, **show don't only tell** (screenshots
   for User/Admin, code examples for Developer, diagrams for Explanations — without forcing it),
   page granularity incl. **low verbosity** and
   a hub page routing rather than narrating + how cross-page duplication is detected, page structure incl.
   Highlights/More/Related semantics, style incl. **never hard-wrapping prose** (one paragraph = one
   unbroken line, on xwiki.org pages and forum posts alike; 120 chars is a Java-source rule),
   attachments/images/videos (`{{image}}` needs a mandatory
-  `size` in the `documentation` space, `webm` + the `{{embed}}` macro), versioning + the `{{version}}`
+  `size` in the `documentation` space, `caption` is never the capture version, the red box is an
+  overlay not an `outline`, `webm` + the `{{embed}}` macro),
+  **placement confirmed with the developer up front as concrete trees**, versioning + the `{{version}}`
   macro incl. documenting a feature ahead of its release, XWiki syntax traps, navigation pinning;
   applied by `xwiki-doc-writing` / `xwiki-doc-convert`), `documentation-migration`
   (migration only: handling the original page — stripping its prose, deleting its leftover

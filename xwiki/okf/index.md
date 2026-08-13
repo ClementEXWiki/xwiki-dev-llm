@@ -58,7 +58,9 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
   requests, a masked `toString()`, a `Class` from an extension jar), and the `java:S2629` exemptions.
 - **documentation** — xwiki.org documentation rules: Diataxis types & audiences, title/page-name
   rules (incl. title case), per-type content rules — including the **result step** that must close a
-  How-to/Tutorial and **show, don't only tell** (aim for screenshots on User/Administrator pages, code
+  How-to/Tutorial **with a screenshot**, a **screenshot on most steps** of a UI procedure, and the
+  **topic page** being an Explanation linking to its Extensions-wiki page,
+  and **show, don't only tell** (aim for screenshots on User/Administrator pages, code
   examples on Developer ones, an architecture or concept diagram on an Explanation — plus when not to
   force a visual), how much belongs on one page (a How-to is one procedure with a
   one-paragraph intro; one fact, one page; **keep verbosity low** since readers skim, and a **hub page
