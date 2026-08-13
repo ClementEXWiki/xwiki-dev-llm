@@ -75,7 +75,13 @@ role holders): the relevant file gives a `verify:` recipe instead (read `pom.xml
 OKF map (topic files under `okf/`, described in `okf/index.md`):
 
 - `okf/conventions/` — `code-style`, `code-comments`, `commit-messages`, `versioning`,
-  `backward-compatibility`, `security`, `performance`, `logging`, `documentation` (xwiki.org doc rules —
+  `backward-compatibility`, `security`, `performance`, `logging`,
+  `naming` (Maven groupId/artifactId + `-api`/`-ui`/`-webjar`/`-node-*`/`-test*` qualifiers, npm
+  packages, `xwiki.properties` properties, UIXP/UIX ids, skins/icons), `frontend` (JavaScript as
+  `xwiki-`-prefixed AMD modules in WebJars/JSX, never inline; the Velocity-in-minified-JS trap;
+  `compatibility.js`; WCAG 2.2 AA), `translations` (key lifecycle: en_US only, registering a new
+  bundle, deprecating/renaming a key, never moving one), `dependencies` (the checklist a new
+  third-party dependency must pass), `documentation` (xwiki.org doc rules —
   Diataxis, titles, the **result step** closing a How-to/Tutorial, **show don't only tell** (screenshots
   for User/Admin, code examples for Developer, diagrams for Explanations — without forcing it),
   page granularity incl. **low verbosity** and
@@ -113,7 +119,9 @@ OKF map (topic files under `okf/`, described in `okf/index.md`):
   UI — endpoints for failing tests, changesets, built SHA and artifacts; the Cloudflare trap where a
   spoofed browser User-Agent 403s and plain `curl` succeeds; `FAILURE` vs `UNSTABLE`; and why a test
   case's `age` is not a reliable first-failure).
-- `okf/processes/` — `release`, `security-policy`.
+- `okf/processes/` — `release`, `security-policy` (incl. merging a security PR by hand from the
+  advisory's private fork), `module-lifecycle` (`git subtree` extract/merge-in, retiring to the Attic,
+  top-level extensions).
 - `okf/decisions/` — ADRs (the *why* behind durable architectural choices).
 
 **Capturing learnings:** when a task relies on or fetches a durable, generic XWiki fact whose topic

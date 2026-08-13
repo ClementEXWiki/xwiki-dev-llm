@@ -28,6 +28,9 @@ time. Lifecycle rules:
   N.1 must come out of unstability before N+2 Milestone 1.
 - Developers are encouraged to remove `@Unstable` earlier, as soon as the API is considered stable;
   the normal deprecation mechanism then applies for any later change.
+- The build **enforces** both halves automatically: it fails when an `@Unstable` has outlived its
+  cycle, and it checks that a correctly-formatted `@since` is present (that tag is what dates the
+  annotation).
 
 ## Evolving an interface without breaking it
 
@@ -36,14 +39,30 @@ creating a new interface:
 
 - A default method preserves binary compatibility for existing implementors.
 - The default implementation should generally **not** throw (e.g. avoid
-  `throw new UnsupportedOperationException(...)`), since callers of the default would then fail.
+  `throw new UnsupportedOperationException(...)`), since callers of the default would then fail — that
+  is not backward compatibility. Two exceptions: the new method **declares a checked exception**, or it
+  documents a runtime exception the call chain is supposed to handle; throwing those from the default
+  is fine.
+
+The alternative — a new interface plus deprecation of the old one — is discouraged: callers then have
+to support both interfaces.
 
 ## Deprecation
 
-Deprecated APIs are re-exported from `-legacy` modules (see [[code-style]]); never put new logic
-there. Tag deprecations with `@Deprecated(since = "…")` using the [[versioning]] format.
+Deprecating happens in **two steps**:
+
+1. Add `@Deprecated` **and** the `@deprecated` Javadoc tag naming the replacement, with the version
+   ([[versioning]] format). The code stays where it is.
+2. Once no XWiki code uses the deprecated API any more — which can be immediately — move it to the
+   repo's `-legacy` module.
+
+APIs are **never removed from a legacy module** by default; doing it anyway is decided case by case with
+a VOTE. Never put new logic in a legacy module (see [[code-style]]).
 
 ### How `-legacy` modules work
+
+Each repo hosts its legacy modules in one place: `xwiki-commons-core/xwiki-commons-legacy/`,
+`xwiki-platform-core/xwiki-platform-legacy/`, `xwiki-rendering-legacy/`.
 
 A `-legacy` module is the backward-compatibility companion of a main module. It re-exports the same
 `xwiki.extension.features` as the main module and, when it must keep an API that the main module has
@@ -67,6 +86,17 @@ Removing the API from the main module is itself a Revapi break, so it needs a `<
 ignore (`java.method.removed` / `java.class.removed`) justified by the move to legacy. The full
 procedure — migrate callers, remove, re-add, ignore, ban in the WAR, verify — is the `xwiki-legacy`
 skill.
+
+## Choosing the `<criticality>` of a Revapi ignore
+
+Every ignore added to a repo's `<revapi.differences>` carries a criticality, and **it feeds the release
+notes** (`allowed` items are not listed there), so it is not cosmetic:
+
+| Criticality | When |
+|---|---|
+| `highlight` | a real break we still want to do — existing code using the API will or may fail at runtime, so users must be warned |
+| `documented` | a real break, but on `@Unstable` code |
+| `allowed` | not a break in our opinion: a semantically-"breaking" but harmless change (e.g. adding an annotation), a Revapi bug/limitation, or an API merely moved to another Maven module (the legacy case) |
 
 ## Where Revapi does and does not look
 

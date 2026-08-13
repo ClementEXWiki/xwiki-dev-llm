@@ -509,7 +509,10 @@ rather than an error, which is why they are worth listing.
 - **Section anchors barely work on www.xwiki.org.** The syntax is
   `[[label>>doc:PageA.PageB||anchor="HMyheading"]]` (the id is `H` + the heading with only
   alphanumerics kept), but the fragment **is only serialized when a `queryString` is also present** —
-  `||anchor="…"` alone is silently dropped from the rendered `href`. Appending `#HMySection` to the
+  `||anchor="…"` alone never reaches the `href`; it surfaces as a
+  `data-xwiki-translated-attribute-anchor="…"` attribute on the `<a>` instead, so writing it is
+  harmless (the link still resolves, just to the top of the page) but it does not take the reader to
+  the section. Appending `#HMySection` to the
   reference is **not** an alternative: it is parsed as part of the page name and yields a red
   `wikicreatelink` to a non-existent page. Until this is fixed, **link to the page and make the section
   title the link label** so the reader knows what to look for on arrival.

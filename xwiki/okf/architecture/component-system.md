@@ -44,6 +44,21 @@ When injection is not possible (e.g. you need a component chosen at runtime), in
 `ComponentManager` and look the component up by role + hint. Prefer field injection wherever the
 dependency is known at development time.
 
+## Never grow `xwiki-platform-oldcore`
+
+`oldcore` is what XWiki was before the split into domain modules, and the strategy is to keep
+*extracting* code out of it. So: **do not add new code to oldcore** — put it in the relevant domain
+module, or a new one. A new module may depend on oldcore (the reverse would be a cycle); when oldcore
+turns out to need the new module, the oldcore code that uses it moves out instead. The end state is
+oldcore holding only the old Model, until the New Model replaces it and oldcore disappears.
+
+## Monitoring: expose it as a JMX MBean
+
+All XWiki monitoring APIs are implemented and exposed as **JMX MBeans**. Register them with XWiki's
+`JMXBeanRegistration` component (`this.jmxRegistration.registerMBean(mbean, "type=…,domain=…,name=…")`),
+never directly — and **unregister**: registration typically goes in the component's
+`Initializable#initialize()` and unregistration in `Disposable#dispose()`.
+
 ## Where to go deeper
 
 The component tutorial on the dev wiki and the Component Module page on extensions.xwiki.org are the

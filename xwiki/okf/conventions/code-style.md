@@ -17,8 +17,24 @@ authoritative source of truth.
 ## Formatting
 
 - **Lines must not exceed 120 characters.** This is enforced by Checkstyle in the `quality` profile.
-- **LGPL license headers** are required on every source file (validated by `license-maven-plugin`).
-  Add missing headers with `mvn license:format -B -ntp`.
+- **LGPL license headers** are required on **every** file, configuration files included (validated by
+  `license-maven-plugin`). Add missing headers with `mvn license:format -B -ntp`. The comment syntax
+  depends on the file type: `/* … */` for Java & JavaScript, `<!-- … -->` for XML & Vue, `#` for shell
+  scripts, `.properties` and YAML, `REM` for `.bat`, `##` for Velocity.
+
+## File encoding
+
+- **Java sources: ASCII characters only** — use Unicode escapes inside strings and XML entities in
+  Javadoc (there are no `@author` tags, so this is rarely a constraint).
+- **Translation files: ASCII only with Unicode escapes** (stricter than the `.properties` spec).
+- **Wiki document sources: UTF-8.**
+- Other XML files declare their encoding in the `<?xml?>` header, UTF-8 whenever possible; all other
+  textual resources are UTF-8 with as few non-ASCII characters as possible.
+
+## Rendering macros
+
+A macro for XWiki Platform is written **in Java**, not as a wiki page (wiki macros lack most of what a
+platform macro needs — see the comparison table on the dev wiki).
 
 ## Use the component system, not context passing
 
@@ -71,3 +87,5 @@ procedure is the `xwiki-fix-sonarqube-issue` skill.
 
 - [[code-comments]] — what to write (and never write) in code comments.
 - [[versioning]] — `@since` / `@Deprecated(since=…)` rules.
+- [[naming]] — Maven/npm/configuration-property/UIXP/skin/icon naming.
+- [[frontend]] — the JavaScript, HTML/CSS and accessibility equivalents of this file.

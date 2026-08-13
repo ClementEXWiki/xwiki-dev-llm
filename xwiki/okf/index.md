@@ -30,6 +30,18 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
 ### conventions/
 - **code-style** — line length (120), LGPL headers, component system, javax→jakarta, `-legacy` rules.
 - **code-comments** — comment about the code as-is; never reference history or transient links.
+- **naming** — Maven groupId/artifactId (+ the `-api`/`-ui`/`-webjar`/`-node-*`/`-test*` qualifier
+  meanings, directory = artifactId, singular form), npm package rules (private vs. public
+  `@xwiki/platform-*`), `xwiki.properties` property naming, UIXP/UIX ids, skins (bird names), icons.
+- **frontend** — JavaScript as AMD/RequireJS modules prefixed `xwiki-`, shipped as WebJars/JSX
+  ("On demand only"), never inline; the minifier trap when Velocity is mixed into JavaScript and the
+  wrapper that separates them; deprecating a JS API via `compatibility.js`; WCAG 2.2 AA.
+- **translations** — the key lifecycle: only en_US is committer-maintained (US spelling), where a
+  bundle lives and the l10n.xwiki.org + Weblate-script registration a new one needs, deprecating a key
+  in the `#@deprecatedstart` section, renaming with `#@deprecated`, and why keys are never moved.
+- **dependencies** — the checklist a third-party project must pass to enter a distribution (license is
+  non-negotiable, longevity, cadence, support, ≥3/≥1 active contributors, docs, security) + the VOTE
+  waiver.
 - **commit-messages** — summary = JIRA key + the issue's title *verbatim*, details as `*` bullets in
   the body; `[Misc]` only when there is genuinely no issue.
 - **versioning** — `@since`/`@Deprecated(since=…)` use `<X.Y.0>RC1`; current version is volatile.
@@ -164,7 +176,12 @@ Applied by `xwiki-fix-sonarqube-issue`, which owns the *procedure*.
 - **release** — how XWiki versions/releases (Commons+Rendering+Platform together); detailed steps are
   volatile pointers to the dev wiki.
 - **security-policy** — CVSS-4 severity scoring (volatile; verify) and the durable rule never to
-  reveal a vulnerability publicly until disclosure (obfuscated commits, restricted JIRA issues).
+  reveal a vulnerability publicly until disclosure (obfuscated commits, restricted JIRA issues); plus
+  merging a non-committer's security PR by hand from the advisory's private fork, never via the UI.
+- **module-lifecycle** — moving code between repos with its history: `git subtree split` to extract
+  (and what changes when the target is xwiki-contrib — contrib parent at the LTS version,
+  `xwiki.extension.features`, same version), `git subtree add` to merge in, retiring to the
+  (unsupported) Attic, and the top-level-extension criteria.
 
 ### decisions/ (ADRs)
 Architectural Decision Records — the *why* behind durable choices (context, decision, consequences),

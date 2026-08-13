@@ -30,6 +30,25 @@ XWiki repos are public, so a fix can be a zero-day signpost. Until the issue is 
 
 This is why a security fix's public commit looks deliberately mundane.
 
+## Merging a non-committer's security pull request
+
+Such a PR lives in the **temporary private fork** of the GitHub security advisory, and it is **not
+merged through the GitHub UI** — the UI gives too little control over the merge message (which must
+stay obfuscated, per the rule above). Do it by hand:
+
+```
+git remote add ghsa-xxxx-xxxx-xxxx git@github.com:xwiki/xwiki-platform-ghsa-xxxx-xxxx-xxxx.git
+git fetch ghsa-xxxx-xxxx-xxxx
+git merge --squash ghsa-xxxx-xxxx-xxxx/<branch>
+# adjust what needs adjusting (e.g. @since tags), then:
+git commit --author="Contributor Name <contributor@example.org>"   # credit the contributor
+git push
+git remote remove ghsa-xxxx-xxxx-xxxx
+```
+
+The squash commit's message defaults to every original message concatenated — replace it with one
+clean (obfuscated) message. Finish with **"Delete temporary private fork"** on the GitHub advisory.
+
 ## Severity scoring — CVSS 4 (volatile thresholds — verify)
 
 Severity is computed with a CVSS 4 calculator. As policy *structure* (re-verify the exact numbers):

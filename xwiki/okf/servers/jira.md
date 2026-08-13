@@ -66,6 +66,18 @@ Choose the **resolution** that matches reality and **assign the issue to yoursel
   `XDOCKER-83` ("Support for ARM architectures") was closed **Cannot Reproduce** once the image had
   become multi-arch as a side effect of other work, with no ARM-specific fix to point at.
 
+### Fill the two documentation fields when closing
+
+Closing an issue is also where its documentation is accounted for, so that release notes are built
+progressively instead of being reconstructed on release day. Fill **both** JIRA fields on the issue:
+the **documentation** field (the xwiki.org reference page documenting it) and the **release note**
+field (for the version(s) in Fix Version/s).
+
+- Put the literal string **`N/A`** in a field that genuinely does not apply — never leave it empty:
+  emptiness is what a JQL query looks for to find undocumented issues.
+- A bug fix with **no** user- or developer-visible impact is the `N/A` case. But a bug fix that changes
+  the user experience **still needs a release-note entry**.
+
 Set the transition + resolution with `jira-cli` (`jira issue move {KEY} "Close Issue"`) or REST
 (`POST /rest/api/2/issue/{KEY}/transitions` with
 `{"transition":{"id":…},"fields":{"resolution":{"name":"Cannot Reproduce"}}}`). **List the issue's
