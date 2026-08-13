@@ -14,6 +14,7 @@ When writing a test:
 * When writing unit tests for XWiki templates (.vm files) or XWiki pages (.xml files representing a wiki page), follow https://dev.xwiki.org/xwiki/bin/view/Community/Testing/ViewUnitTesting/
 * When writing a functional test, follow https://dev.xwiki.org/xwiki/bin/view/Community/Testing/DockerTesting/
 * For functional tests, follow the best practices defined at https://dev.xwiki.org/xwiki/bin/view/Community/Testing/#HBestPractices but also at https://dev.xwiki.org/xwiki/bin/view/Community/Testing/DockerTesting/
+* In a functional test, never call `getDriver()` from the test class — if you need it, an API is missing from a page object; add it to the page object and call that instead (see the page-object boundary rule in `okf/testing/strategy.md`).
 * For other types of tests, see https://dev.xwiki.org/xwiki/bin/view/Community/Testing/ which has sections for other types
 * After writing a test, use Maven to verify that any test written works fine. However, if the test is a functional test, ask before executing Maven since there could be an already running XWiki instance locally on the developer's machine, and the test is supposed to start one too.
 * Apply XWiki's general code best practices and code style when writing tests.
