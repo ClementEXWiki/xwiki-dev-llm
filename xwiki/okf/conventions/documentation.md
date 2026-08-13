@@ -14,8 +14,9 @@ summary: The rules for xwiki.org documentation — Diataxis page types & audienc
   and is *not* for, and drawing the red box as an overlay so no ancestor clips it),
   page location — settled with the developer up front, as concrete alternatives — version-perspective
   and `{{version}}` rules, the XWiki syntax traps that silently
-  mis-render (incl. linking a farm subwiki by URL instead of `doc:<wiki>:<ref>`), and navigation-order
-  pinning. Handling the *original* page after a migration is split
+  mis-render (incl. linking a farm subwiki by URL instead of `doc:<wiki>:<ref>`, the nine cases where an
+  absolute xwiki.org URL *is* the right form, and why a `url:` prefix is not one of them), and
+  navigation-order pinning. Handling the *original* page after a migration is split
   out into [[documentation-migration]]; deleting any page (backlinks first) into [[page-deletion]]. The
   live Documentation Guide is the evolving source of truth; prefer it whenever a detail here is
   borderline or missing.
@@ -549,6 +550,27 @@ rather than an error, which is why they are worth listing.
   dangling. The trap: neighbouring conventions legitimately *do* use absolute URLs (the ExtensionClass
   `website` field, the `ExtensionLD` URL in [[documentation-migration]]), which makes carrying that
   form into page content feel consistent.
+- **The exceptions — when an absolute xwiki.org URL is the correct form.** The rule above has real
+  exceptions, and "fixing" one of them breaks something: **(1) outside-facing pages**, whose links are
+  followed or copied off-wiki — security advisories (`SecurityAdvisoryApplication.*`) and event pages
+  whose text is sent to third parties or printed (`Main.Events.*`); **(2) pages an extension ships**,
+  rendered on every install, so the link must resolve from any wiki — the Help panel's tips in
+  `Help.Translations` (where a local edit is lost on the next upgrade anyway); **(3) values submitted to
+  a third party**, where the field content *is* a URL — the GSoC organization-profile "Blog url" /
+  "Feed url" / "Logo url"; **(4) verbatim records** of what someone said or wrote, which a rewrite
+  falsifies — `IRC.xwikiArchive*`, quoted user feedback; **(5) the URL as subject matter**, where a
+  reference destroys the point — pages arguing CamelCase vs kebab-case URLs, the URL Architecture page;
+  **(6) inside `{{{verbatim}}}` or `{{code}}`**, where a link does not render at all; **(7) non-page
+  resources** that have no document reference — `/xwiki/resources/icons/…` behind `image:`; **(8) a
+  non-`view` action or a query string** a plain reference cannot express — `/bin/login/`, `/bin/Blog/`,
+  `?viewer=code`, `?xpage=plain`; **(9) a target that does not exist yet**, which would render as a red
+  create-link. Verify (9) before converting (`GET …/rest/…/pages/{page}` → 404), since the resulting
+  red link looks like an authoring mistake.
+- **A `url:` prefix on the link target does not mean "keep this a URL".** It reads like the writer
+  declaring intent, but it is what the WYSIWYG editor emits when a URL is pasted, and it lands on
+  internal and external links indiscriminately — one design proposal carries 47 of them, and a FOSDEM
+  stand page 13 while its sibling pages from other years have none. Decide by the exception list above,
+  not by the prefix.
 - **Never escape the hashes of a monospace span.** `~#~#1/1~#~#` renders as a *literal* `##1/1##`.
   Plain `##1/1##` works fine, even directly after a sentence.
 - **Never put a bare URL in a heading** — the autolinker absorbs the trailing punctuation into the
