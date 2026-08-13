@@ -10,8 +10,9 @@ summary: The rules for xwiki.org documentation — Diataxis page types & audienc
   one page (granularity, keeping verbosity low, a hub page routing rather than narrating & how
   duplication is actually detected), the page-structure xobject fields (Highlights/More/Related and their exact
   semantics), documentation style (incl. never hard-wrapping prose — on xwiki.org pages and forum
-  posts alike), attachment/image/video rules (incl. webm + the `{{embed}}` macro, what `caption` is
-  and is *not* for, and drawing the red box as an overlay so no ancestor clips it),
+  posts alike — and not overusing the em dash), attachment/image/video rules (incl. webm + the
+  `{{embed}}` macro, what `caption` is and is *not* for, and drawing the red box as an overlay so no
+  ancestor clips it),
   page location — settled with the developer up front, as concrete alternatives — version-perspective
   and `{{version}}` rules, the XWiki syntax traps that silently
   mis-render (incl. linking a farm subwiki by URL instead of `doc:<wiki>:<ref>`, the nine cases where an
@@ -352,6 +353,11 @@ Use the guide for the authoring rules, and that page for what each structure fie
   **120-character limit is a Java-source rule** ([[code-style]]), enforced by Checkstyle; applying it
   to prose bound for a web editor is a category error. Only fenced/`{{code}}` blocks keep their own
   line structure, since there the code's formatting rules apply.
+- **Do not overuse the em dash (`—`)** — it is not a substitute for a comma, a period, a colon or
+  parentheses. Use the mark the sentence actually needs; keep the em dash for a sharp interruption or
+  a genuine aside. **Exception:** inside a direct quote, dashes stay exactly as the source has them.
+  (Team authoring rule, not yet written up in the guide's DocumentationStyle page — do not drop it as
+  drift when syncing with the guide.)
 
 ## Attachments, images and videos
 

@@ -103,7 +103,9 @@ everything a regex cannot decide.
    reader unable to tell whether it worked.
 7. **Apply the style rules** — `"quotes"` for UI elements, uppercase-first XWiki terminology,
    `##literals##`, link-reference syntax (never hardcoded URLs), `{{scm}}` for GitHub files, the
-   code macro with an explicit `language`, the display macro to avoid duplication.
+   code macro with an explicit `language`, the display macro to avoid duplication, and **no overused
+   em dashes** (use the comma, period, colon or parentheses the sentence needs; quoted text keeps its
+   dashes).
 8. **Give the page something to look at, wherever it earns its place** — **screenshots** on
    User/Administrator pages (every UI element or screen the reader must find), **code examples** on
    Developer pages, and on an Explanation about design/architecture a **PlantUML `bluegray` diagram**
@@ -187,6 +189,8 @@ to; confirm against the live guide when borderline):
 - [ ] **Title case** — significant words capitalised ("Using", not "using").
 - [ ] **Style** — UI elements in `"quotes"`, terminology uppercased, literals in `##…##`, code macro
       uses a `language` parameter.
+- [ ] **Punctuation** — no em dash is doing the job of a comma, period, colon or parentheses. Dashes
+      inside a **direct quote** are never a finding.
 - [ ] **Links** — link-reference syntax (no hardcoded xwiki.org URLs); `{{scm}}` for GitHub files.
 - [ ] **Location** — `documentation.xs` for a bundled extension, `documentation.extensions` otherwise;
       then the most relevant existing topic for its audience/type.
