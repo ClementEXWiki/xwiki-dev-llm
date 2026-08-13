@@ -52,7 +52,8 @@ already handles.
 5. **Choose the location** for each target page in the new tree (most relevant existing
    topic/subtopic for its audience and type).
 6. **Rewrite each page** with the `xwiki-doc-writing` flow — correct title/page-name, page-structure
-   fields, style, and latest-version perspective.
+   fields, style, and latest-version perspective. The style rules apply to the sentences you *carry
+   over* too, not only to the ones you write.
 7. **Update while converting** — remove obsolete information; update deprecated terminology, UI
    names, and configuration examples; convert version-specific notes to the `{{version}}` macro and
    drop notes for versions no longer supported. **Never silently lose still-valid information.**
