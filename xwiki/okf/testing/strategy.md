@@ -2,8 +2,9 @@
 title: XWiki testing strategy (overview)
 stability: durable
 summary: The kinds of tests XWiki uses, their naming, the no-stdout rule, the prefer-the-lightest-base
-  rule, the don't-pay-the-timeout rule, how to read a PRChecker log line, coverage, and where each
-  test framework lives. Procedures live in the test skills.
+  rule, the page-object boundary (no getDriver() in a test), the don't-pay-the-timeout rule, how to
+  read a PRChecker log line, coverage, and where each test framework lives. Procedures live in the
+  test skills.
 sources:
   - https://dev.xwiki.org/xwiki/bin/view/Community/Testing/
   - https://dev.xwiki.org/xwiki/bin/view/Community/Testing/DockerTesting/#HDon27tpaythetimeout
@@ -31,6 +32,15 @@ This is the declarative map of how testing works in XWiki. For **doing** the wor
   with `-Dxwiki.surefire.captureconsole.skip=true` only when justified.
 - **Prefer the lightest base that works** — use `@ComponentTest` rather than `@OldcoreTest` when
   oldcore is not required.
+- **No `getDriver()` in a test — the page-object boundary** — a functional test (`*IT.java`) drives
+  the UI only through page objects. Needing `getDriver()` in the test class (or a raw `findElement`,
+  `By` lookup or `getCssValue()` on top of it) means **an API is missing from a page object
+  somewhere** — add it there, then call it from the test. Which page object gets it follows from what
+  a page object *is*: **a page object represents a real XWiki page and the actions that can be
+  performed on that page.** So widen or add the method on the existing page object for the page under
+  test — widening an already-private helper to public counts — and do not create a page object for a
+  page the test itself creates as a fixture, which is not a real XWiki page. What is specific to the
+  test, such as the wiki content it gives that fixture page, likewise stays in the test.
 - **Don't pay the timeout (Docker functional tests)** — a test must never burn the full Selenium
   wait timeout waiting for something that will not appear. The waiting APIs (`findElement`,
   `findElements`, and the `waitUntil…` helpers) are for elements *expected to be present*; to assert

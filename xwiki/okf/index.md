@@ -118,7 +118,7 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
   core needs Solr's `analysis-extras` module.
 
 ### testing/
-- **strategy** — test kinds & naming, no-stdout rule, lightest-base rule, `@Order` source-ordering rule, don't-pay-the-timeout rule, reading a PRChecker log line, coverage, framework locations.
+- **strategy** — test kinds & naming, no-stdout rule, lightest-base rule, `@Order` source-ordering rule, the page-object boundary (no `getDriver()` in a test), don't-pay-the-timeout rule, reading a PRChecker log line, coverage, framework locations.
 
 ### sonarqube/
 Which SonarCloud fixes are *correct* in XWiki, and — the question that actually matters — which look
