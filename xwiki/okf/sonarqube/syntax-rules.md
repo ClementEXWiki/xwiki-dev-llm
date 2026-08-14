@@ -2,13 +2,13 @@
 title: SonarQube syntax and annotation rules
 stability: durable
 summary: Correct fixes and XWiki-specific drop conditions for the pure syntax/annotation rules —
-  S1116, S1124, S1128, S1161, S1197, S1611, S2209, S3878, S6208, S7476. Includes S3878's
-  infinite-recursion trap and why S2209 is safe where the denylisted S3252 is not.
+  S1116, S1124, S1128, S1161, S1197, S1611, S2209, S3252, S3878, S6208, S7476. Includes S3878's
+  infinite-recursion trap and the S2209/S3252 pair of static-access rules.
 ---
 
 # SonarQube syntax and annotation rules
 
-S1116 · S1124 · S1128 · S1161 · S1197 · S1611 · S2209 · S3878 · S6208 · S7476
+S1116 · S1124 · S1128 · S1161 · S1197 · S1611 · S2209 · S3252 · S3878 · S6208 · S7476
 
 The safest family: zero dataflow, and (except S3878) no way for a correct edit to change behaviour.
 Read [[index]] for the universal drop conditions first.
@@ -76,11 +76,42 @@ Message: "Change this instance-reference to a static reference." A `static` fiel
 read through `this.` or through an instance variable. Fix: drop the `this.` (or the instance
 qualifier) and leave the bare name.
 
-**Do not confuse this with the denylisted `S3252`.** S3252 is about qualifying a static member with a
-*subclass* name and is usually backward-compat-bearing; S2209 changes nothing but the qualifier of a
-resolution the compiler already performed, so it is a pure syntax fix. The typical XWiki site is a
-subclass reading a `protected static final` constant of its parent as `this.CONSTANT` — the XWiki
-style's mandatory `this.` for *instance* fields does not apply to static ones.
+S2209 changes nothing but the qualifier of a resolution the compiler already performed, so it is a
+pure syntax fix. The typical XWiki site is a subclass reading a `protected static final` constant of
+its parent as `this.CONSTANT` — the XWiki style's mandatory `this.` for *instance* fields does not
+apply to static ones. Its sibling is S3252 below, which is the same kind of fix.
+
+## S3252 — a `static` member should be accessed through the class that declares it
+
+Message: "Use static access with "&lt;fully.qualified.Declaring&gt;" for "&lt;MEMBER&gt;"." A `static`
+constant or method is read through a *derived* type instead of the class that declares it
+(`Child.COUNTER` where `Parent` declares `COUNTER`). Fix: replace the qualifier with the declaring
+class and adjust the imports.
+
+**This rule was previously on the denylist as an API change. It is not one** — nothing is declared,
+renamed or re-typed; only the qualifier of a compile-time resolution changes, and static method
+dispatch is by the compile-time type, so the same member is reached. Sonar names the *resolved*
+declaring class, so a member the subclass hides is never flagged. A pool of 123 sites across the three
+repos converted with zero drops.
+
+Two mechanics carry the batch:
+
+- **Classify each site by the token BEFORE the flagged range.** The issue's `textRange` covers only
+  the member name. If the preceding qualifier differs from the declaring class's simple name the fix
+  is a pure qualifier swap. If it is the SAME simple name, the "fix" is really an import swap to the
+  base class — see the drop below.
+- **Fix imports in both directions in the same edit.** Add the declaring class's import (not needed
+  when it is in the file's own package — a redundant import is a Checkstyle error), and remove the old
+  qualifier's import once the swap orphans it, matching the simple name with a word boundary over the
+  whole file so a `{@link X}` in Javadoc still counts as a use. Insert the new import into the group
+  whose first package segment matches and keep that group alphabetical.
+
+**Drop condition — the derived type is an XWiki utility subclass of the same simple name.**
+`org.xwiki.text.StringUtils` and `org.xwiki.localization.LocaleUtils` deliberately extend the Apache
+Commons classes they are named after so that a single import serves both the Apache helpers and the
+XWiki additions. Every inherited call through them is flagged, and "fixing" one means importing the
+base class instead — a style regression, and impossible without a fully-qualified name in any file
+that also uses the XWiki-specific methods. Permanent drop (52 sites in platform + rendering).
 
 ## S1124 — modifier order
 

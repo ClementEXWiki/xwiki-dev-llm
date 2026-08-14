@@ -36,7 +36,7 @@ every day.
 
 | Rule keys | Family file |
 |---|---|
-| S1116 S1124 S1128 S1161 S1197 S1611 S1659 S2209 S3878 S6208 S7476 | [[syntax-rules]] |
+| S1116 S1124 S1128 S1161 S1197 S1611 S1659 S2209 S3252 S3878 S6208 S7476 | [[syntax-rules]] |
 | S1066 S1125 S1126 S1155 S1264 S1488 S1596 S1602 S1612 S1858 S1905 S2130 S2864 S3012 S3024 S3358 S3706 S4201 S6353 S6397 S7158 | [[simplification-rules]] |
 | S1604 S1640 S1643 S6126 S6201 S6204 S6211 S6485 | [[modernization-rules]] |
 | S125 S1068 S1118 S1130 S1144 S1185 S1481 S1854 | [[dead-code-rules]] |
@@ -83,8 +83,9 @@ Each of these is either bad ROI or a false positive against a deliberate XWiki i
 - **`S4144`** "implementation is identical to method X" — deduplicating two methods that legitimately
   mean different things is a design decision.
 - **`S115`** constant naming, **`S1214`** constants-in-interface — cross-module renames, breaking.
-- **`S3252`**, **`S1845`** — static-access / name-differing-only-by-capitalization; usually
-  backward-compat-bearing public API.
+- **`S1845`** name differing only by capitalization — a cross-module rename of published API.
+  (**`S3252`** used to be listed here with it; it is *not* an API change and is now documented in
+  [[syntax-rules]].)
 - **`S2447`** "return null from a Boolean method" — in XWiki **script services** returning `null` is a
   deliberate contract meaning "an error occurred, call `getLastError()`". Not a defect.
 - **`S1215`** `System.gc()` — the enclosing method is sometimes a deliberately exposed API (`$xwiki.gc()`).
