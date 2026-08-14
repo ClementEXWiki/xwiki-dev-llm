@@ -62,10 +62,15 @@ use a module other than `pages.py`.
 Screenshots, per capture:
 
 ```bash
-agent-browser --session doc set viewport 1280 560 1         # dPR 1, once per shape
-./docshot.sh home-page 960 VIEWPORT 'input[name=search]'    # 960 = size "extra"
-python3 checkredbox.py                                      # all of them, in one pass
+agent-browser --session doc set viewport 1440 900 1                # dPR 1, once per shape
+./docshot.sh panel-entry 650 0,0,650,300 '.panel li.selected'      # x,y,w,h — 650 = size "large"
+./docshot.sh account-list 960 239,60,960,360 'union:#list li a'    # one box around them all
+python3 checkredbox.py                                             # all of them, in one pass
 ```
+
+Give the region as `x,y,w,h` rather than `VIEWPORT`: a step's screenshot shows the element plus the
+landmark that locates it, so a region is the normal case and a whole window the exception (a
+procedure's entry step). A region already at the target width is saved unresampled.
 
 ## What each step actually protects against
 
@@ -96,8 +101,12 @@ only as an inline error box, so an object-only check calls a broken page clean.
 
 **`docshot.sh` / `checkredbox.py`** — the red box is drawn as an overlay appended to `<body>`, never
 as a CSS `outline`, which any ancestor with `overflow: hidden` clips into a three-sided box; the
-script refuses to shoot when a box falls outside the viewport, and `checkredbox.py` then proves the
-saved PNG holds a closed rectangle.
+script refuses to shoot when a box falls outside what is being captured, and `checkredbox.py` then
+proves the saved PNG holds a closed rectangle. The region is captured by screenshotting a transparent
+clip element because the two obvious routes silently do something else: the CLI has no `--clip`, and
+macOS `sips -c` crops from the **centre** (`--cropOffset` is a no-op), which yields a plausible PNG of
+the wrong part of the page. A region narrower than the target width is refused rather than upscaled
+into blur.
 
 ## Notes
 

@@ -1,21 +1,31 @@
 #!/bin/bash
-# docshot.sh <out-name> <target-width> <capture-selector|VIEWPORT> [box-selector]
+# docshot.sh <out-name> <target-width> <VIEWPORT|capture-selector|x,y,w,h> [box-selector]
 #
 # Captures a documentation screenshot from a running `agent-browser` session, draws the red box the
-# Documentation Guide requires, and resamples to exactly <target-width> px (960 = `extra`,
-# 650 = `large`, 350 = `medium`, 150 = `small` — `size` is mandatory in the `documentation` space,
-# so the capture width is what decides sharpness).
+# Documentation Guide requires, and delivers exactly <target-width> px (960 = `extra`, 650 = `large`,
+# 350 = `medium`, 150 = `small` — `size` is mandatory in the `documentation` space, so the capture
+# width is what decides sharpness).
 #
-#   AB_SESSION=doc SHOTS=shots ./docshot.sh applications-panel 960 VIEWPORT '.panel li.selected'
+#   AB_SESSION=doc SHOTS=shots ./docshot.sh applications-panel 650 0,0,650,300 '.panel li.selected'
+#   AB_SESSION=doc SHOTS=shots ./docshot.sh find-button 960 239,60,960,282 'input[value="Find"]'
 #
-# Set the viewport before calling, at devicePixelRatio 1, wide enough that the box is not against
-# an edge:  agent-browser --session doc set viewport 1280 560 1
+# Set the viewport before calling, at devicePixelRatio 1, wide enough that the region is not against
+# an edge:  agent-browser --session doc set viewport 1440 900 1
+#
+# The third argument says WHAT to capture, and `x,y,w,h` (viewport pixels) is the one to reach for:
+# a step's screenshot shows the element plus the nearest landmark that locates it, which is almost
+# never a whole window nor a single element (see okf/conventions/documentation.md). Give the region
+# the target width and it is saved unresampled — a wider region is downscaled, and a narrower one is
+# refused rather than upscaled into blur. There is no `--clip` in the CLI and macOS `sips -c` crops
+# from the centre, so the region is captured by screenshotting a transparent clip element.
 #
 # The box is an overlay appended to <body>, NOT a CSS outline on the target: an outline (and a
 # box-shadow) is clipped by any ancestor with `overflow: hidden` — XWiki's `.xwikipanelcontents` is
 # one — which silently yields a box missing an edge. Body-level positioning escapes that. The script
-# then fails rather than shooting if a box falls outside the viewport, since the capture itself
-# would cut it. Run `checkredbox.py` afterwards to prove the saved PNG holds a closed rectangle.
+# then fails rather than shooting if a box falls outside what is being captured, since the capture
+# itself would cut it. A selector matching several elements gets one box each; prefix it with
+# `union:` for a single box around them all (a list of links, say).
+# Run `checkredbox.py` afterwards to prove the saved PNG holds a closed rectangle.
 set -e
 
 SESSION="${AB_SESSION:-doc}"
@@ -26,45 +36,93 @@ WIDTH="$2"
 CAPTURE="$3"
 BOX="$4"
 
-if [ -n "$BOX" ]; then
-  agent-browser --session "$SESSION" eval --stdin >/dev/null <<JS
+REGION=""
+if [[ "$CAPTURE" =~ ^[0-9]+,[0-9]+,[0-9]+,[0-9]+$ ]]; then
+  REGION="$CAPTURE"
+  IFS=, read -r RX RY RW RH <<< "$REGION"
+  if [ "$RW" -lt "$WIDTH" ]; then
+    echo "region is ${RW}px wide but the target is ${WIDTH}px — widen the region or pick a smaller \`size\`" >&2
+    exit 1
+  fi
+else
+  RX=0; RY=0; RW=0; RH=0
+fi
+
+UNION=0
+case "$BOX" in
+  union:*) UNION=1; BOX="${BOX#union:}" ;;
+esac
+
+# One pass: clear the previous overlays, draw the box, then add the clip element the region is
+# captured through. The box has to exist before the screenshot; the clip element is removed after it.
+agent-browser --session "$SESSION" eval --stdin >/dev/null <<JS
 (() => {
-  document.querySelectorAll('[data-doc-box]').forEach(e => e.remove());
-  const els = [...document.querySelectorAll('$BOX')];
-  if (!els.length) throw new Error('box selector matched nothing: $BOX');
-  let clipped = 0;
-  els.forEach(e => {
-    const r = e.getBoundingClientRect();
+  document.querySelectorAll('[data-doc-box],[data-doc-clip]').forEach(e => e.remove());
+  const region = '$REGION' ? {left: $RX, top: $RY, right: $RX + $RW, bottom: $RY + $RH}
+                           : {left: 0, top: 0, right: innerWidth, bottom: innerHeight};
+  const draw = r => {
     const box = document.createElement('div');
     box.setAttribute('data-doc-box', '1');
     Object.assign(box.style, {
       position: 'absolute',
-      left: (r.left + scrollX - 6) + 'px',
-      top: (r.top + scrollY - 6) + 'px',
-      width: (r.width + 6) + 'px',
-      height: (r.height + 6) + 'px',
+      left: (r.left + scrollX - 7) + 'px',
+      top: (r.top + scrollY - 7) + 'px',
+      width: (r.right - r.left + 8) + 'px',
+      height: (r.bottom - r.top + 8) + 'px',
       border: '3px solid rgb(255, 0, 0)',
       borderRadius: '2px',
       pointerEvents: 'none',
-      zIndex: '2147483647',
+      zIndex: '2147483646',
     });
     document.body.appendChild(box);
     const b = box.getBoundingClientRect();
-    if (b.left < 0 || b.top < 0 || b.right > innerWidth || b.bottom > innerHeight) clipped++;
-  });
-  if (clipped) throw new Error(clipped + ' box(es) fall outside the viewport — enlarge it or scroll');
-  return els.length;
+    return (b.left < region.left || b.top < region.top || b.right > region.right
+      || b.bottom > region.bottom) ? 1 : 0;
+  };
+  let clipped = 0;
+  if ('$BOX') {
+    const els = [...document.querySelectorAll('$BOX')];
+    if (!els.length) throw new Error('box selector matched nothing: $BOX');
+    const rs = els.map(e => e.getBoundingClientRect());
+    if ($UNION) {
+      clipped += draw({
+        left: Math.min(...rs.map(r => r.left)), top: Math.min(...rs.map(r => r.top)),
+        right: Math.max(...rs.map(r => r.right)), bottom: Math.max(...rs.map(r => r.bottom)),
+      });
+    } else {
+      rs.forEach(r => { clipped += draw(r); });
+    }
+    if (clipped) {
+      throw new Error(clipped + ' box(es) fall outside the captured area — enlarge it or scroll');
+    }
+  }
+  if ('$REGION') {
+    const clip = document.createElement('div');
+    clip.setAttribute('data-doc-clip', '1');
+    Object.assign(clip.style, {
+      position: 'absolute', left: ($RX + scrollX) + 'px', top: ($RY + scrollY) + 'px',
+      width: '${RW}px', height: '${RH}px', pointerEvents: 'none', zIndex: '2147483647',
+    });
+    document.body.appendChild(clip);
+  }
+  return 'ok';
 })()
 JS
-fi
 
-if [ "$CAPTURE" = "VIEWPORT" ]; then
+if [ -n "$REGION" ]; then
+  agent-browser --session "$SESSION" screenshot '[data-doc-clip]' "$OUT" >/dev/null
+  agent-browser --session "$SESSION" \
+    eval "document.querySelectorAll('[data-doc-clip]').forEach(e => e.remove()); 'ok'" >/dev/null
+elif [ "$CAPTURE" = "VIEWPORT" ]; then
   agent-browser --session "$SESSION" screenshot "$OUT" >/dev/null
 else
   agent-browser --session "$SESSION" screenshot "$CAPTURE" "$OUT" >/dev/null
 fi
 
-# `sips` ships with macOS; there is no PIL or ImageMagick to assume.
-sips --resampleWidth "$WIDTH" "$OUT" >/dev/null
+# `sips` ships with macOS; there is no PIL or ImageMagick to assume. A region given at the target
+# width is already there, and resampling it would only soften it.
+if [ "$RW" != "$WIDTH" ]; then
+  sips --resampleWidth "$WIDTH" "$OUT" >/dev/null
+fi
 sips -g pixelWidth -g pixelHeight "$OUT" | tr '\n' ' '
 echo "-> $OUT"
