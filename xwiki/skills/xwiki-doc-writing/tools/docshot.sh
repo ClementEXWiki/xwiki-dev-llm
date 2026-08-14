@@ -19,6 +19,14 @@
 # refused rather than upscaled into blur. There is no `--clip` in the CLI and macOS `sips -c` crops
 # from the centre, so the region is captured by screenshotting a transparent clip element.
 #
+# The box clears the element it marks by an equal margin on all four sides, so it reads as centred on
+# it and never touches the content. That margin is GAP px (default 6), and it is worth overriding for
+# a target whose own box already carries the clearance: a row of a densely stacked list — a panel
+# entry, a menu item — is a line box whose leading holds the glyphs well inside it, and adding to
+# that puts the border through the row above and below, which touch it. GAP=0 there.
+#
+#   AB_SESSION=doc SHOTS=shots GAP=0 ./docshot.sh applications-panel 650 0,0,650,300 '.panel a.entry'
+#
 # The box is an overlay appended to <body>, NOT a CSS outline on the target: an outline (and a
 # box-shadow) is clipped by any ancestor with `overflow: hidden` — XWiki's `.xwikipanelcontents` is
 # one — which silently yields a box missing an edge. Body-level positioning escapes that. The script
@@ -29,6 +37,7 @@
 set -e
 
 SESSION="${AB_SESSION:-doc}"
+GAP="${GAP:-6}"
 DIR="${SHOTS:-shots}"
 mkdir -p "$DIR"
 OUT="$DIR/$1.png"
@@ -60,16 +69,22 @@ agent-browser --session "$SESSION" eval --stdin >/dev/null <<JS
   document.querySelectorAll('[data-doc-box],[data-doc-clip]').forEach(e => e.remove());
   const region = '$REGION' ? {left: $RX, top: $RY, right: $RX + $RW, bottom: $RY + $RH}
                            : {left: 0, top: 0, right: innerWidth, bottom: innerHeight};
+  // The box clears the element by GAP on all four sides. boxSizing is set rather than assumed:
+  // under the border-box that Bootstrap applies to every element, the width below is the outer
+  // width, and geometry written for content-box would sit half a border off-centre — a gap on the
+  // left and top and the border painted over the content on the right and bottom.
+  const GAP = $GAP, BORDER = 3, OFF = GAP + BORDER;
   const draw = r => {
     const box = document.createElement('div');
     box.setAttribute('data-doc-box', '1');
     Object.assign(box.style, {
       position: 'absolute',
-      left: (r.left + scrollX - 7) + 'px',
-      top: (r.top + scrollY - 7) + 'px',
-      width: (r.right - r.left + 8) + 'px',
-      height: (r.bottom - r.top + 8) + 'px',
-      border: '3px solid rgb(255, 0, 0)',
+      boxSizing: 'border-box',
+      left: (r.left + scrollX - OFF) + 'px',
+      top: (r.top + scrollY - OFF) + 'px',
+      width: (r.right - r.left + 2 * OFF) + 'px',
+      height: (r.bottom - r.top + 2 * OFF) + 'px',
+      border: BORDER + 'px solid rgb(255, 0, 0)',
       borderRadius: '2px',
       pointerEvents: 'none',
       zIndex: '2147483646',
