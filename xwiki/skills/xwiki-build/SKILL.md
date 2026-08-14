@@ -120,6 +120,21 @@ mvn test -B -ntp -pl <module-path> -Dtest=MyTestClass#myMethod
 mvn verify -B -ntp -pl <module-path> -Pintegration-tests
 ```
 
+### Docker ITs: never stop an XWiki instance you did not start
+
+`@UITest` defaults to `JETTY_STANDALONE`, which runs XWiki on the **host** and binds ports 8080/8079.
+When something already listens there — typically an XWiki the developer is running — the test's Jetty
+silently fails to bind, the test drives that instance instead, and `beforeAll` dies with
+`Failed to install Extension(s) … Response status code [401]`.
+
+Check the port first (`lsof -nP -iTCP:8080 -sTCP:LISTEN`). Stop the instance only when **this session
+started it**; otherwise leave it running and move the whole stack into Docker instead:
+
+```bash
+mvn verify -B -ntp -pl <module-path> -Pdocker,integration-tests \
+  -Dxwiki.test.ui.servletEngine=tomcat -Dxwiki.test.ui.database=postgresql
+```
+
 ## Common profiles
 
 Standardized across all XWiki projects — see
