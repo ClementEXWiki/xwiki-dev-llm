@@ -125,7 +125,9 @@ everything a regex cannot decide.
 10. **Respect version perspective** — write for the latest version; use `{{version}}` (with `before`
     for changed behavior) only for genuine new/changed behavior.
 11. **Run the de-duplication *and trimming* pass before saving** — this is a separate step because every
-    page reads fine on its own and both defects are invisible while writing. Lay the page's intro next
+    page reads fine on its own and both defects are invisible while writing. Start with the two that need
+    no judgement and that `lint` decides for you — **the sibling How-tos' step 1** and **an attachment
+    name declared by more than one page** — then lay the page's intro next
     to its own FAQ, then next to its parent/hub and sibling pages, and hunt for **the same fact stated
     twice in different words**. Each hit: pick one home, and reduce the others to a clause with a link or
     delete them. Then **cut verbosity**: take each sentence and ask *does the reader lose something they
@@ -180,6 +182,9 @@ to; confirm against the live guide when borderline):
 - [ ] **No duplication** — no fact is stated on two pages (or in both a page's intro and its own FAQ),
       *however differently it is worded*. Compare against the parent/hub and the siblings, not just
       within the page.
+- [ ] **No repeated entry step, one home per attachment** — sibling How-tos do not open with the same
+      navigation step, and no attachment name is declared by two pages. The fix is a **visible** page the
+      others link to (here, its own How-to), not a hidden `{{display}}` fragment.
 - [ ] **FAQ** — reader questions live in the FAQ field (1–2 sentence answers), not buried in steps;
       longer answers split into an Explanation page.
 - [ ] **Attachments** — kebab-case names with lowercase extensions; images use `{{image}}` with an

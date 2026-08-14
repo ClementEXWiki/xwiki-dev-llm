@@ -7,8 +7,9 @@ summary: The rules for xwiki.org documentation — Diataxis page types & audienc
   Extensions-wiki page), showing
   rather than only telling — screenshots for User/Admin pages, code examples for Developer ones,
   architecture/concept diagrams for Explanations, and when *not* to force a visual, how much belongs on
-  one page (granularity, keeping verbosity low, a hub page routing rather than narrating & how
-  duplication is actually detected), the page-structure xobject fields (Highlights/More/Related and their exact
+  one page (granularity, keeping verbosity low, a hub page routing rather than narrating, how
+  duplication is actually detected & why the surviving copy of shared content wants a visible page rather
+  than a hidden `{{display}}` fragment), the page-structure xobject fields (Highlights/More/Related and their exact
   semantics), documentation style (incl. never hard-wrapping prose — on xwiki.org pages and forum
   posts alike — and not overusing the em dash), attachment/image/video rules (incl. webm + the
   `{{embed}}` macro, what `caption` is and is *not* for, and drawing the red box as an overlay so no
@@ -204,7 +205,19 @@ use, even though level 2 is the norm for ordinary section headings elsewhere —
 - **One fact lives on one page; every other page links to it.** A How-to's intro states the goal plus
   the facts needed to follow the steps — never the *why*, which is the Explanation's job. Do not
   copy-paste a paragraph, a FAQ entry or a step between pages, however short it is.
-- When the **same** content genuinely must appear in two places, use the **`{{display}}` macro**, not a
+- **Give the one copy a *visible* home before reaching for a hidden one.** The bullet above says what to
+  avoid; this one says where the surviving copy goes. A restructure that turns the shared material into a
+  page of the tree in its own right beats a hidden fragment: it is reachable from the navigation panel and
+  from search, it answers a reader goal on its own, and a later author cannot re-duplicate it by failing
+  to notice that it is shared. What the restructure is depends on the content — a navigation step every
+  sibling How-to opens with becomes **its own How-to** ("Open the … Application") that each one links to
+  from a single opening item; a page whose section is repeated elsewhere **splits into two smaller pages**,
+  the shared one linked from both. Repeated **steps** are worth hunting first, because a step drags its
+  screenshot with it and those copies drift apart while every page still passes its own checks. The guide
+  states the avoid-duplication rule and gives `{{display}}` as its mechanism, but not this preference —
+  worth adding upstream.
+- When **no** restructure gives the shared content a page of its own and it genuinely must appear in two
+  places, use the **`{{display}}` macro**, not a
   second copy — the shared text lives on a **hidden page nested inside one of the consuming pages** and
   is displayed from the others. Never a second copy, however short. Mechanics (hiding the page, what
   objects it must *not* carry, reference syntax, heading levels): [[documentation-mechanics]].
@@ -235,7 +248,9 @@ use, even though level 2 is the norm for ordinary section headings elsewhere —
   administrator" appeared in **five** places (two How-to intros, two FAQ entries, one hub) in five
   different phrasings, and a limitation ("Jira Cloud is not supported, because …") appeared verbatim
   on both the user and the administrator hub. Give each recurring fact **one named home**, and
-  elsewhere state it as a clause with a link — or not at all.
+  elsewhere state it as a clause with a link — or not at all. Line up the sibling How-tos' **step 1**
+  and the tree's **attachment names** as well as the prose: those two need no judgement, and are the
+  duplication a prose comparison never reaches.
 
 ## Page-structure fields
 

@@ -81,7 +81,8 @@ external and is **never indexed as a backlink**), a `caption` carrying the captu
 repeating the page type or the audience, an image without `size`/`alt`, an attachment declared but not
 shown (or shown but not declared), a How-to with no result-step screenshot or with a screenshot on
 only a minority of its steps, a topic page that is not an Explanation linking to its Extensions-wiki
-page.
+page. Its last two checks are **cross-page** — several pages opening with the same step, one attachment
+name declared by several pages — and are why the whole set is linted rather than one page.
 
 **`save`** — writes attachments *before* content, so no revision is ever saved with a dangling image;
 then reads every field back, because **a `202` does not mean the write landed** (a property write
