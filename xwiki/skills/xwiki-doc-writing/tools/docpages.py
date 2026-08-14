@@ -164,6 +164,26 @@ def lint(mod):
         if name in p['related']:
             problems.append(f'{name}: Related links to itself')
 
+    # Cross-page checks. Both defects are invisible page by page — every page above passes on its own
+    # — and both are decidable without reading a word of prose.
+    firsts, owners = {}, {}
+    for p in mod.ALL:
+        steps = steps_of(p['content'])
+        # Only a repeated opening step that carries its own screenshot is the defect: the one-line
+        # link that replaces it is *meant* to read identically on every page.
+        if steps and '{{image' in steps[0]:
+            firsts.setdefault(steps[0].split('(((')[0].strip(), []).append(p['ref'])
+        for a in p['attachments']:
+            owners.setdefault(a, []).append(p['ref'])
+    for step, on in firsts.items():
+        if len(on) > 1:
+            problems.append(f'{len(on)} pages open with the same step and screenshot — extract it as '
+                            f'its own How-to and link to that: {step[:60]!r} on {", ".join(on)}')
+    for a, on in owners.items():
+        if len(on) > 1:
+            problems.append(f'{a}: declared by {len(on)} pages ({", ".join(on)}) — an attachment has '
+                            f'one owning page, and the others link to that page')
+
     return problems
 
 
