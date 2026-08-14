@@ -432,7 +432,6 @@ These rules decide whether a page renders as intended, so they belong to authori
   `{{displayIcon}}` to show an icon, say) silently changes when the product does.
 - **Several images side by side go in the Gallery macro**, so variations don't clutter the page.
 - **No animated GIFs** — they are unmaintainable; use several PNGs instead.
-- **Tables and figures are wrapped in the figure + figureCaption macros**, with a meaningful caption.
 - **Videos: avoid them unless they carry real value** — they rot as the UI changes. When one is
   justified it is in **`webm`** format and it is **displayed with the `{{embed}}` macro**:
   `{{embed attachment="usage.webm" width="780"/}}`, which renders a real HTML5 player. **A video is
