@@ -117,8 +117,9 @@ everything a regex cannot decide.
    [Documentation Resources](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationResources/)
    XARs for realistic content.
 9. **Handle attachments by the rules** — kebab-case name with a lowercase extension, images via the
-   `{{image}}` macro with an `alt` and the mandatory `size`, captured at exactly that size's pixel width
-   with a red (`255, 0, 0`) box around the element concerned, **videos in `webm` displayed with the
+   `{{image}}` macro with an `alt` and the mandatory `size`, **framed on the element plus the nearest
+   landmark that locates it** and cropped to exactly that size's pixel width, with a red
+   (`255, 0, 0`) box around the element concerned, **videos in `webm` displayed with the
    `{{embed}}` macro and never as a link**, Gallery for several images, PlantUML (`bluegray`) for
    diagrams. See `okf/conventions/documentation.md`.
 10. **Respect version perspective** — write for the latest version; use `{{version}}` (with `before`
@@ -205,6 +206,9 @@ to; confirm against the live guide when borderline):
 - [ ] **Images in list items** — wrapped in `(((…)))` so the list is not split.
 - [ ] **Screenshot standards** — latest skin, captured while using the feature, captured at the exact
       `size` width, PNG, red (`255, 0, 0`) box around the UI element concerned.
+- [ ] **Screenshot framing** — each shot is cropped to the element plus the landmark that locates it,
+      not a whole window repeated on every step; the box marks what the step asks for; only the entry
+      step keeps the surrounding chrome.
 - [ ] **Technical ID** — prefixed: `xwiki:<extension id>` (or `npm:<package id>`), empty only when no
       extension applies. An unprefixed id is the defect; do not "fix" a prefixed one.
 

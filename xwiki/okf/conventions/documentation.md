@@ -381,8 +381,9 @@ These rules decide whether a page renders as intended, so they belong to authori
   rendered at its natural width, which is why the capture rules below fix the width at capture time.
 - **Screenshot standards** — capture with the **latest skin**; capture while actually **using the
   feature** (not a staged state); capture **at exactly the pixel width of the `size` it will be shown
-  at**, at `devicePixelRatio` 1 (resize the browser first) — anything else is rescaled by the browser,
-  and an undersized original is upscaled and blurred; save in **PNG** only; add a **red square, RGB
+  at**, at `devicePixelRatio` 1 (resize the browser first) and by **cropping** a region of that width
+  rather than shrinking a wider capture into it — anything else is rescaled by the browser, and an
+  undersized original is upscaled and blurred; save in **PNG** only; add a **red square, RGB
   `255, 0, 0`**, around the UI element concerned. The `size` parameter's named values:
 
   | Value | Width |
@@ -395,6 +396,15 @@ These rules decide whether a page renders as intended, so they belong to authori
   The capture-width constraint comes from the checker rule above; the rest is the guide's
   [Working with Attachments](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/WorkingAttachments/)
   "Screenshot Standards" section.
+- **Frame each shot on what its step needs** — the element to act on **plus the nearest landmark that
+  fixes its position**: the panel holding it, the screen title above it, the list it follows. Crop the
+  rest away, side panels included; the test is whether a reader without the UI in front of them still
+  knows where the action happens. A procedure's **entry step** is the exception that keeps the chrome
+  (top bar, panel column), since the reader does not know where to start yet. Then pick the `size`
+  that fits the region you framed instead of framing to fill a size — a whole window at `extra` spends
+  its 960px on furniture and, being downscaled from the browser width, is the blurriest option too.
+  The red box marks **what the step asks for**: on a "review the listed accounts" step it goes around
+  the list, not around the button below it.
 - **Draw the red box as a `position: absolute` div appended to `document.body`** (at the target's
   `getBoundingClientRect()` plus the scroll offsets), never as a CSS `outline`/`box-shadow` on the
   target: those are **clipped by any ancestor with `overflow: hidden`** — XWiki's
