@@ -47,8 +47,9 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
 - **versioning** — `@since`/`@Deprecated(since=…)` use `<X.Y.0>RC1`; current version is volatile.
 - **backward-compatibility** — Revapi (incl. where it does *not* look), the `@Unstable` lifecycle,
   evolve interfaces via default methods.
-- **security** — escaping APIs, untrusted user input & translations, context-author right checks in
-  script services, configurable HTML sanitizer.
+- **security** — escaping APIs, untrusted user input & translations, only Velocity runs on Script
+  Right (every other language also needs Programming Right, but a script service does not),
+  context-author right checks in script services, configurable HTML sanitizer.
 - **performance** — prefer streaming over buffering; never load an unbounded payload (attachment,
   body, upload, export, query result) fully into memory.
 - **logging** — a log argument is an **object**: it is captured in the `LogEvent`, XStream-serialized
