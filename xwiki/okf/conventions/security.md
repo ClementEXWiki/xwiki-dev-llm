@@ -2,9 +2,11 @@
 title: Secure-coding conventions (escaping, untrusted input, right checks)
 stability: durable
 summary: How to escape user input and other untrusted values in scripts/templates, why translation
-  values are untrusted, and the context-author right-check rule for script services.
+  values are untrusted, which right each scripting language requires, and the context-author
+  right-check rule for script services.
 sources:
   - https://www.xwiki.org/xwiki/bin/view/Documentation/DevGuide/Security/
+  - https://www.xwiki.org/xwiki/bin/view/Documentation/DevGuide/Scripting/
 ---
 
 # Secure-coding conventions
@@ -43,6 +45,18 @@ word-order and escaping mechanics.)
   **not**, so you must check them yourself.
 
 Always test that the escaping actually protects (try to break out of the context you escaped for).
+
+## Only Velocity runs on Script Right — every other language also needs Programming Right
+
+Writing any script requires **Script Right**; every scripting language **other than Velocity**
+(Groovy, Python, Ruby…) *additionally* requires **Programming Right** of the script author. The one
+exception is Groovy with the Secure Groovy Customizer enabled (`groovy.compilationCustomizers`,
+empty and therefore off by default), where Script Right suffices and the customizer sandboxes the
+code instead.
+
+The trap: a **script service is callable with Script Right alone**, so putting an operation there
+exposes it behind a *lower* bar than a Groovy macro — which is why the context-author checks below
+matter, and why "the caller could have written Groovy anyway" is never a valid justification.
 
 ## Right checks in script services — check the context *author*, not only the user
 
