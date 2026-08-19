@@ -3,8 +3,9 @@ title: SonarQube test-code rules
 stability: durable
 summary: Correct fixes and XWiki-specific drop conditions for S5786, S5785, S3415, S5778, S5783, S6068,
   S8714 and S8924 — including why S5785 must not be applied inside equals()/hashCode() contract
-  tests, why S3415's operand swap is usually unsafe, how far an S6068 eq() unwrap may reach, and why
-  an S5778 hoist must never move the throwing call out of the lambda.
+  tests, when S3415's operand swap is safe and the two shapes that must be dropped, how far an
+  S6068 eq() unwrap may reach, and why an S5778 hoist must never move the throwing call out of the
+  lambda.
 ---
 
 # SonarQube test-code rules
@@ -112,8 +113,11 @@ and abort on any mismatch — that check is what makes the batch trustworthy. Ne
 
 ## S3415 — swap the expected and actual arguments
 
-**Usually unsafe — default to dropping it.** The rule assumes operand order is cosmetic, but many
-flagged assertions depend on it (the same root cause as "never flip operands" above):
+**Mostly safe, but two shapes must be dropped — and both are visible in the flagged line.** A full
+sweep of the rule needed a drop on roughly one site in six, so what follows is a drop list, not a
+reason to skip the rule. The **free classifier is whether either operand reads `null`**: if one does,
+drop it; otherwise the swap is a pure re-ordering. The two shapes that depend on operand order (the
+same root cause as "never flip operands" above):
 
 - **Asymmetric `equals`.** `RegexEntityReference.equals` does regex matching, so
   `regexRef.equals(plain)` is not `plain.equals(regexRef)`. Swapping flips the result and breaks the
@@ -121,9 +125,23 @@ flagged assertions depend on it (the same root cause as "never flip operands" ab
 - **`assertNotEquals(obj, null)` deliberately exercises `obj.equals(null)`.** Swapping to
   `(null, obj)` short-circuits inside `Objects.equals` and no longer tests that contract.
 
-Only swap when both operands are plain values with symmetric `equals` and neither is `null` — for
-example a bare literal genuinely sitting in the actual slot. Read the asserted type's `equals`
-implementation before trusting Sonar.
+Swap when both operands are plain values with symmetric `equals` and neither is `null`. That covers
+most of the pool: an actual-side getter against a constant, a `List` against a `List`, a computed
+`String` against a `CONTENT_*` constant, a numeric expression against a literal. Only read the
+asserted type's `equals` implementation when the type name suggests it might be asymmetric
+(`Regex*`, a matcher, a pattern holder) — the operands being of *different* static types is not by
+itself a reason to look.
+
+**Convert the whole file, not just the flagged lines.** Sonar flags only *some* of a file's reversed
+assertions, apparently arbitrarily — one oldcore test had five times as many as were reported, and
+elsewhere the `-1.0` sibling of a flagged `1.0` line went unflagged. Shipping only the flagged half
+leaves the file reading two ways, which is what a reviewer objects to; swap all of them and count only
+the flagged keys as fixed.
+
+Two mechanics: identical assertion lines repeat within one file, so extend the `old` with the unique
+line above it (or assert an exact count for a global replace) rather than expecting `count == 1`; and
+overload resolution is unchanged by a swap even across numeric types — `Math.signum(int)` returns
+`float`, and `(float, double)` and `(double, float)` both resolve to `assertEquals(double, double)`.
 
 Where a whole test method is nothing but such assertions, suppress the method per [[code-style]]
 rather than accepting the issues in SonarCloud. `RegexEntityReferenceTest` in
