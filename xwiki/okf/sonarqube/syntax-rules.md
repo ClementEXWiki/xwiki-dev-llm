@@ -229,11 +229,14 @@ source (`5.ORC1`, `4.4MA`) fails the regex, which is the right outcome — do no
 away from the head of the tag is still the deprecation version (`replaced by {@link #exists(…)} since
 2.2.1`, `does not do anything since 11.5RC1`).
 
+**A tag listing SEVERAL versions is not a judgement call — put them all in `since`,
+comma-separated** (`@Deprecated(since = "15.0RC1,14.10.2")`), because the deprecation really did
+happen on each of those branches. See [[versioning]]; picking one of them loses information and is
+wrong even though it compiles.
+
 **Drop conditions**, in the measured order of frequency: no Javadoc comment at all, a Javadoc with no
 `@deprecated` tag, or a tag naming no version (`@deprecated use {@link X} instead`). Those genuinely
-need the deprecating version and must be left open. A tag listing **several** versions (a stable-branch
-release *and* a master one — `since 14.10.2, 15.0RC1`) is a judgement call, since `since` takes one
-string: ship those separately rather than deciding silently.
+need the deprecating version and must be left open.
 
 Two mechanics worth knowing:
 

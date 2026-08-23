@@ -2,9 +2,11 @@
 title: API versioning (@since / @Deprecated)
 stability: durable
 summary: Use the next release of the current dev version, written <X.Y.0>RC1, for @since and
-  @Deprecated(since=…). The current version itself is volatile — read it from pom.xml.
+  @Deprecated(since=…). The current version itself is volatile — read it from pom.xml. A deprecation
+  done on several branches lists ALL its versions, comma-separated, in the annotation.
 sources:
   - https://dev.xwiki.org/xwiki/bin/view/Community/VersioningAndReleasePractices/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/CodeStyle/JavaCodeStyle/#HDeprecation
 ---
 
 # API versioning (`@since` / `@Deprecated`)
@@ -14,6 +16,24 @@ release of the actual current dev version**, written as `<X.Y.0>RC1` (e.g. `18.5
 
 **Always three numeric segments** (since XWiki 16.0.0). Write `18.3.0RC1`, never `18.3RC1`;
 `17.10.10`, `18.4.3`. A two-segment version like `18.3RC1` is invalid.
+
+## `@Deprecated` — the annotation carries the version, the Javadoc tag carries the reason
+
+Four rules, and they are a **division of labour between the annotation and the Javadoc tag** that is
+easy to get half-right (a Sonar sweep of `java:S6355` got two of the four wrong across six pull
+requests before review caught it):
+
+- **Always both**: the `@Deprecated` annotation *and* the `@deprecated` Javadoc tag.
+- **The annotation carries WHEN**: always `since`. **Never `forRemoval`** — XWiki does not break APIs
+  and `false` is the default.
+- **The Javadoc tag carries WHY and WHAT INSTEAD**, and **must not repeat the version** — that would
+  duplicate the annotation, and the javadoc tool already renders the annotation's `since`. So
+  `@deprecated use {@link #getRoleType()} instead`, not `@deprecated since 4.4M1, use …`.
+- **A deprecation done on several branches lists ALL of its versions in `since`, comma-separated** —
+  `@Deprecated(since = "15.5RC1,14.10.12")`. Do **not** pick one of them (neither the newest nor the
+  oldest): each version-line in which the deprecation shipped belongs in the list. This is the one
+  place where a single `since` string holds several versions, and it mirrors the multi-line `@since`
+  rule below.
 
 **Backporting adds `@since` lines, it does not replace them.** When an API is backported to stable
 branches, list one `@since` line per version-line where it becomes available, **ascending by version
