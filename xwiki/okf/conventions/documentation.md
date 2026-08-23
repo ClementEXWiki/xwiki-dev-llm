@@ -27,18 +27,19 @@ sources:
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/Diataxis/ApplyDiataxis/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/ChooseRightLocation/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/CreateNewDocumentation/
-  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/CreateLandingPages/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/LandingPages/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationStyle/
-  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationStyle/PageTitlesNames/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/PageTitlesNames/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/PageStructure/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/HighlightsPage/
-  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationNavigationTree/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationNavigationPanel/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/HorizontalMenu/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationResources/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/Versioning/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/SaveChanges/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/WorkingAttachments/
   - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/WorkingAttachments/wcag/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/HandleOriginalDocumentationPages/
   - https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/create-documentation-page/page-structure/
   - https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/documentation-xwiki-org/page-structure-xwikiorg/
   - https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/version-macro/
@@ -98,7 +99,7 @@ the type-grouped landing pages.
 **Titles use English title case** — capitalise the significant words, not just the first:
 *"Edit a Page Using the WYSIWYG Editor"*, not *"Edit a Page using the WYSIWYG Editor"*. This rule is **not currently
 stated** on the guide's
-[Page Titles and Page Names](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationStyle/PageTitlesNames/)
+[Page Titles and Page Names](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/PageTitlesNames/)
 page even though existing pages follow it, so it is worth adding upstream.
 
 **Titles and page names must not contain the page type** — no "How to", "Explanation", "Reference",
@@ -106,7 +107,7 @@ page even though existing pages follow it, so it is worth adding upstream.
 structure and the badge, so repeating it is redundant. Nor may they repeat the **audience**: a topic
 page is titled just "AntiSpam" under `…admin.` *and* under `…dev.` — never "AntiSpam for Developers" —
 since the path and the badge already carry it. Per the guide's
-[Page Titles and Page Names](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationStyle/PageTitlesNames/)
+[Page Titles and Page Names](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/PageTitlesNames/)
 page.
 
 **Disambiguation is a parenthetical in the title, and is not added to the page name** — e.g. "All the
@@ -611,8 +612,10 @@ rather than an error, which is why they are worth listing.
 - **Angle brackets inside `##…##` are safe** — `##<prefix>_xwiki-data##` renders as literal monospace.
   XWiki 2.1 does not accept raw HTML outside `{{html}}`, so `<…>` placeholders need no escaping.
 - **Section anchors work, but the syntax differs per page syntax — check which one the page uses.**
-  The anchor id is `H` + the heading text with only alphanumerics kept (so `== My heading ==` gives
-  `HMyheading`). In **xwiki/2.1** the anchor is a link *parameter*:
+  The anchor id is `H` + the heading text with whitespace dropped, letters, digits and `:_.-` kept,
+  and every other character replaced by its hex code — so `== My heading ==` gives `HMyheading`, but
+  `== "File path too long" ==` gives `H22Filepathtoolong22`. In **xwiki/2.1** the anchor is a link
+  *parameter*:
   `[[label>>PageA.PageB||anchor="HMyheading"]]`. In **xwiki/2.0** it is appended to the *reference*
   itself: `[[label>>PageA.PageB#HMyheading]]`. Both forms serialize the fragment into the rendered
   `href`. Do not carry one form over to the other syntax: on a 2.1 page, `#HMyheading` appended to the
@@ -621,6 +624,12 @@ rather than an error, which is why they are worth listing.
   `GET …/rest/…/pages/{page}?media=json`, or the editor's syntax selector) before editing links.
   Anchors survive on cross-wiki references too — `[[label>>xwiki:Space.Page||anchor="HFoo"]]` from a
   subwiki keeps its fragment.
+- **Renaming a heading — or dropping its title — loses the anchor id its old text generated**, and
+  nothing warns you: the Backlinks list shows no anchors, and absolute-URL links never appear in it at
+  all. Declare the old id on its own line before it, per the guide's
+  [Handle the Original Documentation Pages](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/HandleOriginalDocumentationPages/):
+  `{{id name="HOldheadingtext"/}}` (`name` is mandatory, `reference` renders an error box).
+  `faq`-field entries are headings too.
 - **Copy-pasted content carries non-breaking spaces (`\xa0`)**, which defeat exact-string matching and
   look like double spaces. Match on line prefixes rather than whole-string equality.
 - **An image inside a list item must be wrapped in `(((…)))`.** Writing the `{{image}}` macro on its
@@ -638,16 +647,15 @@ creating or restructuring pages without pinning silently hands the reader an alp
 an advanced "build your own image" How-to can easily precede the pages that tell you how to run it.
 
 The authority is the guide's
-[Documentation Navigation Panel](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationNavigationTree/):
+[Documentation Navigation Panel](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationNavigationPanel/):
 top-level nodes **must** be pinned, ordered by "usability, relevance, and importance"; other pages
-pinned "where it makes sense"; and **type landing pages** (a distinct thing from ordinary pages) are
-pinned in Diataxis order Tutorial → How-to → Reference → Explanation.
+pinned "where it makes sense"; **type landing pages** (a distinct thing from ordinary pages) are
+pinned in Diataxis order Tutorial → How-to → Reference → Explanation; and a node is pinned **in full
+or not at all**, since a partial pin leaves the rest sorting alphabetically underneath the pinned
+ones, which is worse than either extreme because it looks deliberate.
 
-Two further rules, established in practice and **not** stated in the guide:
+One further rule, established in practice and **not** stated in the guide:
 
-- **Pin a node in full, or not at all.** A partial pin leaves the remaining children sorting
-  alphabetically underneath the pinned ones, which is worse than either extreme because it looks
-  deliberate.
 - **The tree must not contradict the page.** When a landing page's prose lists its children in a
   deliberate order, the pin repeats that order rather than inventing a second one. The same applies to
   the **Highlights** field: if it singles out a subset, take them in the pinned order.

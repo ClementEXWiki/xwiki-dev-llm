@@ -26,8 +26,8 @@ happens to the page the content came *from*. The procedure that applies it is th
 Migrating old content is not done until the **source** page is handled. The rules differ by origin:
 
 - **Old `Documentation`-space page** — repoint its backlinks to the new page(s). When only part of a
-  page is moved, keep the section heading and point it to the new page, preserving old anchors with
-  an `{{id name="HOldSectionName"/}}` so saved links still resolve.
+  page is moved, keep the section heading and point it to the new page, preserving its old anchor
+  with the `{{id}}` macro (see [[documentation]]) so saved links still resolve.
 - **Extensions-wiki (e.x.o) extension page** — **never delete it**: it still carries technical
   metadata (dependencies, prerequisites, versions). Instead:
   1. Remove the migrated documentation from **every xproperty that holds prose** — not just

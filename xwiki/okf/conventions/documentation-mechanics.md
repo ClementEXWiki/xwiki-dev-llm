@@ -11,8 +11,8 @@ summary: Where the xwiki.org Documentation application stores its data and how t
   the `xwiki-rest-api` skill.
 sources:
   - https://www.xwiki.org/xwiki/bin/view/documentation/extensions/user/documentation/create-documentation-page/page-structure/
-  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationNavigationTree/
-  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/CreateLandingPages/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/DocumentationNavigationPanel/
+  - https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/LandingPages/
 ---
 
 # Programming against the xwiki.org documentation tree
@@ -39,7 +39,7 @@ the `DocumentationExtensionClass` object is incomplete even though nothing visib
 A **landing page** is not a documentation page with extra objects: it carries
 `DocApp.Code.LandingPageClass` **instead of** `DocumentationClass`, and no
 `DocumentationExtensionClass` at all. Both kinds named by the guide's
-[Create Landing Pages](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/CreateLandingPages/) use
+[Create Landing Pages](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/LandingPages/) use
 it — the **target** landing pages (`documentation.xs.user`, `…admin`, `…dev`) and the **Diataxis type**
 landing pages nested under each of them (`documentation.xs.user.howto`, `.tutorial`, `.reference`,
 `.explanation`).
