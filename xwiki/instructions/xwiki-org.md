@@ -41,7 +41,8 @@ below).
 
 ## Code conventions
 
-- **Lines must not exceed 120 characters.**
+- **Lines must not exceed 120 characters** — that is a rule about *source*. Never hard-wrap prose:
+  a paragraph on an xwiki.org page or a forum post is one unbroken line.
 - LGPL license headers are required on every source file — run `mvn license:format -B -ntp` to add
   missing headers.
 - In new code, prefer the `jakarta.*` namespaces over `javax.*` (the project is migrating
@@ -73,60 +74,23 @@ is the full, described map. **Volatile facts are never cached** (current version
 role holders): the relevant file gives a `verify:` recipe instead (read `pom.xml`, query the
 `sonarqube`/`discourse` MCP, or WebFetch the dev wiki — the upstream source of truth).
 
-OKF map (topic files under `okf/`, described in `okf/index.md`):
+OKF map — topic files under `okf/`; **`okf/index.md` describes each one**, read it to choose:
 
 - `okf/conventions/` — `code-style`, `code-comments`, `commit-messages`, `versioning`,
-  `backward-compatibility`, `security`, `performance`, `logging`,
-  `naming` (Maven groupId/artifactId + `-api`/`-ui`/`-webjar`/`-node-*`/`-test*` qualifiers, npm
-  packages, `xwiki.properties` properties, UIXP/UIX ids, skins/icons), `frontend` (JavaScript as
-  `xwiki-`-prefixed AMD modules in WebJars/JSX, never inline; the Velocity-in-minified-JS trap;
-  `compatibility.js`; WCAG 2.2 AA), `translations` (key lifecycle: en_US only, registering a new
-  bundle, deprecating/renaming a key, never moving one), `dependencies` (the checklist a new
-  third-party dependency must pass), `documentation` (xwiki.org doc rules —
-  Diataxis, titles, the **result step** closing a How-to/Tutorial and a **screenshot on most steps** of
-  a UI procedure, **show don't only tell** (screenshots
-  for User/Admin, code examples for Developer, diagrams for Explanations — without forcing it),
-  page granularity incl. **low verbosity** and
-  a hub page routing rather than narrating + how cross-page duplication is detected, page structure incl.
-  Highlights/More/Related semantics, style incl. **never hard-wrapping prose** (one paragraph = one
-  unbroken line, on xwiki.org pages and forum posts alike; 120 chars is a Java-source rule),
-  attachments/images/videos (`{{image}}` needs a mandatory
-  `size` in the `documentation` space, `caption` is never the capture version, the red box is an
-  overlay not an `outline`, `webm` + the `{{embed}}` macro),
-  **placement confirmed with the developer up front as concrete trees**, versioning + the `{{version}}`
-  macro incl. documenting a feature ahead of its release, XWiki syntax traps (incl. the links that must
-  stay absolute URLs), navigation pinning;
-  applied by `xwiki-doc-writing` / `xwiki-doc-convert`), `documentation-migration`
-  (migration only: handling the original page — stripping its prose, deleting its leftover
-  attachments, triaging its backlinks), `page-deletion` (**before deleting ANY page on xwiki.org —
-  including an intermediate page you created yourself — list and fix its backlinks**: the delete
-  wizard only repoints them if given a "New target" + "Update links", never over REST, and never for
-  absolute-URL links — which the Information-tab Backlinks list does not show either),
-  `documentation-mechanics`
-  (the storage side: the `DocApp` xobjects — incl. the separate `LandingPageClass` that makes a
-  `DocumentationClass` sweep skip every landing page — reading the doc-quality checker's findings —
-  objects *and* the inline error boxes that create none — how pinning and hidden `{{display}}` fragments
-  are stored).
+  `backward-compatibility`, `security`, `performance`, `logging`, `naming`, `frontend`,
+  `translations`, `dependencies`; and the xwiki.org documentation rules — `documentation`,
+  `documentation-migration`, `documentation-mechanics`, `page-deletion` — applied by
+  `xwiki-doc-writing` / `xwiki-doc-convert`.
 - `okf/architecture/` — `component-system`, `macro-refactoring`, `wiki-user-scope`, `solr-search`.
 - `okf/testing/` — `strategy`.
 - `okf/sonarqube/` — which SonarCloud fixes are *correct* in XWiki and which look mechanical but
-  silently break something. Read `sonarqube/index.md` (rule → file map, the rules never worth fixing,
-  the universal drop conditions), then **only** the family file for the rule at hand: `syntax-rules`,
-  `simplification-rules`, `modernization-rules`, `dead-code-rules`, `constant-and-resource-rules`,
-  `test-code-rules`; plus `verification` (never skip the tests, `-Plegacy,quality`, why removing
-  covered instructions always lowers a JaCoCo ratio). Pool sizes are volatile and deliberately absent.
-  Applied by the `xwiki-fix-sonarqube-issue` skill, which owns the procedure.
-- `okf/servers/` — `index` (JIRA, CI, Nexus, SonarCloud, forum… and how to access/verify each, plus
-  writing via REST: only `/rest` honors Basic auth, the `XWiki-Form-Token` CSRF header, the
-  `extensions` subwiki id);
-  `jira` (jira.xwiki.org access via jira-cli/REST + issue-field conventions + resolving/closing conventions + wiki-markup gotchas — see the `xwiki-jira` skill);
-  `jenkins` (query ci.xwiki.org via the Jenkins REST API `/api/json?tree=…` rather than scraping the
-  UI — endpoints for failing tests, changesets, built SHA and artifacts; the Cloudflare trap where a
-  spoofed browser User-Agent 403s and plain `curl` succeeds; `FAILURE` vs `UNSTABLE`; and why a test
-  case's `age` is not a reliable first-failure).
-- `okf/processes/` — `release`, `security-policy` (incl. merging a security PR by hand from the
-  advisory's private fork), `module-lifecycle` (`git subtree` extract/merge-in, retiring to the Attic,
-  top-level extensions).
+  silently break something. Read `sonarqube/index.md` first, then **only** the family file for the
+  rule at hand: `syntax-rules`, `simplification-rules`, `modernization-rules`, `dead-code-rules`,
+  `constant-and-resource-rules`, `test-code-rules`, plus `verification`. Applied by the
+  `xwiki-fix-sonarqube-issue` skill, which owns the procedure.
+- `okf/servers/` — `index` (JIRA, CI, Nexus, SonarCloud, forum: how to reach each, and writing over
+  REST), `jira`, `jenkins`.
+- `okf/processes/` — `release`, `security-policy`, `module-lifecycle`.
 - `okf/decisions/` — ADRs (the *why* behind durable architectural choices).
 
 **Capturing learnings:** when a task relies on or fetches a durable, generic XWiki fact whose topic

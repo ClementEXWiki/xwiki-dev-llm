@@ -8,12 +8,20 @@
 //      plugin, opencode config comment).
 //   4. Every OKF topic file is referenced in xwiki/okf/index.md AND in the injected mirror
 //      xwiki/instructions/xwiki-org.md.
-//   5. Every `okf/...md` path a skill cites actually exists. Skills delegate their rules to the OKF
+//   5. The injected mirror stays within its size budget. Invariant 4 can only ever demand *more*
+//      text in a file that is loaded into every session; without a ceiling the map grows by
+//      accretion, because each extension appends and none ever cuts.
+//   6. When a branch changes anything under xwiki/ (i.e. anything that ships), the plugin version
+//      is strictly greater than the base branch's. Invariant 3 only proves the manifests agree with
+//      each other — they agree just as happily on a version that never moved, and Claude Code pulls
+//      an update only when the version *increases*, so an un-bumped change silently reaches nobody.
+//   7. Every `okf/...md` path a skill cites actually exists. Skills delegate their rules to the OKF
 //      rather than restating them, so a renamed or deleted topic would otherwise leave a skill
 //      pointing at nothing — and a reviewer that cannot read its rule source fails silently.
 // Node built-ins only. Run from anywhere: `node scripts/validate.mjs`.
 // Exit 0 = all invariants hold; exit 1 = violations (each printed on its own line).
 
+import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join, basename } from "node:path";
@@ -88,7 +96,82 @@ for (const abs of walk(okfRoot)) {
   }
 }
 
-// ---- Invariant 5: OKF paths cited by skills resolve ------------------------------------------
+// ---- Invariant 5: the always-on file stays small ---------------------------------------------
+// xwiki-org.md is injected at the start of every session in every xwiki/* repo, so each line is
+// paid for by every task, including the ones that never needed it. The map is routing only —
+// topic names; okf/index.md is where a topic gets described. Raise a budget only with a reason.
+const ORG_MAX_BYTES = 8000;
+const ORG_MAP_MAX_BYTES = 1800;
+if (Buffer.byteLength(orgMd) > ORG_MAX_BYTES) {
+  errors.push(
+    `xwiki/instructions/xwiki-org.md: ${Buffer.byteLength(orgMd)} bytes exceeds the ${ORG_MAX_BYTES}-byte budget ` +
+      `for the always-on file — move the detail into an okf/ topic (described in okf/index.md) or a skill`
+  );
+}
+const mapStart = orgMd.indexOf("OKF map");
+const mapEnd = orgMd.indexOf("**Capturing learnings:**");
+if (mapStart === -1 || mapEnd === -1 || mapEnd < mapStart) {
+  errors.push(
+    `xwiki/instructions/xwiki-org.md: cannot locate the OKF map block ` +
+      `(expected "OKF map" … "**Capturing learnings:**")`
+  );
+} else {
+  const mapBytes = Buffer.byteLength(orgMd.slice(mapStart, mapEnd));
+  if (mapBytes > ORG_MAP_MAX_BYTES) {
+    errors.push(
+      `xwiki/instructions/xwiki-org.md: the OKF map block is ${mapBytes} bytes, over the ${ORG_MAP_MAX_BYTES}-byte ` +
+        `budget — the mirror lists topic *names*; describe the topic in xwiki/okf/index.md instead`
+    );
+  }
+}
+
+// ---- Invariant 6: the shipped version actually increased -------------------------------------
+// Comparing against the base branch, because "did this change ship?" is only answerable relative to
+// what is already released. Skipped, not failed, when the base ref is not fetched (a shallow clone,
+// or a checkout with no remote) so the other invariants still run.
+const git = (args) => {
+  try {
+    return execFileSync("git", args, {
+      cwd: repoRoot,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return null;
+  }
+};
+const parseVersion = (v) => (v ?? "").split(".").map(Number);
+const isGreater = (a, b) => {
+  const [x, y] = [parseVersion(a), parseVersion(b)];
+  if (x.length !== 3 || x.some(Number.isNaN) || y.length !== 3 || y.some(Number.isNaN)) return null;
+  for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return x[i] > y[i];
+  return false;
+};
+// On a PR the base is whatever it targets; otherwise assume the default branch.
+const baseRef = process.env.GITHUB_BASE_REF ? `origin/${process.env.GITHUB_BASE_REF}` : "origin/master";
+const baseSha = git(["rev-parse", "--verify", "--quiet", `${baseRef}^{commit}`]);
+if (!baseSha) {
+  console.log(`validate.mjs: note - ${baseRef} is not available, skipping the version-increase check`);
+} else if (baseSha !== git(["rev-parse", "--verify", "HEAD"])) {
+  // Base -> working tree, so an un-bumped change is caught before it is even committed.
+  const changed = (git(["diff", "--name-only", baseSha, "--"]) ?? "").split("\n");
+  if (changed.some((f) => f.startsWith("xwiki/"))) {
+    const baseMarketplace = git(["show", `${baseSha}:.claude-plugin/marketplace.json`]);
+    const baseVersion = baseMarketplace && JSON.parse(baseMarketplace).metadata?.version;
+    const version = versions["marketplace.metadata.version"];
+    const greater = isGreater(version, baseVersion);
+    if (greater === null) {
+      errors.push(`Cannot compare plugin versions: '${version}' vs '${baseVersion}' on ${baseRef}`);
+    } else if (!greater) {
+      errors.push(
+        `Plugin version ${version} is not greater than ${baseVersion} on ${baseRef}, but this branch ` +
+          `changes files under xwiki/ - bump it, or installed plugins will never pull the change`
+      );
+    }
+  }
+}
+
+// ---- Invariant 7: OKF paths cited by skills resolve ------------------------------------------
 // Matches `okf/<dir>/<topic>.md` wherever it appears in a SKILL.md, in backticks or bare.
 const okfRefPattern = /okf\/[a-z0-9-]+\/[a-z0-9-]+\.md/g;
 for (const skill of skills) {
