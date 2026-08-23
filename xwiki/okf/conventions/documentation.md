@@ -444,6 +444,12 @@ These rules decide whether a page renders as intended, so they belong to authori
 - **Updating an attachment means re-uploading it under the same name**, which versions it — do not
   delete and re-add. The one place attachments *are* deleted is the original page after a migration
   (see [[documentation-migration]]).
+- **An image has exactly one owning page**, so needing the same screenshot on two pages means the
+  *content* is duplicated: fix that (see "How much belongs on one page") instead of uploading the
+  file twice, or the copies drift as re-capturing one reaches only its own page. And **never point at
+  another page's attachment** — `{{image reference="other-page.WebHome@shot.png"/}}` stops rendering
+  as soon as that page is moved or renamed (`XWIKI-24413`, still open) — which rules out the obvious
+  way around the first half of this rule.
 
 ## Choose the right location
 
