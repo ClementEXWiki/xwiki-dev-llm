@@ -188,15 +188,29 @@ usually does.** The version is *copied*, never invented:
 
 ```java
     /**
-     * @deprecated since 8.3RC1, use {@link #AbstractCache(CacheConfiguration)} instead
+-    * @deprecated since 8.3RC1, use {@link #AbstractCache(CacheConfiguration)} instead
++    * @deprecated use {@link #AbstractCache(CacheConfiguration)} instead
      */
 -   @Deprecated
 +   @Deprecated(since = "8.3RC1")
 ```
 
-`@Deprecated(since = "…")` is already the convention in the code base, and the format rule for the
-string is [[versioning]]'s — but nothing here writes a *new* version, so that rule only matters for
-the sites this one drops.
+**The version is MOVED, not duplicated — stripping it from the `@deprecated` Javadoc tag is part of
+the fix, not an optional extra** (asked for explicitly in review of the first sweep). Once
+`@Deprecated(since = …)` carries it in the form tools read, restating it in prose is redundant and
+will drift. `@Deprecated(since = "…")` is already the convention in the code base, and the format
+rule for the string is [[versioning]]'s — but nothing here writes a *new* version, so that rule only
+matters for the sites this one drops.
+
+Stripping the phrase has three shapes worth scripting, all on the one line that holds it: a **leading**
+`since X,` (drop it, and capitalise the remainder if the tag started with a capital), an **embedded or
+trailing** ` since X` (`replaced by {@link #exists(…)} since 2.2.1` → `replaced by {@link #exists(…)}`),
+and a tag whose **entire** text was the version, which becomes a bare `@deprecated` marker — no
+information is lost (the annotation has it) and no Checkstyle rule objects, since XWiki does not enable
+`NonEmptyAtclauseDescription`. Two gotchas: when the phrase sits alone on a *continuation* line the
+strip leaves a dangling ` * ` line that must be deleted, and one legitimate `since <number>` survives
+the strip because it is a *third-party* version (`Velocity supports the same functionality natively
+since 1.6`) — so re-scan the rewritten lines for a leftover version rather than trusting the regex.
 
 **The classifier is one pass over the Javadoc block, with no snippet reads.** From the flagged line
 walk up over annotation/blank lines to the Javadoc, cut the `@deprecated` tag's text at the next
