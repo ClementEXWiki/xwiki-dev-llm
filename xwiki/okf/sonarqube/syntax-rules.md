@@ -181,10 +181,12 @@ The dense sites are the declaration preamble of long legacy methods (`XWiki.java
 un-wrap it entirely rather than keeping a half-split declaration. Nothing about scoping or
 initialisation order changes, so there is no drop condition beyond a comment on the line.
 
-## S6355 — `@Deprecated` should carry `since` (and/or `forRemoval`)
+## S6355 — `@Deprecated` should carry `since`
 
-**Fixable whenever the element's own `@deprecated` Javadoc tag names the version — which in XWiki it
-usually does.** The version is *copied*, never invented:
+**Fixable whenever the element's own `@deprecated` Javadoc tag names the version** — which in XWiki it
+usually does, so the version is copied, never invented. Moving it is the whole fix; the conventions
+(strip it from the tag, list every version of a multi-branch deprecation, no `forRemoval`) are in
+[[versioning]].
 
 ```java
     /**
@@ -195,56 +197,17 @@ usually does.** The version is *copied*, never invented:
 +   @Deprecated(since = "8.3RC1")
 ```
 
-**The version is MOVED, not duplicated — stripping it from the `@deprecated` Javadoc tag is part of
-the fix, not an optional extra** (asked for explicitly in review of the first sweep). Once
-`@Deprecated(since = …)` carries it in the form tools read, restating it in prose is redundant and
-will drift. `@Deprecated(since = "…")` is already the convention in the code base, and the format
-rule for the string is [[versioning]]'s — but nothing here writes a *new* version, so that rule only
-matters for the sites this one drops.
+**Drop** when the version is not written down: no Javadoc, no `@deprecated` tag, or a tag naming no
+version (`@deprecated use {@link X} instead`). Never guess one.
 
-Stripping the phrase has three shapes worth scripting, all on the one line that holds it: a **leading**
-`since X,` (drop it, and capitalise the remainder if the tag started with a capital), an **embedded or
-trailing** ` since X` (`replaced by {@link #exists(…)} since 2.2.1` → `replaced by {@link #exists(…)}`),
-and a tag whose **entire** text was the version, which becomes a bare `@deprecated` marker — no
-information is lost (the annotation has it) and no Checkstyle rule objects, since XWiki does not enable
-`NonEmptyAtclauseDescription`. Two gotchas: when the phrase sits alone on a *continuation* line the
-strip leaves a dangling ` * ` line that must be deleted, and one legitimate `since <number>` survives
-the strip because it is a *third-party* version (`Velocity supports the same functionality natively
-since 1.6`) — so re-scan the rewritten lines for a leftover version rather than trusting the regex.
+Three mechanics:
 
-**Anchor the version pattern with a trailing `(?![\w.])`.** The pool contains malformed versions
-(`4.4MA`, `5.2M`, `14.0CR1`, `5.ORC1`); without the boundary the regex matches their numeric prefix,
-so the annotation gets `since = "4.4"` and the Javadoc strip below orphans the rest of the token
-(`@deprecated MA use {@link #getRoleType()} instead`). It compiles and passes every gate. With the
-boundary those sites drop out, which is correct — never silently repair a malformed version, and audit
-after applying by checking whether the captured version is a *prefix* of a longer token in the source.
-
-**The classifier is one pass over the Javadoc block, with no snippet reads.** From the flagged line
-walk up over annotation/blank lines to the Javadoc, cut the `@deprecated` tag's text at the next
-block tag (otherwise a following `@since` — which means *when the element appeared* — is captured
-instead), and take the version from
-`(?:since|starting with|as of|from)\s+(\d+\.\d+(?:\.\d+)?(?:(?:RC|M|BETA|DEV)\d+)?)`. Requiring the
-keyword is what keeps a version-looking token inside a `{@link}` out; a malformed version in the
-source (`5.ORC1`, `4.4MA`) fails the regex, which is the right outcome — do not repair it. A `since`
-away from the head of the tag is still the deprecation version (`replaced by {@link #exists(…)} since
-2.2.1`, `does not do anything since 11.5RC1`).
-
-**A tag listing SEVERAL versions is not a judgement call — put them all in `since`,
-comma-separated, in the order the tag listed them** (`@deprecated since 14.10.2, 15.0RC1 …` →
-`@Deprecated(since = "14.10.2,15.0RC1")`), because the deprecation really did happen on each of those
-branches. See [[versioning]]; picking one of them loses information and is wrong even though it
-compiles, and sorting them is not asked for either — copy the tag's order.
-
-**Drop conditions**, in the measured order of frequency: no Javadoc comment at all, a Javadoc with no
-`@deprecated` tag, or a tag naming no version (`@deprecated use {@link X} instead`). Those genuinely
-need the deprecating version and must be left open.
-
-Two mechanics worth knowing:
-
-- **Sonar flags the annotation line itself**, so `line.strip() == "@Deprecated"` is both the site
-  location and the whole guard — assert it and the batch cannot mis-target (it held for 768/768 sites).
-- **Revapi does not report this.** `java.annotation.attributeAdded` on `@Deprecated` passed
-  `revapi:check` in 77 modules across the three repos, `oldcore` and public API included.
+- Sonar flags the bare `@Deprecated` line itself, so `line.strip() == "@Deprecated"` is both the site
+  location and the guard.
+- **Anchor the version pattern** (`…(?![\w.])`) and require a `since`-style keyword before it: the pool
+  holds malformed versions (`4.4MA`, `5.2M`, `14.0CR1`) whose numeric prefix otherwise matches, which
+  silently truncates the version and orphans the rest of the token in the tag. Those sites should drop.
+- Adding the attribute is not an API break — `revapi:check` passes.
 
 ## Related
 

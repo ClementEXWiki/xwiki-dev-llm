@@ -19,9 +19,7 @@ release of the actual current dev version**, written as `<X.Y.0>RC1` (e.g. `18.5
 
 ## `@Deprecated` — the annotation carries the version, the Javadoc tag carries the reason
 
-Four rules, and they are a **division of labour between the annotation and the Javadoc tag** that is
-easy to get half-right (a Sonar sweep of `java:S6355` got two of the four wrong across six pull
-requests before review caught it):
+A division of labour between the annotation and the Javadoc tag:
 
 - **Always both**: the `@Deprecated` annotation *and* the `@deprecated` Javadoc tag.
 - **The annotation carries WHEN**: always `since`. **Never `forRemoval`** — XWiki does not break APIs
@@ -31,10 +29,8 @@ requests before review caught it):
   `@deprecated use {@link #getRoleType()} instead`, not `@deprecated since 4.4M1, use …`.
 - **A deprecation done on several branches lists ALL of its versions in `since`, comma-separated** —
   `@Deprecated(since = "15.5RC1,14.10.12")`. Do **not** pick one of them (neither the newest nor the
-  oldest): each version-line in which the deprecation shipped belongs in the list. This is the one
-  place where a single `since` string holds several versions. **No ordering is prescribed** — when the
-  versions come from an existing `@deprecated` tag, keep the order that tag used rather than sorting
-  them (asked for in review; unlike the `@since` block below, which is explicitly ascending).
+  oldest): each version-line in which the deprecation shipped belongs in the list. No ordering is
+  prescribed, so keep the order the source used — unlike the `@since` block below, which is ascending.
 
 **Backporting adds `@since` lines, it does not replace them.** When an API is backported to stable
 branches, list one `@since` line per version-line where it becomes available, **ascending by version

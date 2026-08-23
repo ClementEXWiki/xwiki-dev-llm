@@ -102,8 +102,7 @@ Each of these is either bad ROI or a false positive against a deliberate XWiki i
 - **`S1123`** "add the missing `@Deprecated` annotation / `@deprecated` Javadoc tag" — one shape needs
   prose only the API's author can write (*why*, and what to use instead); the other adds an annotation
   that changes what tools report about a published API. A product decision, not a cleanup.
-  (**`S6355`** was listed here with it and should not have been — the deprecating version is usually
-  already written on the element. It is documented in [[syntax-rules]].)
+  (**`S6355`** was listed here with it and should not have been — see [[syntax-rules]].)
 - **`S6035`** "replace this alternation with a character class" — safe in principle, but the XWiki
   pool sits on `public static final String` regex constants. The value of a **compile-time constant**
   changing is a Revapi `java.field.constantValueChanged` break even when the two regexes match
