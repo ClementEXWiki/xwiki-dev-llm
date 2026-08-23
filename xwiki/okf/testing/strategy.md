@@ -3,8 +3,8 @@ title: XWiki testing strategy (overview)
 stability: durable
 summary: The kinds of tests XWiki uses, their naming, the no-stdout rule, the prefer-the-lightest-base
   rule, the page-object boundary (no getDriver() in a test), the don't-pay-the-timeout rule, how to
-  read a PRChecker log line, coverage, and where each test framework lives. Procedures live in the
-  test skills.
+  read a PRChecker log line, the bare @UITest on an AllIT container, coverage, and where each test
+  framework lives. Procedures live in the test skills.
 sources:
   - https://dev.xwiki.org/xwiki/bin/view/Community/Testing/
   - https://dev.xwiki.org/xwiki/bin/view/Community/Testing/DockerTesting/#HDon27tpaythetimeout
@@ -63,6 +63,13 @@ This is the declarative map of how testing works in XWiki. For **doing** the wor
   further probes from the same page. A page that legitimately needs the right is allowlisted with the
   `test.prchecker.excludePattern` property (a regex matched against the serialized secure-document
   reference), which logs `PRChecker: Skipping check for [X] since it's excluded` instead.
+- **An `AllIT` container class carries a bare `@UITest`** — the Docker framework resolves the
+  `@UITest` of the container class **and of every nested class** (walking each nested class's
+  superclass chain) and merges them all into one configuration
+  (`ExtensionContextTestConfigurationResolver`). So `properties`, `extraJARs` and the rest declared
+  on an individual `*IT` class already apply when it runs nested: repeating them on the container is
+  redundant, and repeating a scalar (`browser`, `database`, `servletEngine`, …) that a nested class
+  also sets aborts the run with a `DockerTestException` as soon as the two values differ.
 - **Test method order matches `@Order`** — in a test class that orders its methods with `@Order(n)`,
   keep the physical (source) order of the `@Test` methods aligned with their `@Order` values (1, 2,
   3 …) so the file reads in execution order. When adding a new test, place it according to its
