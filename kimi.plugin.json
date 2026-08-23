@@ -1,6 +1,6 @@
 {
   "name": "xwiki",
-  "version": "1.0.32",
+  "version": "1.1.0",
   "description": "Org-wide XWiki conventions, MCP servers and dev skills for all xwiki / xwiki-contrib GitHub org repos",
   "interface": {
     "displayName": "XWiki",
@@ -10,8 +10,8 @@
   "skillInstructions": "When a skill needs to locate the shared OKF knowledge base, resolve it relative to the skill file: `${KIMI_SKILL_DIR}/../../okf/`. In Claude Code the same location is `${CLAUDE_PLUGIN_ROOT}/okf/`.",
   "mcpServers": {
     "discourse": {
-      "command": "npx",
-      "args": ["-y", "@discourse/mcp@latest", "--site", "https://forum.xwiki.org"]
+      "command": "node",
+      "args": ["./xwiki/scripts/start-discourse-mcp.mjs"]
     },
     "sonarqube": {
       "command": "node",

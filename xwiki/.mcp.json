@@ -1,8 +1,14 @@
 {
   "mcpServers": {
     "discourse": {
-      "command": "npx",
-      "args": ["-y", "@discourse/mcp@latest", "--site", "https://forum.xwiki.org"]
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/start-discourse-mcp.mjs"],
+      "env": {
+        "DISCOURSE_API_KEY": "${DISCOURSE_API_KEY:-}",
+        "DISCOURSE_API_USERNAME": "${DISCOURSE_API_USERNAME:-}",
+        "DISCOURSE_USER_API_KEY": "${DISCOURSE_USER_API_KEY:-}",
+        "DISCOURSE_USER_API_CLIENT_ID": "${DISCOURSE_USER_API_CLIENT_ID:-}"
+      }
     },
     "sonarqube": {
       "command": "docker",

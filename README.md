@@ -108,7 +108,9 @@ ln -s "$XWIKI_LLM_HOME/xwiki/opencode/plugins/xwiki-line-endings.js" ~/.config/o
   (`xwiki/opencode/plugins/xwiki-line-endings.js`, a `tool.execute.after` hook reusing the same
   logic).
 - **MCP servers** (`xwiki/.mcp.json` for Claude; mirrored in `kimi.plugin.json` and `opencode.jsonc`):
-  - `discourse` — forum.xwiki.org search/read (no auth).
+  - `discourse` — forum.xwiki.org. Search/read topics and posts with no credentials. Set
+    `DISCOURSE_API_KEY` + `DISCOURSE_API_USERNAME` (or the user-key pair) and the same server also
+    gets write tools, so Claude can post and reply on the forum — see "Forum write access" below.
   - `sonarqube` — SonarCloud code-quality analysis (Docker). Reads `SONARQUBE_TOKEN` and the
     repo-specific `SONARQUBE_PROJECT_KEY` from the environment; no secrets are committed.
     `SONARQUBE_PROJECT_KEY` is optional (it defaults to empty), so repos that have no SonarCloud
@@ -161,6 +163,9 @@ ln -s "$XWIKI_LLM_HOME/xwiki/opencode/plugins/xwiki-line-endings.js" ~/.config/o
 | `SONARQUBE_PROJECT_KEY` | sonarqube | The SonarCloud project key — **differs per repo**. Optional: leave it unset in repos that have no SonarCloud project. |
 | `JIRA_API_TOKEN`        | `xwiki-jira` (jira-cli / REST) | Your jira.xwiki.org personal access token. Optional — only needed to act on JIRA issues. See "JIRA access" below. |
 | `JIRA_AUTH_TYPE`        | jira-cli  | Set to `bearer` (PAT auth) for the self-hosted XWiki JIRA.       |
+| `DISCOURSE_API_KEY`     | discourse | A forum.xwiki.org **admin** API key. Optional — without it the forum MCP is read-only. See "Forum write access" below. |
+| `DISCOURSE_API_USERNAME`| discourse | The forum username the admin API key acts as (e.g. your own). Required together with `DISCOURSE_API_KEY`. |
+| `DISCOURSE_USER_API_KEY` + `DISCOURSE_USER_API_CLIENT_ID` | discourse | Alternative to the admin key: a forum **user** API key, which any account can hold. |
 
 ### Setting `SONARQUBE_PROJECT_KEY` per repo
 
@@ -184,6 +189,45 @@ before launching Claude Code from that repo.
 
 Find a repo's exact key on its SonarCloud project page (**Project Information → Project Key**) at
 https://sonarcloud.io/organizations/xwiki/projects.
+
+## Forum write access (for the `discourse` MCP server)
+
+The `discourse` server always provides search and read of [forum.xwiki.org](https://forum.xwiki.org)
+without any credential. Posting — replying to a topic, creating one, drafting a proposal — needs one,
+because the underlying server registers its write tools only when it is authenticated. This is
+**optional**: leave the variables unset and everything keeps working read-only.
+
+Two kinds of credential work, whichever you can get:
+
+- **Admin API key** (forum admins only) — create it at
+  https://forum.xwiki.org/admin/api/keys with *User Level: Single User* pointing at your own account,
+  and scope it to what you actually want Claude to do (the *Granular* scope, e.g. only
+  `posts#create`, is a good default — the server's write tools cover topics, posts, PMs, categories
+  and users, and the key is what bounds them). Then:
+
+  ```bash
+  export DISCOURSE_API_KEY="<the-key>"
+  export DISCOURSE_API_USERNAME="<your-forum-username>"
+  ```
+
+- **User API key** (any account) — generated through Discourse's
+  [user-api-key flow](https://meta.discourse.org/t/user-api-keys-specification/48536), which yields a
+  key plus a client id:
+
+  ```bash
+  export DISCOURSE_USER_API_KEY="<the-key>"
+  export DISCOURSE_USER_API_CLIENT_ID="<the-client-id>"
+  ```
+
+Set them in your shell profile, or per project with [direnv](https://direnv.net) as described above.
+Never commit them: the launcher (`xwiki/scripts/start-discourse-mcp.mjs`) passes the credential to
+the server in a temporary `0600` profile file, so it stays out of the process list, but keeping it
+out of git is on you. Anything Claude posts goes out under the account the key acts as, so it should
+confirm the exact text with you before posting.
+
+If the forum refuses the credential (revoked, expired, wrong username), the launcher says so on
+stderr and starts the server read-only, rather than letting it fail to start and take the search and
+read tools down with it.
 
 ## JIRA access (for the `xwiki-jira` skill)
 
