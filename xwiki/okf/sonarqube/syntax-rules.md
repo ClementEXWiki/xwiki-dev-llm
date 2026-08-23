@@ -212,6 +212,13 @@ strip leaves a dangling ` * ` line that must be deleted, and one legitimate `sin
 the strip because it is a *third-party* version (`Velocity supports the same functionality natively
 since 1.6`) — so re-scan the rewritten lines for a leftover version rather than trusting the regex.
 
+**Anchor the version pattern with a trailing `(?![\w.])`.** The pool contains malformed versions
+(`4.4MA`, `5.2M`, `14.0CR1`, `5.ORC1`); without the boundary the regex matches their numeric prefix,
+so the annotation gets `since = "4.4"` and the Javadoc strip below orphans the rest of the token
+(`@deprecated MA use {@link #getRoleType()} instead`). It compiles and passes every gate. With the
+boundary those sites drop out, which is correct — never silently repair a malformed version, and audit
+after applying by checking whether the captured version is a *prefix* of a longer token in the source.
+
 **The classifier is one pass over the Javadoc block, with no snippet reads.** From the flagged line
 walk up over annotation/blank lines to the Javadoc, cut the `@deprecated` tag's text at the next
 block tag (otherwise a following `@since` — which means *when the element appeared* — is captured
