@@ -1,6 +1,6 @@
 {
   // XWiki shared LLM configuration for opencode (https://opencode.ai).
-  // version: 1.0.32 — keep in sync with the plugin version (see CLAUDE.md).
+  // version: 1.1.2 — keep in sync with the plugin version (see CLAUDE.md).
   //
   // Paths reference this checkout through the XWIKI_LLM_HOME environment variable so this file is
   // identical for everyone (no personal paths) and works whether it is used globally or per-project.
@@ -12,7 +12,15 @@
   "mcp": {
     "discourse": {
       "type": "local",
-      "command": ["npx", "-y", "@discourse/mcp@latest", "--site", "https://forum.xwiki.org"]
+      // Started via a Node wrapper (like Claude Code and Kimi Code) so that the forum credential,
+      // when set, is passed to the server in a temporary profile file and writes get enabled.
+      "command": ["node", "{env:XWIKI_LLM_HOME}/xwiki/scripts/start-discourse-mcp.mjs"],
+      "environment": {
+        "DISCOURSE_API_KEY": "{env:DISCOURSE_API_KEY}",
+        "DISCOURSE_API_USERNAME": "{env:DISCOURSE_API_USERNAME}",
+        "DISCOURSE_USER_API_KEY": "{env:DISCOURSE_USER_API_KEY}",
+        "DISCOURSE_USER_API_CLIENT_ID": "{env:DISCOURSE_USER_API_CLIENT_ID}"
+      }
     },
     "sonarqube": {
       "type": "local",

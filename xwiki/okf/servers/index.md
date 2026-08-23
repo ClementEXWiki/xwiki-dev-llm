@@ -29,7 +29,7 @@ https://dev.xwiki.org/xwiki/bin/view/Community/DevelopmentPractices#HServers
 | [ge.xwiki.org](https://ge.xwiki.org) | Develocity — stores CI build scans and provides build caching for CI and local builds. | No MCP. Build scans at `https://ge.xwiki.org/scans`. |
 | [sonar.xwiki.org](https://sonar.xwiki.org) → [sonarcloud.io (org `xwiki`)](https://sonarcloud.io/organizations/xwiki/projects/) | Code-quality analysis + quality gate (fails CI on gate failure). `sonar.xwiki.org` redirects to the SonarCloud `xwiki` organization, where analysis now runs. | **MCP: `sonarqube`** (this plugin) — needs `SONARQUBE_TOKEN` + per-repo `SONARQUBE_PROJECT_KEY`. See the `xwiki-fix-sonarqube-issue` skill. |
 | [nexus.xwiki.org](https://nexus.xwiki.org) | Maven artifacts: CI snapshots + official releases. Used by the Extension Manager. | No MCP. Snapshot/release jar names also resolvable under `~/.m2`. Good source to *verify* the current dev version. |
-| [forum.xwiki.org](https://forum.xwiki.org) | Community + dev discussion (replaced most mailing-list usage). | **MCP: `discourse`** (this plugin, no auth) — search/read topics and posts. |
+| [forum.xwiki.org](https://forum.xwiki.org) | Community + dev discussion (replaced most mailing-list usage). | **MCP: `discourse`** (this plugin) — search/read topics and posts with no credential. Posting (reply, new topic) needs `DISCOURSE_API_KEY` + `DISCOURSE_API_USERNAME` (or the `DISCOURSE_USER_API_KEY` pair) in the environment: without them the write tools are not registered at all, so a missing post tool means "no credential set", not "posting unavailable". Confirm the exact text with the developer before posting — it goes out under their forum account. |
 | [lists.xwiki.org](https://lists.xwiki.org) | Mailing lists kept for server notifications and committer-private / infra / security discussions. | No MCP. Web archive. |
 | [extensions.xwiki.org](https://extensions.xwiki.org) | Catalog + docs of all free extensions; the source used by in-product Extension Manager. Extension/Application types have a per-version page at `Extension/<Space>/Versions/<version>/WebHome`; **Project** types do not. | No MCP. WebFetch an extension page (e.g. to find an extension id/version). |
 | [xwiki.org](https://xwiki.org) | The product/documentation web site (itself a running XWiki instance). New docs live under `/documentation` (see the `xwiki-doc-writing` and `xwiki-doc-convert` skills). | No MCP. WebFetch to read a rendered page. To read/write page content or xobjects programmatically, use its REST API via the `xwiki-rest-api` skill. |
@@ -41,8 +41,8 @@ https://dev.xwiki.org/xwiki/bin/view/Community/DevelopmentPractices#HServers
 
 ## What has MCP today vs. WebFetch-only
 
-- **MCP available (fast, structured):** `discourse` (forum), `sonarqube` (SonarCloud). These ship
-  in this plugin's `.mcp.json`.
+- **MCP available (fast, structured):** `discourse` (forum — read always, write when a forum
+  credential is set), `sonarqube` (SonarCloud). These ship in this plugin's `.mcp.json`.
 - **Everything else is WebFetch / REST / `gh` / git.** For repeated reads of the same dev-wiki or
   extensions page within a session, index it once with context-mode (if installed) and search,
   rather than re-fetching.
