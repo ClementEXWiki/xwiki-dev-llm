@@ -181,8 +181,50 @@ The dense sites are the declaration preamble of long legacy methods (`XWiki.java
 un-wrap it entirely rather than keeping a half-split declaration. Nothing about scoping or
 initialisation order changes, so there is no drop condition beyond a comment on the line.
 
+## S6355 — `@Deprecated` should carry `since` (and/or `forRemoval`)
+
+**Fixable whenever the element's own `@deprecated` Javadoc tag names the version — which in XWiki it
+usually does.** The version is *copied*, never invented:
+
+```java
+    /**
+     * @deprecated since 8.3RC1, use {@link #AbstractCache(CacheConfiguration)} instead
+     */
+-   @Deprecated
++   @Deprecated(since = "8.3RC1")
+```
+
+`@Deprecated(since = "…")` is already the convention in the code base, and the format rule for the
+string is [[versioning]]'s — but nothing here writes a *new* version, so that rule only matters for
+the sites this one drops.
+
+**The classifier is one pass over the Javadoc block, with no snippet reads.** From the flagged line
+walk up over annotation/blank lines to the Javadoc, cut the `@deprecated` tag's text at the next
+block tag (otherwise a following `@since` — which means *when the element appeared* — is captured
+instead), and take the version from
+`(?:since|starting with|as of|from)\s+(\d+\.\d+(?:\.\d+)?(?:(?:RC|M|BETA|DEV)\d+)?)`. Requiring the
+keyword is what keeps a version-looking token inside a `{@link}` out; a malformed version in the
+source (`5.ORC1`, `4.4MA`) fails the regex, which is the right outcome — do not repair it. A `since`
+away from the head of the tag is still the deprecation version (`replaced by {@link #exists(…)} since
+2.2.1`, `does not do anything since 11.5RC1`).
+
+**Drop conditions**, in the measured order of frequency: no Javadoc comment at all, a Javadoc with no
+`@deprecated` tag, or a tag naming no version (`@deprecated use {@link X} instead`). Those genuinely
+need the deprecating version and must be left open. A tag listing **several** versions (a stable-branch
+release *and* a master one — `since 14.10.2, 15.0RC1`) is a judgement call, since `since` takes one
+string: ship those separately rather than deciding silently.
+
+Two mechanics worth knowing:
+
+- **Sonar flags the annotation line itself**, so `line.strip() == "@Deprecated"` is both the site
+  location and the whole guard — assert it and the batch cannot mis-target (it held for 768/768 sites).
+- **Revapi does not report this.** `java.annotation.attributeAdded` on `@Deprecated` passed
+  `revapi:check` in 77 modules across the three repos, `oldcore` and public API included.
+
 ## Related
 
 - [[index]] — rule map, denylist, universal drop conditions.
+- [[versioning]] — the `@since` / `@Deprecated(since = …)` version format (needed only when a version
+  must be *written*, which S6355's fixable subset never does).
 - [[simplification-rules]] — S1602, which pairs with S1611.
 - [[verification]] — the build gates that confirm a fix.
