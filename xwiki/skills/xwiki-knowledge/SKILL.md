@@ -81,7 +81,8 @@ Then:
    (`.claude-plugin/marketplace.json` `metadata.version` + the `xwiki` plugin entry's `version`,
    `xwiki/.claude-plugin/plugin.json`, `kimi.plugin.json` — the Kimi manifest — and the `// version:`
    comment at the top of `opencode.jsonc`); **patch** for an OKF content edit.
-   `node scripts/validate.mjs` verifies they stay in sync, and is the authority if this list drifts.
+   `node scripts/validate.mjs` verifies they stay in sync **and that the version actually rose above
+   the base branch's**, and is the authority if this list drifts.
 5. Open a PR using the `xwiki-pull-request` skill's conventions (JIRA/`[Misc]` prefix, squashed
    commit, AI-attribution trailers). The change is reviewed like code before it ships.
 
