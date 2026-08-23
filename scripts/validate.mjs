@@ -8,7 +8,10 @@
 //      plugin, opencode config comment).
 //   4. Every OKF topic file is referenced in xwiki/okf/index.md AND in the injected mirror
 //      xwiki/instructions/xwiki-org.md.
-//   5. Every `okf/...md` path a skill cites actually exists. Skills delegate their rules to the OKF
+//   5. The injected mirror stays within its size budget. Invariant 4 can only ever demand *more*
+//      text in a file that is loaded into every session; without a ceiling the map grows by
+//      accretion, because each extension appends and none ever cuts.
+//   6. Every `okf/...md` path a skill cites actually exists. Skills delegate their rules to the OKF
 //      rather than restating them, so a renamed or deleted topic would otherwise leave a skill
 //      pointing at nothing — and a reviewer that cannot read its rule source fails silently.
 // Node built-ins only. Run from anywhere: `node scripts/validate.mjs`.
@@ -88,7 +91,36 @@ for (const abs of walk(okfRoot)) {
   }
 }
 
-// ---- Invariant 5: OKF paths cited by skills resolve ------------------------------------------
+// ---- Invariant 5: the always-on file stays small ---------------------------------------------
+// xwiki-org.md is injected at the start of every session in every xwiki/* repo, so each line is
+// paid for by every task, including the ones that never needed it. The map is routing only —
+// topic names; okf/index.md is where a topic gets described. Raise a budget only with a reason.
+const ORG_MAX_BYTES = 8000;
+const ORG_MAP_MAX_BYTES = 1800;
+if (Buffer.byteLength(orgMd) > ORG_MAX_BYTES) {
+  errors.push(
+    `xwiki/instructions/xwiki-org.md: ${Buffer.byteLength(orgMd)} bytes exceeds the ${ORG_MAX_BYTES}-byte budget ` +
+      `for the always-on file — move the detail into an okf/ topic (described in okf/index.md) or a skill`
+  );
+}
+const mapStart = orgMd.indexOf("OKF map");
+const mapEnd = orgMd.indexOf("**Capturing learnings:**");
+if (mapStart === -1 || mapEnd === -1 || mapEnd < mapStart) {
+  errors.push(
+    `xwiki/instructions/xwiki-org.md: cannot locate the OKF map block ` +
+      `(expected "OKF map" … "**Capturing learnings:**")`
+  );
+} else {
+  const mapBytes = Buffer.byteLength(orgMd.slice(mapStart, mapEnd));
+  if (mapBytes > ORG_MAP_MAX_BYTES) {
+    errors.push(
+      `xwiki/instructions/xwiki-org.md: the OKF map block is ${mapBytes} bytes, over the ${ORG_MAP_MAX_BYTES}-byte ` +
+        `budget — the mirror lists topic *names*; describe the topic in xwiki/okf/index.md instead`
+    );
+  }
+}
+
+// ---- Invariant 6: OKF paths cited by skills resolve ------------------------------------------
 // Matches `okf/<dir>/<topic>.md` wherever it appears in a SKILL.md, in backticks or bare.
 const okfRefPattern = /okf\/[a-z0-9-]+\/[a-z0-9-]+\.md/g;
 for (const skill of skills) {

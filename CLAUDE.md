@@ -17,7 +17,7 @@ required directory layout. Keep new content that way.
 
 ```
 claude plugin validate ./xwiki   # manifest schema
-node scripts/validate.mjs        # repo consistency (skill inventory, version sync, OKF map)
+node scripts/validate.mjs        # repo consistency (skill inventory, version sync, OKF map, always-on size budget)
 ```
 
 Run both after any change to the plugin. `scripts/validate.mjs` also runs in CI (GitHub Actions) on
@@ -82,6 +82,9 @@ Inside `xwiki/`:
   host manifests: `marketplace.json` (`metadata.version` and the plugin entry's `version`),
   `xwiki/.claude-plugin/plugin.json`, `kimi.plugin.json`, and the `// version:` comment in
   `opencode.jsonc` — `node scripts/validate.mjs` fails if they diverge.
+- **`xwiki/instructions/xwiki-org.md` is injected into every session** in every `xwiki/*` repo, so
+  it has a byte budget the validator enforces. Its OKF map lists topic *names*; a topic is described
+  in `xwiki/okf/index.md`. Put a rule there only when it must be obeyed without opening any OKF file.
 - A skill's `description` must clearly state *when* to use it (and when to use a sibling skill
   instead) — that text is the only thing Claude sees when deciding to invoke it.
 - Mirror substantive changes to the plugin's capabilities in `README.md`, which documents the

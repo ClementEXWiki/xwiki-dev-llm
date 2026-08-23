@@ -54,6 +54,14 @@ When a session establishes a fact worth keeping, run the **gate checklist** befo
       When the new fact touches an existing bullet, **edit that bullet or cross-reference it** rather
       than stating the fact in two sections. Re-read your diff and cut whatever can go without losing
       a rule or a trap.
+- [ ] **Nothing extra in the always-on file** — `instructions/xwiki-org.md` is injected into *every*
+      session of every XWiki repo, so a line there is paid for by every task that never needed it.
+      Its OKF map is **routing only**: the topic name, plus a clause only where the name does not say
+      what is inside. Never copy a rule, a trap or an example into it — describing a topic is
+      `okf/index.md`'s job, and a skill's own `description` is already always visible. The one
+      exception is a rule that must be obeyed *without* opening the OKF file: promote it to a real
+      bullet in the section it belongs to (folding it into the bullet it qualifies), and only when it
+      bears on nearly every session.
 
 Then:
 
@@ -61,15 +69,20 @@ Then:
    `title`, `stability` (`durable`|`volatile`), `summary`, and `sources:` (the dev-wiki URL(s) it
    derives from). For volatile facts add a `verify:` line and store the recipe, not the value.
    Cross-link related entries with `[[name]]` (the target file's basename without extension).
-2. **Update `okf/index.md`** (add the topic line) **and the mirrored map in
-   `instructions/xwiki-org.md`** so the always-on map stays in sync.
-3. **Bump the plugin version** so installed plugins actually pull the update — Claude Code updates a
+2. **Update `okf/index.md`** — the topic line, described in full; this is the map that gets read.
+   Then add the topic's **name** to the mirrored map in `instructions/xwiki-org.md`, and nothing
+   more (see the always-on gate above). `node scripts/validate.mjs` checks both that every topic is
+   listed and that the mirror has stayed within its size budget.
+3. **Leave what you touched shorter than you found it.** Cut what has gone stale, what your new
+   entry now says better, and what is stated twice — a knowledge base that only ever grows stops
+   being read. List those cuts in the PR so they get reviewed alongside the addition.
+4. **Bump the plugin version** so installed plugins actually pull the update — Claude Code updates a
    plugin only when its version *increases*. Increment all five synced fields
    (`.claude-plugin/marketplace.json` `metadata.version` + the `xwiki` plugin entry's `version`,
    `xwiki/.claude-plugin/plugin.json`, `kimi.plugin.json` — the Kimi manifest — and the `// version:`
    comment at the top of `opencode.jsonc`); **patch** for an OKF content edit.
    `node scripts/validate.mjs` verifies they stay in sync, and is the authority if this list drifts.
-4. Open a PR using the `xwiki-pull-request` skill's conventions (JIRA/`[Misc]` prefix, squashed
+5. Open a PR using the `xwiki-pull-request` skill's conventions (JIRA/`[Misc]` prefix, squashed
    commit, AI-attribution trailers). The change is reviewed like code before it ships.
 
 ### Recording an ADR (architectural decision)
