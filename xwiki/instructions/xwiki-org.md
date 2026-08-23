@@ -13,7 +13,8 @@ below).
   contrib. Reference issues by their key (e.g. `XWIKI-12345`). To view/create/update issues use the
   **`xwiki-jira`** skill (jira-cli or REST); issue-field conventions are in `okf/servers/jira.md`.
 - XWiki Commons, XWiki Rendering and XWiki Platform are **released together with the same version**.
-- The **Java version depends on the XWiki version** (defined in the `pom.xml`) — see
+- The **Java version depends on the XWiki version** (defined in the `pom.xml`) — build with that JDK,
+  not the machine default; the **`xwiki-build`** skill has how. See
   https://dev.xwiki.org/xwiki/bin/view/Community/SupportStrategy/JavaSupportStrategy/#HByXWikiVersions
 
 ## Commit messages
@@ -28,10 +29,6 @@ below).
 
 - For all Maven build/test commands — full build, single module, single test, profiles, skip flags,
   `clean`/`verify` gotchas — use the **`xwiki-build`** skill (the canonical reference).
-- **Build with the JDK the branch targets, not the machine default** — a too-new JDK fails in ways
-  that look like code problems (JaCoCo `Unsupported class file major version`, Spoon `could not add
-  URL to system classloader`). The **`xwiki-build`** skill has both ways to get it right (the `xmvn`
-  wrapper, or `JAVA_HOME` by hand).
 - **Always pass `-B -ntp`** on every `mvn` invocation (batch mode + no-transfer-progress), to
   suppress interactive prompts and the download/progress lines that otherwise flood the output.
 - Unit test classes end with `*Test.java` (Surefire); integration test classes end with `*IT.java`
