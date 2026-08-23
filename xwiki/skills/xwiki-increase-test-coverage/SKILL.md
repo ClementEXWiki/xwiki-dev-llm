@@ -7,9 +7,8 @@ description: Increase (and lock in) the unit-test coverage of an XWiki module. R
   missing tests otherwise.
 ---
 
-Run this from the module directory. Use ``xmvn`` in place of ``mvn`` below when it is available, so
-JaCoCo runs on the JDK the branch targets — on a too-new JDK its agent aborts with ``Unsupported class
-file major version`` and no coverage is produced (see the ``xwiki-build`` skill).
+Run this from the module directory, on the JDK the branch targets — on a too-new JDK the JaCoCo agent
+aborts and produces no coverage at all (see the ``xwiki-build`` skill).
 
 1. Verify the build passes with ``mvn clean install -B -ntp -q -Pquality -Dxwiki.jacoco.instructionRatio=0.00``
 2. Run ``mvn jacoco:report -B -ntp``
