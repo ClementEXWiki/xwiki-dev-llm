@@ -32,8 +32,9 @@ requests before review caught it):
 - **A deprecation done on several branches lists ALL of its versions in `since`, comma-separated** —
   `@Deprecated(since = "15.5RC1,14.10.12")`. Do **not** pick one of them (neither the newest nor the
   oldest): each version-line in which the deprecation shipped belongs in the list. This is the one
-  place where a single `since` string holds several versions, and it mirrors the multi-line `@since`
-  rule below.
+  place where a single `since` string holds several versions. **No ordering is prescribed** — when the
+  versions come from an existing `@deprecated` tag, keep the order that tag used rather than sorting
+  them (asked for in review; unlike the `@since` block below, which is explicitly ascending).
 
 **Backporting adds `@since` lines, it does not replace them.** When an API is backported to stable
 branches, list one `@since` line per version-line where it becomes available, **ascending by version

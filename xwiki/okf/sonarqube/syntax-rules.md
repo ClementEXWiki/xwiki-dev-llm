@@ -230,9 +230,10 @@ away from the head of the tag is still the deprecation version (`replaced by {@l
 2.2.1`, `does not do anything since 11.5RC1`).
 
 **A tag listing SEVERAL versions is not a judgement call — put them all in `since`,
-comma-separated** (`@Deprecated(since = "15.0RC1,14.10.2")`), because the deprecation really did
-happen on each of those branches. See [[versioning]]; picking one of them loses information and is
-wrong even though it compiles.
+comma-separated, in the order the tag listed them** (`@deprecated since 14.10.2, 15.0RC1 …` →
+`@Deprecated(since = "14.10.2,15.0RC1")`), because the deprecation really did happen on each of those
+branches. See [[versioning]]; picking one of them loses information and is wrong even though it
+compiles, and sorting them is not asked for either — copy the tag's order.
 
 **Drop conditions**, in the measured order of frequency: no Javadoc comment at all, a Javadoc with no
 `@deprecated` tag, or a tag naming no version (`@deprecated use {@link X} instead`). Those genuinely
