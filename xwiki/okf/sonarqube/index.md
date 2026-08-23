@@ -36,7 +36,7 @@ every day.
 
 | Rule keys | Family file |
 |---|---|
-| S1116 S1124 S1128 S1161 S1197 S1611 S1659 S2209 S3252 S3878 S6208 S7476 | [[syntax-rules]] |
+| S1116 S1124 S1128 S1161 S1197 S1611 S1659 S2209 S3252 S3878 S6208 S6355 S7476 | [[syntax-rules]] |
 | S1066 S1125 S1126 S1155 S1264 S1488 S1596 S1602 S1612 S1858 S1905 S2130 S2864 S3012 S3024 S3358 S3706 S4201 S6353 S6397 S7158 | [[simplification-rules]] |
 | S1604 S1640 S1643 S6126 S6201 S6204 S6211 S6485 | [[modernization-rules]] |
 | S125 S1068 S1118 S1130 S1144 S1185 S1481 S1854 | [[dead-code-rules]] |
@@ -99,7 +99,10 @@ Each of these is either bad ROI or a false positive against a deliberate XWiki i
   `java.method.visibilityReduced`.
 - **`S5411`** boxed → primitive `boolean`, **`S1168`** return empty instead of `null`,
   **`S1172`** remove an unused parameter — all real behaviour or signature changes.
-- **`S6355`** / **`S1123`** `@Deprecated(since=…)` — needs the deprecating version; see [[versioning]].
+- **`S1123`** "add the missing `@Deprecated` annotation / `@deprecated` Javadoc tag" — one shape needs
+  prose only the API's author can write (*why*, and what to use instead); the other adds an annotation
+  that changes what tools report about a published API. A product decision, not a cleanup.
+  (**`S6355`** was listed here with it and should not have been — see [[syntax-rules]].)
 - **`S6035`** "replace this alternation with a character class" — safe in principle, but the XWiki
   pool sits on `public static final String` regex constants. The value of a **compile-time constant**
   changing is a Revapi `java.field.constantValueChanged` break even when the two regexes match

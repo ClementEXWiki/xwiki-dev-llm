@@ -181,8 +181,38 @@ The dense sites are the declaration preamble of long legacy methods (`XWiki.java
 un-wrap it entirely rather than keeping a half-split declaration. Nothing about scoping or
 initialisation order changes, so there is no drop condition beyond a comment on the line.
 
+## S6355 — `@Deprecated` should carry `since`
+
+**Fixable whenever the element's own `@deprecated` Javadoc tag names the version** — which in XWiki it
+usually does, so the version is copied, never invented. Moving it is the whole fix; the conventions
+(strip it from the tag, list every version of a multi-branch deprecation, no `forRemoval`) are in
+[[versioning]].
+
+```java
+    /**
+-    * @deprecated since 8.3RC1, use {@link #AbstractCache(CacheConfiguration)} instead
++    * @deprecated use {@link #AbstractCache(CacheConfiguration)} instead
+     */
+-   @Deprecated
++   @Deprecated(since = "8.3RC1")
+```
+
+**Drop** when the version is not written down: no Javadoc, no `@deprecated` tag, or a tag naming no
+version (`@deprecated use {@link X} instead`). Never guess one.
+
+Three mechanics:
+
+- Sonar flags the bare `@Deprecated` line itself, so `line.strip() == "@Deprecated"` is both the site
+  location and the guard.
+- **Anchor the version pattern** (`…(?![\w.])`) and require a `since`-style keyword before it: the pool
+  holds malformed versions (`4.4MA`, `5.2M`, `14.0CR1`) whose numeric prefix otherwise matches, which
+  silently truncates the version and orphans the rest of the token in the tag. Those sites should drop.
+- Adding the attribute is not an API break — `revapi:check` passes.
+
 ## Related
 
 - [[index]] — rule map, denylist, universal drop conditions.
+- [[versioning]] — the `@since` / `@Deprecated(since = …)` version format (needed only when a version
+  must be *written*, which S6355's fixable subset never does).
 - [[simplification-rules]] — S1602, which pairs with S1611.
 - [[verification]] — the build gates that confirm a fix.
