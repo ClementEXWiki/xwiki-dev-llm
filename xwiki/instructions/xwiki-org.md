@@ -13,7 +13,8 @@ below).
   contrib. Reference issues by their key (e.g. `XWIKI-12345`). To view/create/update issues use the
   **`xwiki-jira`** skill (jira-cli or REST); issue-field conventions are in `okf/servers/jira.md`.
 - XWiki Commons, XWiki Rendering and XWiki Platform are **released together with the same version**.
-- The **Java version depends on the XWiki version** (defined in the `pom.xml`) — see
+- The **Java version depends on the XWiki version** (defined in the `pom.xml`) — build with that JDK,
+  not the machine default; the **`xwiki-build`** skill has how. See
   https://dev.xwiki.org/xwiki/bin/view/Community/SupportStrategy/JavaSupportStrategy/#HByXWikiVersions
 
 ## Commit messages

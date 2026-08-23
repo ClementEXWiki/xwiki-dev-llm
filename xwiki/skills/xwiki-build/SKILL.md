@@ -15,6 +15,34 @@ keep it on the commands below and on any new `mvn` command you run.
 per-module state behind, and stale `target/` (and locally-installed SNAPSHOTs) cause confusing,
 hard-to-diagnose failures.
 
+## Build with the JDK the branch targets — `xmvn`
+
+Never build on the machine default JDK without checking it: a too-new JDK fails in ways that read as
+code or configuration problems and are neither — JaCoCo aborts instrumenting with `Unsupported class
+file major version NN` (its bundled ASM cannot read the JDK's own classes, so *every* `-Pquality`
+build fails), and the Spoon plugin fails with `could not add URL to system classloader`.
+
+Every command below is written `mvn`; run it as `xmvn` whenever `command -v xmvn` finds one. `xmvn`
+ships with [`xwiki-dev-tools`](https://github.com/xwiki/xwiki-dev-tools) (`bash/xmvn`): run from the
+directory holding the pom, it reads `xwiki.java.version` from it (falling back to deducing it from the
+XWiki version), exports the matching `JAVA_HOME`, then delegates to `mvn`. It also raises that version
+when the arguments contain a sonar goal, the Sonar scanner having a JDK floor of its own — above what
+the older branches target.
+
+**`xmvn` looks for JDKs the Linux way only** (`update-alternatives`, `/usr/lib/jvm/java-*`). Anywhere
+else — macOS in particular — it finds none, silently runs `mvn` on the default JDK, and you get the
+failures above regardless. There, and wherever `xmvn` is absent, select the JDK yourself:
+
+```bash
+mvn -N -B -ntp -q -DforceStdout help:evaluate -Dexpression=xwiki.java.version   # e.g. 11
+JAVA_HOME=<path to a JDK of that version> mvn clean install -B -ntp -Plegacy
+```
+
+Which Java version each XWiki version needs is in the Java support strategy (linked from the org-wide
+conventions); for a `sonar:sonar` run, `xmvn` and `xwiki-jenkins-pipeline`'s
+`vars/configureJavaTool.groovy` hold the scanner's current floor — read it there rather than pinning a
+number here, since it moves with the `sonar-maven-plugin` version.
+
 ## Full build (fast, unit tests only — no integration tests)
 
 ```bash
