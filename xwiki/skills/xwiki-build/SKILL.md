@@ -29,9 +29,8 @@ XWiki version), exports the matching `JAVA_HOME`, then delegates to `mvn`. It al
 when the arguments contain a sonar goal, the Sonar scanner having a JDK floor of its own — above what
 the older branches target.
 
-**`xmvn` looks for JDKs the Linux way only** (`update-alternatives`, `/usr/lib/jvm/java-*`). Anywhere
-else — macOS in particular — it finds none, silently runs `mvn` on the default JDK, and you get the
-failures above regardless. There, and wherever `xmvn` is absent, select the JDK yourself:
+Wherever `xmvn` isn't available, select the JDK yourself. If a build still fails as above under
+`xmvn`, it didn't switch the JDK — set `JAVA_HOME` yourself the same way:
 
 ```bash
 mvn -N -B -ntp -q -DforceStdout help:evaluate -Dexpression=xwiki.java.version   # e.g. 11
