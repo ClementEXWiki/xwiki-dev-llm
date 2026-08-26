@@ -95,8 +95,12 @@ Each of these is either bad ROI or a false positive against a deliberate XWiki i
   `PDFExportJobStatus`, …) are serialized by the job-status store with XStream, which honours
   `transient`. Removing it changes what gets persisted.
 - **`S5845`** assert on dissimilar types — erasure can make the assertion correct as written.
-- **`S5993`** reduce a constructor to `protected` — **reduces visibility** → Revapi
-  `java.method.visibilityReduced`.
+- **`S5993`** reduce an abstract class's constructor to `protected` — **only outside an `internal`
+  package**, where it is a real Revapi `java.method.visibilityReduced` break. Inside one it is a clean
+  mechanical pool: `revapi.json` excludes `**.internal.**` from the API check, and JLS §6.6.2.2 lets
+  both `super(…)` and `new AbstractX(…){…}` reach a `protected` constructor from any package while
+  plain `new AbstractX(…)` is already illegal on an abstract class, so no compilable caller can break.
+  Split the pool on `/internal/` in the path.
 - **`S5411`** boxed → primitive `boolean`, **`S1168`** return empty instead of `null` — real
   behaviour changes. **`S1172`** remove an unused parameter — a signature change on anything
   **non-`private`**; its `private` subset is a normal mechanical pool, see [[dead-code-rules]].
