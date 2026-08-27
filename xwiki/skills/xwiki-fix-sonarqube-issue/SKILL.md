@@ -63,6 +63,11 @@ The cost here is almost entirely file reads while evaluating candidates. Rules:
   `gh pr list --search "is:pr label:llm-agent is:open"`. Scope the off-limits check by **(rule +
   module)**, not rule alone — a per-module PR only claims the files it touched. But a **same-file** open
   PR is off-limits even for a different rule, because a concurrent edit risks a merge conflict.
+* **Ask what else the lines you are about to rewrite already carry.** One query per candidate file —
+  `"…/issues/search?componentKeys=<the issue's full component>&resolved=false&ps=100"` — then compare
+  with the lines your edit touches. A rewrite SonarCloud cannot match re-dates those findings into the
+  new-code period and can turn the `master` quality gate red although you introduced nothing (see
+  `okf/sonarqube/verification.md`). Fix them in the same PR, or pick another site.
 * **Stop at the first viable candidate.** Pull a small batch (`ps=5`), read only the top candidate's
   snippet, and accept it unless the snippet disqualifies it. Do not pre-read multiple candidates.
 
