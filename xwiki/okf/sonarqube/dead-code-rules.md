@@ -187,8 +187,17 @@ declaration and that assignment. An `@Override` setter's now-unused parameter is
   22 un-annotated sites, leaving only four `public`/`protected` helpers on abstract test bases.
 - Add `@BeforeComponent` (and the other XWiki test-framework hooks) to the safe annotation set — they
   are invoked reflectively exactly like the JUnit ones.
-- **`src/main`: permanent drop.** Narrowing a `throws` on a published method breaks every caller that
-  catches it, and on an overridable method it also breaks subclasses that declare the wider clause.
+- **`src/main` is NOT the drop line — non-`private` is, in test and main sources alike.** Narrowing a
+  `throws` on a published or overridable method breaks every caller that catches it and every
+  subclass that declares the wider clause, so `public`/`protected`/package-private is a drop wherever
+  it lives. A `private` `src/main` method carries the same "none" risk as a `private` test helper, so
+  fix it. Bucket on the modifier of the **declaration** line, not of the flagged line: Sonar
+  attributes the issue to the line holding the `throws`, which under XWiki's wrapping is often a
+  continuation line with no modifier on it.
+- **Narrowing a private method can make an enclosing caller's `catch` unreachable**, which is a
+  compile error, so the fix sometimes includes deleting a now-dead `try`/`catch` and dedenting its
+  body. Check per site whether any *other* call inside that `try` still declares the exception; a
+  `catch (Exception …)` is never affected.
 
 Two follow-ons: removing the exception usually orphans its import (drop it in the same edit), and a
 Javadoc `@throws` tag for the removed exception must go with it. When a signature loses two flagged
