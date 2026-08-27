@@ -83,12 +83,17 @@ finding.** SonarCloud matches an issue by line and code hash; a rewrite it canno
 issue as FIXED and raises an identical one dated today. A finding that sat outside the new-code period
 for years is suddenly inside it, and one re-dated RELIABILITY/BLOCKER is enough to take New Reliability
 Rating to C and turn the gate red. Ask what else a region carries *before* rewriting it (recipe in the
-`xwiki-fix-sonarqube-issue` skill), and fix or avoid those lines.
+`xwiki-fix-sonarqube-issue` skill), and fix or avoid those lines. A PR analysis surfaces a re-dated
+finding only when the rewrite also broke issue matching at PR level — measured both ways — so the
+pre-flight check stays worth doing even with PR analysis in place.
 
 **`javabugs:*` findings are computed server-side, during the SonarCloud analysis** — neither the local
-scanner nor the IDE reports them, so no local build proves one gone and the next analysis of the branch
-is the only confirmation. `qualitygates/project_status?projectKey=$SONARQUBE_PROJECT_KEY` names the red
-condition. Before believing *or* dismissing such a finding, read the analyzer's own path:
+scanner nor the IDE reports them, so no local build proves one gone. **A PR analysis does, before
+merge**, and it runs the same rules and gate as the branch: measured on xwiki-commons, a direct *and* an
+interprocedural null dereference were both reported and took the PR gate to ERROR. The recipe is in the
+`xwiki-pull-request` skill — no tests, no `-Pquality` and no coverage, which holds as long as the gate's
+`new_coverage` condition stays disabled (`qualitygates/project_status` shows the conditions, and also
+names the red one). Before believing *or* dismissing such a finding, read the analyzer's own path:
 `&additionalFields=_all` on `issues/search` returns `flows[].locations[]`, whose `msg` chain states
 every assumption it made ("Assuming this condition to be false"). Print `startLine` + `msg` only — the
 raw arrays are huge.
