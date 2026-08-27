@@ -130,30 +130,34 @@ Applied by `xwiki-fix-sonarqube-issue`, which owns the *procedure*.
   XWiki idioms Sonar misreads: `S2447` null-from-a-script-service, `S1215` `$xwiki.gc()`, `S2065`
   XStream-honoured `transient`); and the drop conditions common to every rule (120 chars, Revapi,
   JaCoCo, an explanatory comment, an existing suppression, the ~15-minute ceiling).
-- **syntax-rules** — S1116 S1124 S1128 S1161 S1197 S1611 S3878 S7476. Holds S3878's
-  **infinite-recursion trap** (spreading `new Object[]{…}` re-binds to a same-name fixed-arity
-  overload — often the enclosing method, the whole commons `logging-*` SLF4J family).
-- **simplification-rules** — S1066 S1125 S1126 S1155 S1488 S1602 S1612 S1858 S2130 S2864 S3706 S7158.
-  S1612's method-ref-needs-the-type-imported build-breaker; S7158 fires on `String` receivers too;
-  S1066's outer-`else` and comment-between-the-`if`s drops plus the brace-balance check.
-- **modernization-rules** — S1604 S1640 S1643 S6126 S6201 S6204/S6211. The big ones: S6201's
-  flow-scoping shapes and one-issue-per-cast; **S6204's escape analysis** (`.toList()` is
+- **syntax-rules** — the pure syntax and annotation rules. Holds the **infinite-recursion trap**
+  (spreading `new Object[]{…}` re-binds to a same-name fixed-arity overload — often the enclosing
+  method, the whole commons `logging-*` SLF4J family).
+- **simplification-rules** — the behaviour-preserving rewrites. The method-reference
+  needs-the-type-imported build-breaker; `isEmpty()` fires on `String` receivers too; the
+  collapsible-`if` outer-`else` and comment-between-the-`if`s drops plus the brace-balance check.
+- **modernization-rules** — the language/API modernizations. The big ones: the instanceof-pattern
+  flow-scoping shapes and one-issue-per-cast; **the `.toList()` escape analysis** (it is
   unmodifiable — trace to the outermost public/`ScriptService` method, since Velocity callers are
   untraceable; the sibling-branch safe signal; the defensive-copy setter) and its `Collectors`
-  orphaned-import build-breaker; S1640's `EnumMap` **null-key runtime break**; S1643's prepend and
-  StringBuilder-vs-mock-equality traps; S6126's text-block byte-identity rules.
-- **dead-code-rules** — S1068 S1118 S1144 S1185 S1481 S1854. The highest false-positive family:
+  orphaned-import build-breaker; the `EnumMap` **null-key runtime break**; the `StringBuilder`
+  prepend and mock-equality traps; the text-block byte-identity rules.
+- **dead-code-rules** — removing unused code, and the highest false-positive family:
   **`XWikiPluginManager.initPlugin()` reflective `getDeclaredMethods()` dispatch** makes every
-  `com.xpn.xwiki.plugin.*` super-only override load-bearing (S1185); `.hbm.xml`-mapped accessors
-  (S1144); S1118's `FinalClass` follow-on, Revapi `visibilityReduced` and the `-legacy` re-export;
-  removal cascades.
-- **constant-and-resource-rules** — S1143+S1163 S1192 S2093 S2119 S2147 S3626 S5361. S1192's
+  `com.xpn.xwiki.plugin.*` super-only override load-bearing; `.hbm.xml`-mapped accessors; the
+  private-constructor `FinalClass` follow-on, Revapi `visibilityReduced` and the `-legacy`
+  re-export; the private-only subsets of the unused-parameter and narrowed-`throws` rules; removal
+  cascades.
+- **constant-and-resource-rules** — constants, resources and exceptions. The duplicated-literal
   reviewer preferences (parameterized SLF4J over a constant, the owning `*DocumentInitializer`
-  constant, `@since` on a widened field) and forward-reference gotcha; **S2093 in XWiki is usually a
-  state *restore*, not a close** — that batch is near-100% drops.
-- **test-code-rules** — S3415 S5785 S5786 S8924. **S5785 must not be applied inside
-  `equals()`/`hashCode()` contract tests** (reviewer-rejected — suppress instead) and receiver-first /
-  never-flip-operands; S3415's default-drop on asymmetric `equals`; S5786's cross-module test-jar check.
+  constant, `@since` on a widened field) and forward-reference gotcha; **try-with-resources in XWiki
+  is usually a state *restore*, not a close** — that batch is near-100% drops; the charset-constant
+  unreachable-catch build-breaker.
+- **test-code-rules** — the test-only rules. **`assertEquals` must not replace
+  `assertTrue(a.equals(b))` inside `equals()`/`hashCode()` contract tests** (reviewer-rejected —
+  suppress instead), and receiver-first / never-flip-operands; the expected/actual swap's default-drop
+  on asymmetric `equals`; the package-private cross-module test-jar check; and why an `assertThrows`
+  hoist must never move the throwing call out of the lambda.
 - **verification** — what makes a Sonar fix *verified*: never skip the tests, `-Plegacy,quality` is
   mandatory, why removing covered instructions **always** lowers a JaCoCo ratio `(c−k)/(t−k) < c/t`
   (so drop the module, never the pinned ratio), and how to tell your reactor failure from a

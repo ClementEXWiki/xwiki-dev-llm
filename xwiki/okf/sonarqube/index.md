@@ -84,8 +84,6 @@ Each of these is either bad ROI or a false positive against a deliberate XWiki i
   mean different things is a design decision.
 - **`S115`** constant naming, **`S1214`** constants-in-interface — cross-module renames, breaking.
 - **`S1845`** name differing only by capitalization — a cross-module rename of published API.
-  (**`S3252`** used to be listed here with it; it is *not* an API change and is now documented in
-  [[syntax-rules]].)
 - **`S2447`** "return null from a Boolean method" — in XWiki **script services** returning `null` is a
   deliberate contract meaning "an error occurred, call `getLastError()`". Not a defect.
 - **`S1215`** `System.gc()` — the enclosing method is sometimes a deliberately exposed API (`$xwiki.gc()`).
@@ -107,7 +105,6 @@ Each of these is either bad ROI or a false positive against a deliberate XWiki i
 - **`S1123`** "add the missing `@Deprecated` annotation / `@deprecated` Javadoc tag" — one shape needs
   prose only the API's author can write (*why*, and what to use instead); the other adds an annotation
   that changes what tools report about a published API. A product decision, not a cleanup.
-  (**`S6355`** was listed here with it and should not have been — see [[syntax-rules]].)
 - **`S6035`** "replace this alternation with a character class" — safe in principle, but the XWiki
   pool sits on `public static final String` regex constants. The value of a **compile-time constant**
   changing is a Revapi `java.field.constantValueChanged` break even when the two regexes match
