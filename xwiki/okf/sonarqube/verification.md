@@ -75,6 +75,24 @@ show an unrelated recent commit. Two recurring shapes:
 
 Do not try to fix an unrelated failure as part of a Sonar fix — that is a separate change.
 
+## The quality gate measures NEW code — and a rewrite re-dates old findings
+
+The gate that fails CI looks only at a rolling new-code period (30 days), so a mechanical fix can fail
+it without introducing any defect: **rewriting a line that carries another open finding re-dates that
+finding.** SonarCloud matches an issue by line and code hash; a rewrite it cannot match closes the old
+issue as FIXED and raises an identical one dated today. A finding that sat outside the new-code period
+for years is suddenly inside it, and one re-dated RELIABILITY/BLOCKER is enough to take New Reliability
+Rating to C and turn the gate red. Ask what else a region carries *before* rewriting it (recipe in the
+`xwiki-fix-sonarqube-issue` skill), and fix or avoid those lines.
+
+**`javabugs:*` findings are computed server-side, during the SonarCloud analysis** — neither the local
+scanner nor the IDE reports them, so no local build proves one gone and the next analysis of the branch
+is the only confirmation. `qualitygates/project_status?projectKey=$SONARQUBE_PROJECT_KEY` names the red
+condition. Before believing *or* dismissing such a finding, read the analyzer's own path:
+`&additionalFields=_all` on `issues/search` returns `flows[].locations[]`, whose `msg` chain states
+every assumption it made ("Assuming this condition to be false"). Print `startLine` + `msg` only — the
+raw arrays are huge.
+
 ## Related
 
 - [[index]] — rule map, denylist, universal drop conditions.

@@ -62,11 +62,14 @@ Each of these is either bad ROI or a false positive against a deliberate XWiki i
   is the wrong justification for deleting one — SLF4J is not the only consumer. The rule is only ever
   resolved here by `@SuppressWarnings("java:S2629")` plus the inline reason, never by removing the
   eager String.
-- **`javabugs:S2259`** "fix this access that will throw a NullPointerException" — the largest
-  untouched pool in every repo, and not a sweep. It is 100% `src/main`, every site needs its own
-  dataflow argument, and the fix changes behaviour. The clusters are where Sonar's analysis cannot
-  follow an indirection (the `xwiki-rendering` chaining renderers hold ~40 between them), so the
-  false-positive rate is high on exactly the densest files.
+- **`javabugs:S2259`** "fix this access that will throw a NullPointerException" — not a sweep. It is
+  100% `src/main`, every site needs its own dataflow argument, and the fix changes behaviour. Sonar
+  reports it where its analysis cannot follow an indirection, so the false-positive rate is highest on
+  the files carrying the most of them. One shape is mechanical: a helper defaulting a nullable
+  parameter (`return factory != null ? factory : DEFAULT;`) called from an overload that passes
+  `DEFAULT` in *as* that parameter — the analyzer takes the `null` branch, which constrains `DEFAULT`
+  itself to null, then reports every dereference of the helper's result. Fix it by passing `null`, the
+  documented way of asking for the default.
 - **`S899`** ignored `File.delete()` result and **`S4042`** "use `java.nio.file.Files#delete`" — these
   two fire on the SAME line, so one edit looks like it clears two issues. It does not pay: the XWiki
   pool is temp-file cleanup in a `finally`, and `Files.delete` *throws*, which masks the original
