@@ -2,9 +2,10 @@
 title: XWiki testing strategy (overview)
 stability: durable
 summary: The kinds of tests XWiki uses, their naming, the no-stdout rule, the prefer-the-lightest-base
-  rule, the page-object boundary (no getDriver() in a test), the don't-pay-the-timeout rule, how to
-  read a PRChecker log line, the bare @UITest on an AllIT container, coverage, and where each test
-  framework lives. Procedures live in the test skills.
+  rule, the scenario rule (a functional test has one fixture and as few @Test methods as possible,
+  and @Order is not a substitute), the page-object boundary (no getDriver() in a test), the
+  don't-pay-the-timeout rule, how to read a PRChecker log line, the bare @UITest on an AllIT
+  container, coverage, and where each test framework lives. Procedures live in the test skills.
 sources:
   - https://dev.xwiki.org/xwiki/bin/view/Community/Testing/
   - https://dev.xwiki.org/xwiki/bin/view/Community/Testing/DockerTesting/#HDon27tpaythetimeout
@@ -32,6 +33,20 @@ This is the declarative map of how testing works in XWiki. For **doing** the wor
   with `-Dxwiki.surefire.captureconsole.skip=true` only when justified.
 - **Prefer the lightest base that works** — use `@ComponentTest` rather than `@OldcoreTest` when
   oldcore is not required.
+- **A functional test is a scenario, not a unit test — one fixture, as few methods as possible** — a
+  `*IT` pays a wiki start, a browser start and a page load per navigation, so what drives its runtime
+  is the number of *fixtures*, not the number of assertions. Write **as few `@Test` methods as the
+  scenario allows, one if it allows one**, asserting the successive states inside it, rather than one
+  method per assertion as in a unit test. Concretely, before adding a `@Test`: if a method in the
+  class already builds the fixture your assertion needs, add the assertion there instead of adding a
+  method that rebuilds the same fixture; and before adding a new `*IT` class, look for an existing
+  `*IT` covering the same feature and extend it. **`@Order` is not a substitute** — it fixes
+  execution order only, it does not share a fixture, and making methods depend on each other's
+  leftover state makes them impossible to run in isolation; sharing a fixture across methods needs
+  `@TestInstance(PER_CLASS)` plus shared state, which is rarely worth it below a handful of methods.
+  Whatever is fixture rather than subject is built with `TestUtils` (`createPage`, `createUser`,
+  `loginAsSuperAdmin`, REST), never by driving the UI as a user would.
+  (https://dev.xwiki.org/xwiki/bin/view/Community/Testing/#HBestPractices)
 - **No `getDriver()` in a test — the page-object boundary** — a functional test (`*IT.java`) drives
   the UI only through page objects. Needing `getDriver()` in the test class (or a raw `findElement`,
   `By` lookup or `getCssValue()` on top of it) means **an API is missing from a page object
