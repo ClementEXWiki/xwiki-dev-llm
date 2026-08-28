@@ -22,16 +22,12 @@ https://ci.xwiki.org/api/ (append `/api/` to *any* Jenkins URL for that object's
 
 ## The Cloudflare User-Agent trap
 
-ci.xwiki.org sits behind Cloudflare, and its bot rules key off the `User-Agent`:
-
-- **plain `curl` (default `curl/x.y` UA) → `200`** and the real JSON.
-- **a spoofed browser UA** (`Mozilla/5.0 … Chrome/…`) → **`403`** with a `Just a moment...`
-  Cloudflare interstitial, for the exact same URL.
-
-So the counter-intuitive rule is **never dress the request up as a browser** — issue it as plain
-`curl` and do not set `User-Agent`. Generic HTML-fetching tooling that sends a browser UA (or a
-headless browser) gets the challenge page instead of the content; that is a Cloudflare block, not an
-auth problem, so adding credentials does not help.
+Cloudflare fronts ci.xwiki.org — as it does www./extensions.xwiki.org ([[index]]) — and its bot rules
+key off the `User-Agent`: plain `curl` (default `curl/x.y` UA) gets `200` and the real JSON, while a
+spoofed browser UA (`Mozilla/5.0 … Chrome/…`) gets **`403`** with a `Just a moment...` interstitial
+for the exact same URL. So **never dress the request up as a browser**. Generic HTML-fetching tooling
+that sends a browser UA (or a headless browser) gets the challenge page instead of the content; that
+is a Cloudflare block, not an auth problem, so credentials do not help.
 
 ## URL shape
 

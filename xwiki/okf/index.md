@@ -70,7 +70,7 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
   writing each carefully), page-structure xobject fields with the exact semantics of
   Highlights / More / Related, style (incl. **never hard-wrapping prose** — one paragraph is one
   unbroken line, on xwiki.org pages and forum.xwiki.org posts alike; 120 chars is a Java-source rule),
-  attachment/image/video rules (kebab-case names, `{{image}}` +
+  attachment/image/video rules (kebab-case names — stop words stripped from these too, `{{image}}` +
   `alt`, **`size` mandatory and `width` forbidden in the `documentation` space**, which fixes the width a
   screenshot must be captured at, **`webm` videos displayed with `{{embed}}`, never linked**, Gallery,
   PlantUML `bluegray`), location, version perspective and the `{{version}}` macro (incl. **documenting a
@@ -165,9 +165,10 @@ Applied by `xwiki-fix-sonarqube-issue`, which owns the *procedure*.
 
 ### servers/
 - **index** — the xwiki.org server ecosystem (JIRA, CI, Nexus, SonarCloud, forum, …) and how to
-  access/verify each (MCP vs. WebFetch); plus writing via REST (only `/rest` honors Basic auth, the
-  `XWiki-Form-Token` CSRF header, and the `extensions` subwiki id) and the `~/.xwiki-credentials`
-  convention (never printed, only sourced).
+  access/verify each (MCP vs. WebFetch); plus reading/writing via REST (the **Cloudflare block on a
+  browser-like User-Agent**, only `/rest` honors Basic auth, the `XWiki-Form-Token` CSRF header, and
+  the `extensions` subwiki id) and the `~/.xwiki-credentials` convention (never printed, only
+  sourced).
 - **jira** — accessing jira.xwiki.org (jira-cli or REST), the durable issue-field conventions
   (Component, Affects Version = oldest affected/else last LTS, Fix Version); values are volatile;
   resolving/closing (Fixed vs. Cannot Reproduce for already-covered issues, assign to yourself); and
