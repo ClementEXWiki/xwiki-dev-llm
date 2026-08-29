@@ -54,6 +54,15 @@ cold.
    left, stop mid-task, record in the task file exactly where to resume, and hand back. A task that
    is too big for one session is a planning bug — split it in PLAN.md rather than pushing through.
 
+**Nothing reaches xwiki.org until the whole set is ready.** xwiki.org is public: for the weeks a
+conversion is in flight, every reader who lands on it sees whatever is currently there. A page
+published on its own is a page with **red links** to the siblings and hubs that do not exist yet,
+often with **no parent page**, and sometimes with a defect the author has not caught. So the
+`page-*` tasks are **preparation** tasks — they draft into `pages.py`, capture screenshots, and lint
+offline — and **one final `publish` task puts the whole set live in a single pass**, parents before
+children. Publish order matters even within that pass: a child saved before its parent is briefly
+live with a broken hierarchy. A partially converted tree is never the visible state of the wiki.
+
 The steps below are the *content* of the conversion; `references/conversion-plan.md` says which task
 owns each one, and holds the PLAN.md / task-file templates and the resume rules. Read it in the
 planning session, and in any session that has to re-plan or split a task.
@@ -61,8 +70,9 @@ planning session, and in any session that has to re-plan or split a task.
 ## Conversion flow
 
 Which task owns which step: **0–1** the planning session · **2** one `extract-*` task per legacy
-page · **3–5** `target-map` · **6–8** one `page-*` task per target page · **9** `dedup` · **10**
-`original-*` · **11** `deletions` · **12** each `page-*` task saves into the shared Change Request.
+page · **3–5** `target-map` · **6–8** one `page-*` task per target page, which drafts and lints but
+does **not** publish · **9** `dedup` · **10** `original-*` · **11** `deletions` · **12** the single
+`publish` task at the end.
 
 0. **Ask the developer the four setup questions from `xwiki-doc-writing` first** (that skill's "Before
    writing anything" section owns the credentials-file lookup and the exact questions), and **record
@@ -134,12 +144,21 @@ page · **3–5** `target-map` · **6–8** one `page-*` task per target page ·
     earlier in this conversion** and then merged, moved or dropped. Every deletion follows
     `okf/conventions/page-deletion.md` (list the backlinks, complete the list with a search, handle them,
     then delete), and relocating a page is a rename/move rather than a delete-and-recreate.
-12. **Save** each new page via a **Change Request** — a conversion is a major change. Group the new
-    pages and the original-page edits into the **same** Change Request where they belong to one
-    conversion, so a reviewer sees the move whole. (The minor-change exception in
-    `okf/conventions/documentation.md` does not apply to a conversion.) Because the pages are saved
-    across many sessions, the Change Request is created once and its URL recorded in PLAN.md's Setup
-    section; every later task adds to that same one instead of opening a second.
+12. **Publish, once, at the end** — as a single task, after `dedup` and `original-*` have settled the
+    set. Save the pages **parents before children** so no page is ever live without its hub, then run
+    `docpages.py verify`, which is the first time xwiki.org's own doc checker sees them: expect a
+    round of fixes (page-name violations in particular) and re-save. Prefer a **Change Request** for
+    the whole set where the tooling can write into one — a conversion is a major change, the new
+    pages and the original-page edits belong in the *same* one so a reviewer sees the move whole, and
+    the pages stay invisible until it is merged. (The minor-change exception in
+    `okf/conventions/documentation.md` does not apply to a conversion.) Saving direct instead is a
+    decision to record in PLAN.md's Setup section, and it does not license publishing early: the set
+    still goes live in one pass, at the end.
+
+    Two consequences for the tasks before it. **The offline `lint` is the only gate a `page-*` task
+    has**, so anything the live checker would have caught has to be checkable offline — page names
+    with stop words in them, for one. And a `page-*` task cannot prove its page renders correctly,
+    so the `publish` task **reads back what it published** rather than assuming the syntax was right.
 
 Refs: [Migrate and Refactor Documentation](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/),
 [Handle Original Documentation Pages](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/HandleOriginalDocumentationPages/).
@@ -177,6 +196,8 @@ only complete record of what the legacy page said — comparing legacy → new, 
   How-to/Tutorial ends on a **result step**; the hub page links every page below it.
 - **Not more verbose than it needs to be** — the rewrite cut the legacy prose rather than reflowing it;
   no sentence survives that the reader does not need in order to act.
+- **Nothing was live half-built** — the set went public in one pass, parents first, and no reader
+  could reach a converted page while its hub, siblings or parent were still missing.
 - **Original page finished** — prose stripped, "Documentation" button set, **attachments deleted**,
   **backlinks triaged**. A conversion that stops at the new pages is not done.
 - **No page was deleted with live backlinks** — for every page the conversion removed (the original, a

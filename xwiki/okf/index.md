@@ -85,7 +85,9 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
   e.x.o extension page without deleting it (**every** xproperty that holds prose, not just
   `description`) and wiring its "Documentation" button via the `ExtensionLD` URL, **deleting its
   leftover attachments** (the one place the never-delete-an-attachment rule is inverted), and
-  **triaging its backlinks** (which to repoint, which to leave). Applied by `xwiki-doc-convert`.
+  **triaging its backlinks** (which to repoint, which to leave). Also **when** a migration may
+  publish — the whole set at once, parents first, never page by page, because xwiki.org is public and
+  a half-built tree is what readers get. Applied by `xwiki-doc-convert`.
 - **page-deletion** — the rule that applies to **deleting any page on xwiki.org**, whatever the reason
   (migrated page, duplicate, obsolete extension/blog page, or an intermediate page you created
   yourself): **list and fix the backlinks before deleting**, since the breakage lands on *other* pages
