@@ -39,7 +39,9 @@ cold.
 **Do this before anything else, on every invocation:**
 
 1. Find `conversion/PLAN.md` in the conversion working directory (the one holding `pages.py` and
-   `shots/`). Ask the developer which directory if it is ambiguous.
+   `shots/`) — a `<work>/<repo>/<date>-<slug>/` directory under the work directory given in the
+   org-wide conventions. Look there first; only ask the developer if several conversions are in
+   flight and the target is ambiguous.
 2. **No plan yet** → this session is the **planning session**. Do steps 0–1 of the flow below and
    *enumerate* (do not yet read) the legacy pages in scope, then write
    `conversion/PLAN.md` and the first task files — one `extract-*` per legacy page, then

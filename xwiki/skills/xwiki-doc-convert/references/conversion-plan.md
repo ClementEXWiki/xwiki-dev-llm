@@ -9,10 +9,13 @@ what to do.
 ## Layout
 
 Everything lives in the conversion **working directory** — the same directory that holds the
-`pages.py` and `shots/` the `xwiki-doc-writing` tools use. One working directory per conversion.
+`pages.py` and `shots/` the `xwiki-doc-writing` tools use. One working directory per conversion, and
+it is a task directory under the work directory the org-wide conventions define
+(`$XWIKI_LLM_WORK`, else `~/.xwiki-llm/work`), never inside the repo: none of this is publishable
+and none of it belongs in a commit.
 
 ```
-work-<slug>/
+<work>/<repo>/<YYYY-MM-DD>-<slug>/
   pages.py                      the page set (grows as target-page tasks are done)
   shots/                        screenshots
   conversion/
@@ -193,8 +196,9 @@ keeps the visible state of the wiki either "not converted yet" or "converted", n
 
 Every invocation of this skill, in a fresh session, does this **before anything else**:
 
-1. Look for `conversion/PLAN.md` in the working directory (ask the developer for the directory if it
-   is not obvious, or if several conversions are in flight).
+1. Look for `conversion/PLAN.md` in the working directory — the conversion's task directory under
+   the work directory (`$XWIKI_LLM_WORK`, else `~/.xwiki-llm/work`); ask the developer only when
+   several conversions are in flight there.
 2. **No plan** → this is the planning session. Run the survey and write PLAN.md and the first tasks.
    Do not start converting anything; stop after the plan and show the developer the task list.
 3. **A plan exists** → read PLAN.md, take the first task whose status is not `done`, read **only that
