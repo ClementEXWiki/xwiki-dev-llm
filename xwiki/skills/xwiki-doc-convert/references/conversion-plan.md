@@ -33,7 +33,11 @@ stripped — **if the extraction was incomplete, the audit compares against the 
 passes**. Extract once, completely, to disk.
 
 Nothing under `conversion/` is ever published. It is scratch state for the conversion, and can be
-deleted once the Change Request is merged.
+deleted once the set is live (or its Change Request merged).
+
+**`pages.py` is a staging area, not a publication queue.** The `page-*` tasks fill it and lint it;
+only the final `publish` task saves any of it to xwiki.org. See "Nothing is published until the end"
+below.
 
 ## PLAN.md
 
@@ -54,7 +58,8 @@ Started: <YYYY-MM-DD>
 
 - Local instance: <URL> / version <X.Y>
 - Credentials file: ~/.xwiki-credentials
-- Change Request: <URL, or "not created yet">
+- Publication: Change Request <URL> | direct save (developer's choice, <date>) — either way the set
+  goes live only in the final `publish` task
 - Anything the developer decided up front: <...>
 
 ## Target page map
@@ -112,7 +117,8 @@ One or two sentences. What exists at the end that does not exist now.
 ## Done when
 
 - `python3 docpages.py lint` prints 0 problems
-- `python3 docpages.py verify <page ref>` is clean
+- the page's dict is appended to `pages.py` (nothing is saved to xwiki.org — the `publish` task does
+  that for the whole set)
 - <other machine-checkable conditions>
 
 ## Out of scope
@@ -149,16 +155,39 @@ Sized so each is one session's work. Adjust the set to the conversion; keep the 
    inventory item to a target page (an item mapped nowhere is either dropped-as-obsolete — say so —
    or a gap), and **append one `page-<slug>` task per target page to the task table**, writing each
    task file.
-3. **`page-<slug>`** — one per target page: draft it into `pages.py`, capture its screenshots, lint,
-   save, verify that page. One page per session; if a page turns out to need more, split the task.
+3. **`page-<slug>`** — one per target page: draft it into `pages.py`, capture its screenshots, and
+   run `docpages.py lint` until it is clean. **It does not save anything to xwiki.org** — it is a
+   preparation task. One page per session; if a page turns out to need more, split the task.
 4. **`dedup`** — the cross-page de-duplication and trimming pass, hub prose included. Cannot be done
    page by page, which is why it is its own task.
 5. **`original-<legacy page>`** — strip the prose, set the "Documentation" button, delete the
    leftover attachments, triage and repoint the backlinks.
 6. **`deletions`** — the backlink handling for every page the conversion removes, including
    intermediate pages this conversion itself created and then dropped.
-7. **`verify`** — the full "Verify the conversion" checklist in `SKILL.md`, run against
+7. **`publish`** — the one task that writes to xwiki.org. Save the whole set in a single pass,
+   **parents before children**, run `docpages.py verify`, fix what the live doc checker reports
+   (page-name violations especially — the offline lint cannot see them all) and re-save, then
+   `docpages.py pin` the hub orders. Budget a session for the fix round, not just the save.
+8. **`verify`** — the full "Verify the conversion" checklist in `SKILL.md`, run against
    `conversion/source/`.
+
+## Nothing is published until the end
+
+xwiki.org is public and a conversion runs for weeks. A page saved the moment it is drafted is a page
+the world can find while its hub does not exist, its siblings are red links and its parent is a 404 —
+and a defect in it stays visible until someone happens to look. Publishing once, at the end, is what
+keeps the visible state of the wiki either "not converted yet" or "converted", never "half".
+
+- `page-*` tasks **draft and lint**; they never call `docpages.py save`.
+- The `publish` task saves everything **parents before children**, so no page is ever live under a
+  missing parent. Sort the page set by path depth before saving it.
+- The **offline `lint` is the only gate the drafting tasks have.** Whatever the live checker would
+  have told them has to be decidable offline instead; when a `publish` round finds a class of defect
+  the lint could have caught, add the check rather than only fixing the page.
+- **Forward links are fine while drafting** — a page may link to a sibling that does not exist yet,
+  because they go live together. That is the point of the batch.
+- If the developer wants something visible early, publish a **complete subtree** (a hub plus its
+  children), never a single leaf.
 
 ## Resume protocol
 
