@@ -147,7 +147,7 @@ ln -s "$XWIKI_LLM_HOME/xwiki/opencode/plugins/xwiki-line-endings.js" ~/.config/o
   - `xwiki-xar-pages` — edit extension wiki pages (XAR XML): the `xar:format` / `xar:verify` conventions.
   - `xwiki-translations` — externalize and render i18n strings safely.
   - `xwiki-doc-writing` — write, update or review a page of xwiki.org documentation per the XWiki Documentation Guide (Diataxis).
-  - `xwiki-doc-convert` — convert old documentation (the `Documentation` space or the Extensions wiki) into the new `/documentation` tree.
+  - `xwiki-doc-convert` — convert old documentation (the `Documentation` space or the Extensions wiki) into the new `/documentation` tree, as a resumable plan of one-session tasks (also used to resume a conversion already under way).
   - `xwiki-contrib-release-blog-post` — create the "<Extension> Extension <version> Released" announcement on the xwiki.org Blog for an xwiki-contrib extension.
   - `xwiki-fix-sonarqube-issue` — find and fix SonarCloud issues, open a PR, mark them Accepted; the
     per-rule fix correctness and drop conditions it applies live in `xwiki/okf/sonarqube/`.
