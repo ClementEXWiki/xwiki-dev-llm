@@ -1,6 +1,6 @@
 ---
 name: xwiki-doc-convert
-description: Convert OLD XWiki documentation into the new xwiki.org documentation tree. Old documentation = pages under https://www.xwiki.org/xwiki/bin/view/Documentation/ and all extension pages under https://extensions.xwiki.org/xwiki/bin/view/Extension/ (the Extensions wiki). New documentation = https://www.xwiki.org/xwiki/bin/view/documentation/ (and pages nested under it). Use when migrating/refactoring a legacy page (or an extension page) into the new tree — treating the legacy content as source material, re-classifying it by Diataxis type, dropping obsolete content, and verifying nothing useful was lost. For authoring/reviewing a page that is already in the new tree, use xwiki-doc-writing instead.
+description: Convert OLD XWiki documentation into the new xwiki.org documentation tree. Old documentation = pages under https://www.xwiki.org/xwiki/bin/view/Documentation/ and all extension pages under https://extensions.xwiki.org/xwiki/bin/view/Extension/ (the Extensions wiki). New documentation = https://www.xwiki.org/xwiki/bin/view/documentation/ (and pages nested under it). Use when migrating/refactoring a legacy page (or an extension page) into the new tree — treating the legacy content as source material, re-classifying it by Diataxis type, dropping obsolete content, and verifying nothing useful was lost. A conversion is run as a persisted plan of one-session tasks, so also use this skill to RESUME, continue or check the status of a conversion already under way. For authoring/reviewing a page that is already in the new tree, use xwiki-doc-writing instead.
 ---
 
 # Converting old documentation into the new documentation
@@ -28,29 +28,75 @@ drafted together as data, linted offline, published idempotently, then audited. 
 `xwiki-doc-writing/tools/README.md` — hand-rolling REST calls for a whole tree re-earns every trap it
 already handles.
 
+## A conversion runs as a plan, one task per session
+
+A real conversion — a legacy page split into several new ones, each needing freshly captured
+screenshots, plus the original page's attachments and backlinks — does not fit in one context
+window. So this skill **never converts directly**. It first writes a plan to disk, then executes
+**one task per session**, keeping the status in that plan so any later session can pick the work up
+cold.
+
+**Do this before anything else, on every invocation:**
+
+1. Find `conversion/PLAN.md` in the conversion working directory (the one holding `pages.py` and
+   `shots/`). Ask the developer which directory if it is ambiguous.
+2. **No plan yet** → this session is the **planning session**. Do steps 0–1 of the flow below and
+   *enumerate* (do not yet read) the legacy pages in scope, then write
+   `conversion/PLAN.md` and the first task files — one `extract-*` per legacy page, then
+   `target-map` (layout, standard task set and templates:
+   [references/conversion-plan.md](references/conversion-plan.md)), show the developer the task list,
+   and **stop**. Converting nothing is the correct outcome of a planning session.
+3. **A plan exists** → read PLAN.md, take the first task that is not `done`, read **only that task's
+   file**, execute it, write its Outcome, mark it `done` in PLAN.md, and **stop** — report what
+   landed and what comes next. Do not read the other task files or the raw legacy source; not
+   spending that context is the entire point of the split. Do not roll into the next task.
+4. **Checkpoint before you run out of room**, not after: at roughly a quarter of the context window
+   left, stop mid-task, record in the task file exactly where to resume, and hand back. A task that
+   is too big for one session is a planning bug — split it in PLAN.md rather than pushing through.
+
+The steps below are the *content* of the conversion; `references/conversion-plan.md` says which task
+owns each one, and holds the PLAN.md / task-file templates and the resume rules. Read it in the
+planning session, and in any session that has to re-plan or split a task.
+
 ## Conversion flow
 
+Which task owns which step: **0–1** the planning session · **2** one `extract-*` task per legacy
+page · **3–5** `target-map` · **6–8** one `page-*` task per target page · **9** `dedup` · **10**
+`original-*` · **11** `deletions` · **12** each `page-*` task saves into the shared Change Request.
+
 0. **Ask the developer the four setup questions from `xwiki-doc-writing` first** (that skill's "Before
-   writing anything" section owns the credentials-file lookup and the exact questions). A conversion
-   needs the local instance even more than fresh authoring does: legacy screenshots are usually stale
-   or absent, so most of the images on the new pages have to be **re-captured**, not moved.
+   writing anything" section owns the credentials-file lookup and the exact questions), and **record
+   the answers in PLAN.md's Setup section** — they are asked once per conversion, not once per
+   session. A conversion needs the local instance even more than fresh authoring does: legacy
+   screenshots are usually stale or absent, so most of the images on the new pages have to be
+   **re-captured**, not moved.
 1. **Check for existing Change Requests** on the target first, so two people don't refactor the same
    page in parallel.
-2. **Read the legacy page in source mode** so you capture its real syntax, links, macros and version
-   notes (not just the rendered text). For an **e.x.o extension page** the page content is empty and
+2. **Read the legacy page in source mode and save it to `conversion/source/`** so you capture its real
+   syntax, links, macros and version
+   notes (not just the rendered text) — and so the sessions that come after this one, including the
+   final audit, still have the legacy content after the original page has been stripped. Alongside the
+   verbatim copy write the **inventory**: one bullet per atomic piece of material (concept,
+   prerequisite, procedure, warning, limitation, config detail, example, troubleshooting note, image,
+   video), tagged with its Diataxis type and audience. Every later task reads the inventory instead of
+   the raw legacy text. For an **e.x.o extension page** the page content is empty and
    the documentation lives in xobject xproperties — **enumerate every xproperty of every xobject and
    filter for prose**, never just `description`. `installation` and `compatibility` routinely hold
    mandatory steps and prerequisites that appear nowhere else, and missing them is invisible later:
    the "nothing lost" verification below would compare against your incomplete extraction and pass.
    The field-by-field table is in `okf/conventions/documentation-migration.md`.
-3. **Decompose by Diataxis type.** A legacy page usually mixes types — some explanation, a procedure
+3. **Decompose by Diataxis type**, working from the inventories rather than the raw legacy text. A
+   legacy page usually mixes types — some explanation, a procedure
    or two, a configuration reference, maybe a tutorial. Identify each distinct piece and its type and
    audience. Do **not** keep the mixed structure.
 4. **Split into target pages** — one page per How-to, one per Explanation, one per Reference topic,
    and a separate Tutorial whenever an end-to-end scenario exists. Splitting is preferred over a long
    mixed page. Merge only when several legacy pages describe a single coherent topic.
 5. **Choose the location** for each target page in the new tree (most relevant existing
-   topic/subtopic for its audience and type).
+   topic/subtopic for its audience and type). Then **fill PLAN.md's target map and write one
+   `page-*` task per target page**, mapping every inventory item to the page that will carry it — an
+   item mapped to no page is either deliberately dropped as obsolete (say so in the map) or a gap
+   that the "nothing lost" audit will later fail on.
 6. **Rewrite each page** with the `xwiki-doc-writing` flow — correct title/page-name, page-structure
    fields, style, and latest-version perspective. The style rules apply to the sentences you *carry
    over* too, not only to the ones you write.
@@ -91,22 +137,27 @@ already handles.
 12. **Save** each new page via a **Change Request** — a conversion is a major change. Group the new
     pages and the original-page edits into the **same** Change Request where they belong to one
     conversion, so a reviewer sees the move whole. (The minor-change exception in
-    `okf/conventions/documentation.md` does not apply to a conversion.)
+    `okf/conventions/documentation.md` does not apply to a conversion.) Because the pages are saved
+    across many sessions, the Change Request is created once and its URL recorded in PLAN.md's Setup
+    section; every later task adds to that same one instead of opening a second.
 
 Refs: [Migrate and Refactor Documentation](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/),
 [Handle Original Documentation Pages](https://dev.xwiki.org/xwiki/bin/view/Community/DocGuide/MigrateDocumentation/HandleOriginalDocumentationPages/).
 
 ## Verify the conversion
 
-A conversion is only correct if the new pages preserve the legacy page's meaning and useful content.
-After rewriting, verify against the legacy source — comparing legacy → new — and report issues with a
+This is the `verify` task, the last one in the plan. A conversion is only correct if the new pages
+preserve the legacy page's meaning and useful content.
+Verify against `conversion/source/` — the verbatim legacy copy and its inventory, which by now is the
+only complete record of what the legacy page said — comparing legacy → new, and report issues with a
 **severity** (Critical / Major / Minor / Suggestion), a **location** (page + section), the
 **problem**, and a **recommendation**:
 
 - **Nothing useful lost** — every still-relevant concept, prerequisite, warning, limitation,
   configuration detail, example and troubleshooting note from the legacy page is present somewhere in
-  the new pages. (Ignore genuinely obsolete/deprecated/unsupported content — that is meant to be
-  dropped.)
+  the new pages. Walk the **inventory** item by item: each one is either on a new page or marked
+  obsolete in the target map — an item that is neither is the finding. (Ignore genuinely
+  obsolete/deprecated/unsupported content — that is meant to be dropped.)
 - **Meaning preserved** — the rewrite did not change what the feature does, its requirements, or the
   relationships between features; nothing was over-simplified into being wrong.
 - **Up to date** — no obsolete UI names, deprecated terminology, removed features, or references to
