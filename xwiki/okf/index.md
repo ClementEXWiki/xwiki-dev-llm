@@ -173,7 +173,8 @@ Applied by `xwiki-fix-sonarqube-issue`, which owns the *procedure*.
   sourced).
 - **jira** — accessing jira.xwiki.org (jira-cli or REST), the durable issue-field conventions
   (Component, Affects Version = oldest affected/else last LTS, Fix Version); values are volatile;
-  resolving/closing (Fixed vs. Cannot Reproduce for already-covered issues, assign to yourself); and
+  resolving/closing (Fixed vs. Cannot Reproduce for already-covered issues, assign to yourself);
+  attachments (REST-only, and the attachment URL is how an image reaches a GitHub PR body); and
   wiki-markup gotchas (wrap literals in `{{…}}`, don't over-escape prose, never escape inside `{code}`).
 - **jenkins** — querying ci.xwiki.org through the Jenkins REST API (`/api/json?tree=…`, anonymous
   read) instead of scraping the UI: the multibranch URL shape, the endpoints for builds / failing
