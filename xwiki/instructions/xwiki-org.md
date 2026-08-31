@@ -94,7 +94,7 @@ OKF map — topic files under `okf/`; **`okf/index.md` describes each one**, rea
   `xwiki-doc-writing` / `xwiki-doc-convert`.
 - `okf/architecture/` — `component-system`, `macro-refactoring`, `wiki-user-scope`, `solr-search`,
   `wiki-application-data`.
-- `okf/testing/` — `strategy`.
+- `okf/testing/` — `strategy`, `running-docker-its`.
 - `okf/sonarqube/` — which SonarCloud fixes are *correct* in XWiki and which look mechanical but
   silently break something. Read `sonarqube/index.md` first, then **only** the family file for the
   rule at hand: `syntax-rules`, `simplification-rules`, `modernization-rules`, `dead-code-rules`,

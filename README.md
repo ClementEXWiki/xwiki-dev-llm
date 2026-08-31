@@ -105,6 +105,17 @@ ln -s "$XWIKI_LLM_HOME/xwiki/opencode/plugins/xwiki-line-endings.js" ~/.config/o
   the `SessionStart` hook appends the resolved absolute path to the injected conventions so the
   model does not have to guess it. Files that only matter until the end of the current session stay
   in the host's own session scratch directory.
+- **Docker IT slot limiter** (`xwiki/scripts/xwiki-it-slot.mjs`) — a wrapper that caps how many
+  XWiki functional-test runs (`-Pdocker,integration-tests`) execute at once on one machine, two by
+  default (`--max N`, or `XWIKI_LLM_IT_SLOTS`). Such a run holds a servlet engine, a browser
+  container of a couple of gigabytes and a ryuk, and writes SNAPSHOT artifacts into the shared
+  `~/.m2`; several agents launching one at the same time starve the Docker daemon, and starvation
+  surfaces as a failure in `beforeAll` that reads like a product bug rather than as an
+  out-of-resources error. Wrap the whole Maven invocation —
+  `node "${CLAUDE_PLUGIN_ROOT}/scripts/xwiki-it-slot.mjs" -- mvn verify …` — and later runs queue
+  instead of colliding; `--status` shows who holds what, the slot is released however the command
+  ends, and one whose holder died is reclaimed. Not a hook: the `xwiki-build` skill tells Claude to
+  use it, so it costs nothing in sessions that run no functional test.
 - **Line-ending guard** (`xwiki/scripts/check-line-endings.mjs`) — a `PostToolUse` hook on
   `Write`/`Edit` that checks every file written against the explicit `eol` declared by the repo's
   `.gitattributes` (via `git check-attr`). On a CRLF/LF mismatch it fails with a clear message so

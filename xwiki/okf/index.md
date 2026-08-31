@@ -132,6 +132,14 @@ The full how-to-read-and-extend protocol is the `xwiki-knowledge` skill.
 ### testing/
 - **strategy** — test kinds & naming, no-stdout rule, lightest-base rule, the scenario rule (no two `@Test` methods build the same fixture; a distinct fixture is what justifies a distinct method; `@Order` is not a substitute), `@Order` source-ordering rule, the page-object boundary (no `getDriver()` in a test), don't-pay-the-timeout rule, reading a PRChecker log line, the bare `@UITest` on an `AllIT` container, coverage, framework locations.
 
+- **running-docker-its** — running `-Pdocker,integration-tests` on a developer machine rather than a
+  CI agent: how the browser container reaches XWiki under each servlet engine (host-gateway
+  `/etc/hosts` entry vs `xwikiweb` alias over Docker DNS) and why that makes the two configurations
+  exercise different networking, which engine the local loop should use and when the containerised
+  one is mandatory, the setup-failure symptom table (a `beforeAll` failure is never evidence about
+  your change), and what several agents on one machine contend for (host :8080, the daemon budget,
+  the shared `~/.m2`). Commands in `xwiki-build`.
+
 ### sonarqube/
 Which SonarCloud fixes are *correct* in XWiki, and — the question that actually matters — which look
 mechanical but silently break something. Read `sonarqube/index.md`, then **only** the one family file
