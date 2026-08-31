@@ -59,9 +59,17 @@ if (!text) {
 // extracted source, drafts) lives, so those files are all in one place instead of scattered over
 // the repo, the system temp dir and the home directory. The rule itself is in xwiki-org.md; what is
 // appended here is only the resolved absolute path, which the model cannot compute on its own
-// (`~` and the repo name). Nothing is created: a session that writes no work file leaves no trace,
-// and `mkdir -p` at first use also repairs a directory the developer has since deleted.
-const workRoot = process.env.XWIKI_LLM_WORK || join(homedir(), ".xwiki-llm", "work");
+// (env vars, `~` and the repo name). Nothing is created: a session that writes no work file leaves
+// no trace, and `mkdir -p` at first use also repairs a directory the developer has since deleted.
+// The default root follows each platform's own convention for this kind of state: XDG_STATE_HOME
+// on Linux/macOS, LOCALAPPDATA on Windows — with each ecosystem's own fallback when that var isn't set.
+function defaultWorkRoot() {
+  if (process.platform === "win32") {
+    return join(process.env.LOCALAPPDATA || join(homedir(), "AppData", "Local"), "xwiki-llm");
+  }
+  return join(process.env.XDG_STATE_HOME || join(homedir(), ".local", "state"), "xwiki-llm");
+}
+const workRoot = process.env.XWIKI_LLM_WORK || defaultWorkRoot();
 const repoWorkDir = join(workRoot, basename(projectDir));
 
 text += `

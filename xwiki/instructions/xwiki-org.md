@@ -21,7 +21,8 @@ below).
 
 - Every file a task needs that the **repo must not hold** — plan and handoff files, extracted
   source, drafts, notes, screenshots, anything that has to survive the session — goes under the
-  **work directory**: `$XWIKI_LLM_WORK` when set, else `~/.xwiki-llm/work`. Never in the repo (it
+  **work directory**: `$XWIKI_LLM_WORK` when set, else `$XDG_STATE_HOME/xwiki-llm` (Linux/macOS) or
+  `%LOCALAPPDATA%\xwiki-llm` (Windows). Never in the repo (it
   gets committed by accident), never in a session-scoped temp directory (it is gone next session).
 - One directory per piece of work: `<work>/<repo>/<YYYY-MM-DD>-<slug>/`. `mkdir -p` it the first
   time it is needed and tell the developer the path once, so the state is findable and deletable.

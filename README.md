@@ -99,7 +99,8 @@ ln -s "$XWIKI_LLM_HOME/xwiki/opencode/plugins/xwiki-line-endings.js" ~/.config/o
 - **A single work directory** — every file a task needs but the repo must not hold (plan and
   handoff files, extracted source, drafts, notes, screenshots) goes under one root instead of being
   scattered over the repo, the system temp directory and your home directory. The default is
-  `~/.xwiki-llm/work`, overridable with `XWIKI_LLM_WORK`; each piece of work gets its own
+  `$XDG_STATE_HOME/xwiki-llm` on Linux/macOS or `%LOCALAPPDATA%\xwiki-llm` on Windows, overridable
+  with `XWIKI_LLM_WORK`; each piece of work gets its own
   `<work>/<repo>/<YYYY-MM-DD>-<slug>/` directory, so it is findable later and removable in one
   command. Nothing is created up front — a session that writes no work file leaves no trace — and
   the `SessionStart` hook appends the resolved absolute path to the injected conventions so the
@@ -173,7 +174,7 @@ ln -s "$XWIKI_LLM_HOME/xwiki/opencode/plugins/xwiki-line-endings.js" ~/.config/o
 | Variable                | Used by   | Notes                                              |
 |-------------------------|-----------|----------------------------------------------------|
 | `XWIKI_LLM_HOME`        | opencode  | Absolute path to your `xwiki-dev-llm` checkout. **opencode only** (Claude Code and Kimi Code resolve paths themselves). |
-| `XWIKI_LLM_WORK`        | all hosts | Absolute path to the work directory for plans, handoffs, drafts and other cross-session state. Optional — defaults to `~/.xwiki-llm/work`. |
+| `XWIKI_LLM_WORK`        | all hosts | Absolute path to the work directory for plans, handoffs, drafts and other cross-session state. Optional — defaults to `$XDG_STATE_HOME/xwiki-llm` (Linux/macOS) or `%LOCALAPPDATA%\xwiki-llm` (Windows). |
 | `SONARQUBE_TOKEN`       | sonarqube | Your personal SonarCloud token (same for all repos). |
 | `SONARQUBE_PROJECT_KEY` | sonarqube | The SonarCloud project key — **differs per repo**. Optional: leave it unset in repos that have no SonarCloud project. |
 | `DEVELOCITY_MCP_ACCESS_KEY` | develocity | Your community.develocity.cloud access key, **bare** (no `community.develocity.cloud=` prefix). Optional — without it the build-scan MCP is not loaded. See "Develocity access" below. |

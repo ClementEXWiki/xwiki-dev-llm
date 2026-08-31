@@ -43,7 +43,8 @@ set -a; . ~/.xwiki-credentials; set +a
 
 Write the pages as a `pages.py` in your working directory — a `<work>/<repo>/<date>-<slug>/`
 directory under the work directory the org-wide conventions define (`$XWIKI_LLM_WORK`, else
-`~/.xwiki-llm/work`), not inside the repo. Drafting them as data is what makes `lint` possible
+`$XDG_STATE_HOME/xwiki-llm` on Linux/macOS or `%LOCALAPPDATA%\xwiki-llm` on Windows), not inside the
+repo. Drafting them as data is what makes `lint` possible
 before anything is saved, and makes a re-save idempotent afterwards:
 
 ```python
