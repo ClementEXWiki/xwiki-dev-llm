@@ -42,10 +42,9 @@ set -a; . ~/.xwiki-credentials; set +a
 ## The page set
 
 Write the pages as a `pages.py` in your working directory — a `<work>/<repo>/<date>-<slug>/`
-directory under the work directory the org-wide conventions define (`$XWIKI_LLM_WORK`, else
-`$XDG_STATE_HOME/xwiki-llm` on Linux/macOS or `%LOCALAPPDATA%\xwiki-llm` on Windows), not inside the
-repo. Drafting them as data is what makes `lint` possible
-before anything is saved, and makes a re-save idempotent afterwards:
+directory under the work directory the org-wide conventions define, not inside the repo. Drafting
+them as data is what makes `lint` possible before anything is saved, and makes a re-save idempotent
+afterwards:
 
 ```python
 EXT = "xwiki:org.xwiki.contrib:application-antispam-ui"
@@ -109,13 +108,15 @@ procedure's entry step). A region already at the target width is saved unresampl
 
 **`lint`** — the traps that produce a *plausible-looking* page rather than an error: a scheme-like
 token followed by a colon (`image:` emits an empty image reference), an unmatched `--` striking
-through the rest of the block, a URL inside `##…##`, an absolute URL to a farm subwiki (renders
-external and is **never indexed as a backlink**), a `caption` carrying the capture version, a title
-repeating the page type or the audience, an image without `size`/`alt`, an attachment declared but not
-shown (or shown but not declared), a How-to with no result-step screenshot or with a screenshot on
-only a minority of its steps, a topic page that is not an Explanation linking to its Extensions-wiki
-page. Its last two checks are **cross-page** — several pages opening with the same step, one attachment
-name declared by several pages — and are why the whole set is linted rather than one page.
+through the rest of the block, a URL inside `##…##`, a single-brace `{macro}` (an f-string field
+halves every `{{`, and the halved macro renders as literal text), an absolute URL to a farm subwiki
+(renders external and is **never indexed as a backlink**), a `caption` carrying the capture version,
+a title repeating the page type or the audience, an image without `size`/`alt`, an attachment
+declared but not shown (or shown but not declared), a How-to with no result-step screenshot or with
+a screenshot on only a minority of its steps, a topic page that is not an Explanation linking to its
+Extensions-wiki page. Its last two checks are **cross-page** — several pages opening with the same
+step, one attachment name declared by several pages — and are why the whole set is linted rather than
+one page.
 
 **`save`** — writes attachments *before* content, so no revision is ever saved with a dangling image;
 then reads every field back, because **a `202` does not mean the write landed** (a property write

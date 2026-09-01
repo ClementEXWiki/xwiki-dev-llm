@@ -98,14 +98,28 @@ ln -s "$XWIKI_LLM_HOME/xwiki/opencode/plugins/xwiki-line-endings.js" ~/.config/o
   the opencode install note above).
 - **A single work directory** — every file a task needs but the repo must not hold (plan and
   handoff files, extracted source, drafts, notes, screenshots) goes under one root instead of being
-  scattered over the repo, the system temp directory and your home directory. The default is
-  `$XDG_STATE_HOME/xwiki-llm` on Linux/macOS or `%LOCALAPPDATA%\xwiki-llm` on Windows, overridable
-  with `XWIKI_LLM_WORK`; each piece of work gets its own
+  scattered over the repo, the system temp directory and your home directory. That root sits in
+  your platform's state directory, overridable with `XWIKI_LLM_WORK` (see the environment-variable
+  table below for the exact defaults); each piece of work gets its own
   `<work>/<repo>/<YYYY-MM-DD>-<slug>/` directory, so it is findable later and removable in one
   command. Nothing is created up front — a session that writes no work file leaves no trace — and
   the `SessionStart` hook appends the resolved absolute path to the injected conventions so the
   model does not have to guess it. Files that only matter until the end of the current session stay
-  in the host's own session scratch directory.
+  in the host's own session scratch directory. Up to version 1.5.0 the default root was
+  `~/.xwiki-llm/work` on every OS; if you have files there, move them to the new root (while
+  anything remains, each session starts with a reminder to do so) — or point `XWIKI_LLM_WORK` at the
+  old path to keep it.
+- **Docker IT slot limiter** (`xwiki/scripts/xwiki-it-slot.mjs`) — a wrapper that caps how many
+  XWiki functional-test runs (`-Pdocker,integration-tests`) execute at once on one machine, two by
+  default (`--max N`, or `XWIKI_LLM_IT_SLOTS`). Such a run holds a servlet engine, a browser
+  container of a couple of gigabytes and a ryuk, and writes SNAPSHOT artifacts into the shared
+  `~/.m2`; several agents launching one at the same time starve the Docker daemon, and starvation
+  surfaces as a failure in `beforeAll` that reads like a product bug rather than as an
+  out-of-resources error. Wrap the whole Maven invocation —
+  `node "${CLAUDE_PLUGIN_ROOT}/scripts/xwiki-it-slot.mjs" -- mvn verify …` — and later runs queue
+  instead of colliding; `--status` shows who holds what, the slot is released however the command
+  ends, and one whose holder died is reclaimed. Not a hook: the `xwiki-build` skill tells Claude to
+  use it, so it costs nothing in sessions that run no functional test.
 - **Line-ending guard** (`xwiki/scripts/check-line-endings.mjs`) — a `PostToolUse` hook on
   `Write`/`Edit` that checks every file written against the explicit `eol` declared by the repo's
   `.gitattributes` (via `git check-attr`). On a CRLF/LF mismatch it fails with a clear message so
@@ -174,7 +188,7 @@ ln -s "$XWIKI_LLM_HOME/xwiki/opencode/plugins/xwiki-line-endings.js" ~/.config/o
 | Variable                | Used by   | Notes                                              |
 |-------------------------|-----------|----------------------------------------------------|
 | `XWIKI_LLM_HOME`        | opencode  | Absolute path to your `xwiki-dev-llm` checkout. **opencode only** (Claude Code and Kimi Code resolve paths themselves). |
-| `XWIKI_LLM_WORK`        | all hosts | Absolute path to the work directory for plans, handoffs, drafts and other cross-session state. Optional — defaults to `$XDG_STATE_HOME/xwiki-llm` (Linux/macOS) or `%LOCALAPPDATA%\xwiki-llm` (Windows). |
+| `XWIKI_LLM_WORK`        | all hosts | Absolute path to the work directory for plans, handoffs, drafts and other cross-session state. Optional — defaults to `$XDG_STATE_HOME/xwiki-llm/work` on Linux/macOS, falling back to `~/.local/state/xwiki-llm/work` when `XDG_STATE_HOME` is unset (as it is by default on macOS); and to `%LOCALAPPDATA%\xwiki-llm\work` on Windows, falling back to `%USERPROFILE%\AppData\Local\xwiki-llm\work` when `LOCALAPPDATA` is unset. |
 | `SONARQUBE_TOKEN`       | sonarqube | Your personal SonarCloud token (same for all repos). |
 | `SONARQUBE_PROJECT_KEY` | sonarqube | The SonarCloud project key — **differs per repo**. Optional: leave it unset in repos that have no SonarCloud project. |
 | `DEVELOCITY_MCP_ACCESS_KEY` | develocity | Your community.develocity.cloud access key, **bare** (no `community.develocity.cloud=` prefix). Optional — without it the build-scan MCP is not loaded. See "Develocity access" below. |
